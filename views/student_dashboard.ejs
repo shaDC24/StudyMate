@@ -7,14 +7,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard</title>
     <link rel="stylesheet" href="/login.css">
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            width: 200px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        li:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome <%= userType %>!</h1>
-    <p>Choose an option:</p>
-    <ul>
-        <% options.forEach(option => { %>
-            <li><%= option %></li>
-        <% }) %>
-    </ul>
+    <div>
+        <h1>Welcome <%= userType %>!</h1>
+        <p>Choose an option:</p>
+        <ul>
+            <% options.forEach(option => { %>
+                <li><%= option %></li>
+            <% }) %>
+        </ul>
+    </div>
 </body>
 </html>
