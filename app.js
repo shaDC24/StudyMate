@@ -1,6 +1,8 @@
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
+const bcrypt = require('bcrypt');
+const db = require('./db'); // Import your database connection
 
 const app = express();
 
@@ -23,18 +25,41 @@ app.get('/', (req, res) => {
     res.render('login', { error: '' });
 });
 
+app.get('/students', async (req, res) => {
+    try {
+      const students = await db.any('SELECT * FROM students');
+      res.json(students);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Internal Server Error');
+    }
+  });
 
-app.post('/login', (req, res) => {
+
+
+app.post('/login', async (req, res) => {
     const { userType, userId, password } = req.body;
 
-    // Basic login logic (replace with secure authentication)
-    if (userId === validUser.username && password === validUser.password) {
-        // Redirect to the dashboard based on user type
-        res.redirect(`/${userType}/dashboard`);
-    } else {
-        res.render('login', { error: 'Invalid credentials. Please try again.' });
+    try {
+        // Query the database to retrieve the user's details
+        const user = await db.oneOrNone('SELECT * FROM students WHERE student_id = $1', Number(userId));
+
+        console.log('User from database:', user);
+        console.log('Password comparison result:', bcrypt.compareSync(password, user.password_hash));
+
+        if (user && password===user.password_hash) {
+            // Password matches, redirect to the dashboard based on user type
+            res.redirect(`/${userType}/dashboard`);
+        } else {
+            // Invalid credentials
+            res.render('login', { error: 'Invalid credentials. Please try again.' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
     }
 });
+
 
 
 app.get('/student/dashboard', (req, res) => {

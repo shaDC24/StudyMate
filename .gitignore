@@ -1,2 +1,13 @@
 *.log
 node_modules/
+
+# Ignore database files
+*.db
+*.sqlite
+*.sql
+
+# Ignore database directories
+/db/
+/database/
+/data/
+
