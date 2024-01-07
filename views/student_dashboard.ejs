@@ -1,0 +1,20 @@
+<!-- views/student_dashboard.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="/login.css">
+</head>
+<body>
+    <h1>Welcome <%= userType %>!</h1>
+    <p>Choose an option:</p>
+    <ul>
+        <% options.forEach(option => { %>
+            <li><%= option %></li>
+        <% }) %>
+    </ul>
+</body>
+</html>
