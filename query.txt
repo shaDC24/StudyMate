@@ -1,0 +1,30 @@
+CREATE DATABASE studymate;
+-- Create the students table
+CREATE TABLE students (
+    student_id SERIAL PRIMARY KEY,
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    age INTEGER,
+    enrollment_date DATE,
+    password_hash VARCHAR(255) -- Assuming hashed passwords with a length of 255 characters
+);
+INSERT INTO students (first_name, last_name, age, enrollment_date, password_hash)
+ VALUES ('ASIF', 'KHAN', 22, '2024-01-07', 'hashed_password');
+
+
+
+ CREATE TABLE courses (
+    id SERIAL PRIMARY KEY,
+    course_title VARCHAR(255) NOT NULL,
+    course_description TEXT,
+    creation_timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    course_creator VARCHAR(255) NOT NULL,
+    update_timestamp TIMESTAMPTZ,
+    update_author VARCHAR(255)
+);
+
+ INSERT INTO courses(course_title, course_description, course_creator)
+  VALUES('Astronomy','Earth,Moon,Sun includes.','Reahn Emily');
+
+ INSERT INTO courses(course_title, course_description, course_creator)
+  VALUES('Neutonian mechanics','Newtonian mechanics is based on application of Newton's Laws of motion','John Doe');  

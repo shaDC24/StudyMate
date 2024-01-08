@@ -2,6 +2,7 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -54,15 +55,21 @@
         }
     </style>
 </head>
+
 <body>
     <div>
         <h1>Welcome <%= userType %>!</h1>
         <p>Choose an option:</p>
         <ul>
-            <% options.forEach(option => { %>
-                <li><%= option %></li>
-            <% }) %>
+            <% options.forEach(option=> { %>
+                <li>
+                    <%= option %>
+                </li>
+                <% }) %>
         </ul>
+        <li><a href="/student/enroll-courses">Enroll Courses</a></li>
+        <li><a href="/student/course-lists">Course Lists</a></li>
     </div>
 </body>
+
 </html>

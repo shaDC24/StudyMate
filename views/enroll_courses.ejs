@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Enroll Courses</title>
+    <!-- Add any additional styling or links here -->
+    <style>
+        /* Additional CSS styles for better UI */
+        .course {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #ced4da;
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .course-description {
+            display: none;
+        }
+
+        .add-button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: green;
+        }
+
+        .added-course {
+            border: 1px solid #007bff;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Enroll Courses</h1>
+
+    <!-- Iterate through courses and display course titles -->
+    <% courses.forEach(course=> { %>
+        <div class="course" onclick="toggleDescription('<%= course.id %>')">
+            <div>
+                <h3>
+                    <%= course.course_title %>
+                </h3>
+                <p class="course-description" id="description<%= course.id %>">
+                    <strong>Description:</strong>
+                    <%= course.course_description %><br>
+                        <strong>Author:</strong>
+                        <%= course.course_creator %>
+                </p>
+            </div>
+            <button class="add-button" onclick="addCourse('<%= course.id %>')">Add</button>
+        </div>
+        <% }) %>
+
+            <!-- Added Courses Section -->
+            <div class="added-course" id="addedCoursesSection">
+                <h2>Added Courses</h2>
+                <!-- Added courses will be displayed here -->
+            </div>
+
+            <script>
+                // Pass courses data from server to client-side JavaScript
+                const courses = `<%= JSON.stringify(courses) %>`;
+                console.log(courses);
+                let addedCourses = {};
+
+                // Function to toggle course description and author
+                function toggleDescription(courseId) {
+                    const description = document.getElementById('description' + courseId);
+                    if (description.style.display === 'none') {
+                        description.style.display = 'block';
+                    } else {
+                        description.style.display = 'none';
+                    }
+                }
+
+                // Function to add a course
+                // Function to add a course
+                function addCourse(courseId) {
+                    if (!addedCourses[courseId]) {
+                        addedCourses[courseId] = true;
+
+                        const selectedCourse = JSON.parse(courses).find(course => course.id === courseId);
+
+                        if (selectedCourse) {
+                            // Display added courses in the added courses section
+                            const addedCourseSection = document.getElementById('addedCoursesSection');
+                            const addedCourseDiv = document.createElement('div');
+                            addedCourseDiv.textContent = selectedCourse.course_title; // Display course title
+                            addedCourseSection.appendChild(addedCourseDiv);
+
+                            // Replace this alert with your own logic for adding a course
+                            alert('Course added!');
+                        }
+                    }
+                }
+
+            </script>
+</body>
+
+</html>
