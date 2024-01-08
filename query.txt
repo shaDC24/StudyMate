@@ -26,5 +26,5 @@ INSERT INTO students (first_name, last_name, age, enrollment_date, password_hash
  INSERT INTO courses(course_title, course_description, course_creator)
   VALUES('Astronomy','Earth,Moon,Sun includes.','Reahn Emily');
 
- INSERT INTO courses(course_title, course_description, course_creator)
-  VALUES('Neutonian mechanics','Newtonian mechanics is based on application of Newton's Laws of motion','John Doe');  
+INSERT INTO courses(course_title, course_description, course_creator)
+VALUES('Neutonian mechanics','Newtonian mechanics is based on application of Newton's Laws of motion','John Doe');  
