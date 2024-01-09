@@ -28,7 +28,7 @@ VALUES (
 	
 	
 	
-	CREATE TABLE courses (
+CREATE TABLE courses (
     id SERIAL PRIMARY KEY,
     course_title VARCHAR(255) NOT NULL,
     course_description TEXT,
@@ -36,27 +36,15 @@ VALUES (
     course_creator VARCHAR(255) NOT NULL,
     enrolled_id INTEGER REFERENCES student(student_id),
     update_timestamp TIMESTAMPTZ,
-    update_author VARCHAR(255)
+    teacher_id INTEGER REFERENCES teacher(teacher_id) -- Adding teacher reference
 );
-INSERT INTO courses(course_title, course_description, course_creator)
-VALUES(
-        'Astronomy',
-        'Earth,Moon,Sun includes.',
-        'Reahn Emily'
-    );
-INSERT INTO courses(course_title, course_description, course_creator)
-VALUES(
-        'Neutonian mechanics',
-        'Newtonian mechanics is based on application of Newtons Laws of motion ',
-        ' John Doe '
-    );
+
 SELECT *
 FROM courses;
 -- Create the teacher table
 CREATE TABLE Teacher (
     teacher_id SERIAL PRIMARY KEY,
-   
-    -- Assuming user_id is a foreign key referencing the user table
+-- Assuming user_id is a foreign key referencing the user table
     teacher_name VARCHAR(255),
     teacher_proficiency VARCHAR(255),
     teacher_birth_date DATE,

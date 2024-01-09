@@ -8,7 +8,7 @@ const db = require('./db'); // Import your database connection
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true })); // Parse form data
-let id=null;
+let id = null;
 
 // Set the view engine to EJS
 // Set the views directory
@@ -41,7 +41,7 @@ app.get('/students', async (req, res) => {
 
 app.post('/login', async (req, res) => {
     const { userType, userId, password } = req.body;
-    id=userId;
+    id = userId;
 
     try {
         // Query the database to retrieve the user's details
@@ -100,10 +100,37 @@ app.get('/teacher/dashboard', (req, res) => {
 
 app.get('/teacher/courses', async (req, res) => {
     try {
-       
-        const courses = await db.any('SELECT *FROM teacher WHERE teacher_id=$1', Number(id));
-        res.json(courses);
-        res.render('.teacher_course', { userType: 'Teacher', courses });
+
+        const tData = await db.any('SELECT *FROM teacher WHERE teacher_id=$1', Number(id));
+        const courses = await db.any(`SELECT * FROM courses WHERE  ${tData[0].teacher_id}=${id}`);
+        console.log(tData);
+        console.log(courses);
+        res.render('teacher_course', { userType: 'Teacher', Data: tData, courses: courses, res: res });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+app.get('/course/initiation', async (req, res) => {
+    try {
+        res.render('course_initiate', { userType: 'Teacher'});
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+app.post('/course/initiation', async (req, res) => {
+    const { course_title, course_description } = req.body;
+    try {
+        const tname = await db.one('SELECT teacher_name FROM teacher WHERE teacher_id=$1', Number(id));
+        const newcourse = await db.one(`INSERT INTO courses (course_title,course_description,course_creator,teacher_id) VALUES($1,$2,$3,$4) RETURNING *`, [course_title, course_description, tname, Number(id)]);
+        console.log(newcourse);
+        console.log('Successfully added');
+        
+        res.redirect('/teacher/courses');
+
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
@@ -127,7 +154,7 @@ app.get('/', (req, res) => {
 
 app.get('/about', (req, res) => {
     console.log('User hit');
-    res.status(200).send('About Page');
+    res.status(500).send('About Page');
 });
 
 
