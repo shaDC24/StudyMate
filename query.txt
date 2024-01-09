@@ -1,30 +1,99 @@
-CREATE DATABASE studymate;
--- Create the students table
-CREATE TABLE students (
+SELECT *FROM student;
+SELECT *FROM courses;
+SELECT *FROM teacher;
+
+CREATE TABLE Student (
     student_id SERIAL PRIMARY KEY,
     first_name VARCHAR(50),
     last_name VARCHAR(50),
     age INTEGER,
     enrollment_date DATE,
-    password_hash VARCHAR(255) -- Assuming hashed passwords with a length of 255 characters
+    password_hash VARCHAR(255), 
+    creation_timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
-INSERT INTO students (first_name, last_name, age, enrollment_date, password_hash)
- VALUES ('ASIF', 'KHAN', 22, '2024-01-07', 'hashed_password');
-
-
-
- CREATE TABLE courses (
+INSERT INTO student (
+        first_name,
+        last_name,
+        age,
+        enrollment_date,
+        password_hash
+    )
+VALUES (
+        'ASIF',
+        'KHAN',
+        22,
+        '2024-01-07',
+        'hashed_password'
+    );
+	
+	
+	
+	CREATE TABLE courses (
     id SERIAL PRIMARY KEY,
     course_title VARCHAR(255) NOT NULL,
     course_description TEXT,
     creation_timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     course_creator VARCHAR(255) NOT NULL,
+    enrolled_id INTEGER REFERENCES student(student_id),
     update_timestamp TIMESTAMPTZ,
     update_author VARCHAR(255)
 );
-
- INSERT INTO courses(course_title, course_description, course_creator)
-  VALUES('Astronomy','Earth,Moon,Sun includes.','Reahn Emily');
-
 INSERT INTO courses(course_title, course_description, course_creator)
-VALUES('Neutonian mechanics','Newtonian mechanics is based on application of Newton's Laws of motion','John Doe');  
+VALUES(
+        'Astronomy',
+        'Earth,Moon,Sun includes.',
+        'Reahn Emily'
+    );
+INSERT INTO courses(course_title, course_description, course_creator)
+VALUES(
+        'Neutonian mechanics',
+        'Newtonian mechanics is based on application of Newtons Laws of motion ',
+        ' John Doe '
+    );
+SELECT *
+FROM courses;
+-- Create the teacher table
+CREATE TABLE Teacher (
+    teacher_id SERIAL PRIMARY KEY,
+   
+    -- Assuming user_id is a foreign key referencing the user table
+    teacher_name VARCHAR(255),
+    teacher_proficiency VARCHAR(255),
+    teacher_birth_date DATE,
+    age INTEGER,
+    initiated_courses_name VARCHAR(255),
+    last_uploaded TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+     password_hash VARCHAR(255)
+);
+-- Create a function to calculate age and update the age field
+CREATE OR REPLACE FUNCTION update_teacher_age() RETURNS TRIGGER AS $$ BEGIN NEW.age = EXTRACT(
+        YEAR
+        FROM age(NEW.teacher_birth_date)
+    );
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+-- Create a trigger to call the function before insert or update
+CREATE TRIGGER before_insert_or_update_teacher BEFORE
+INSERT
+    OR
+UPDATE ON teacher FOR EACH ROW EXECUTE FUNCTION update_teacher_age();
+-- Update the trigger to set teacher_id from user_id
+CREATE OR REPLACE FUNCTION set_teacher_id() RETURNS TRIGGER AS $$ BEGIN IF NEW.teacher_id IS NULL THEN NEW.teacher_id := NEW.user_id;
+END IF;
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+-- Create a new trigger to set teacher_id before insert
+CREATE TRIGGER before_insert_teacher_set_id BEFORE
+INSERT ON teacher FOR EACH ROW EXECUTE FUNCTION set_teacher_id();
+-- Insert data into the teacher table without specifying initiated_courses_name
+INSERT INTO teacher (
+       teacher_id,
+        teacher_name,
+        teacher_proficiency,
+        teacher_birth_date,password_hash
+    )
+VALUES (1, 'John Doe', 'Mathematics', '1990-05-15','1'),
+    (2, 'Jane Smith', 'Physics', '1985-09-22','2');
+-- The rest of the fields (age, last_uploaded) will be automatically updated by triggers

@@ -69,8 +69,6 @@
         <!-- Added courses will be displayed here -->
     </div>
 
-    <!-- Add this script tag after the existing script tag in your HTML -->
-<!-- Add this script tag after the existing script tag in your HTML -->
 <script>
     // Pass courses data from server to client-side JavaScript
     const coursesData = '<%- JSON.stringify(courses) %>';
@@ -105,14 +103,6 @@
             // Append the added course div to the added courses section
             addedCoursesSection.appendChild(addedCourseDiv);
 
-            // Optionally, you can remove the added course from the list of available courses
-            // based on your application's logic
-            // const indexToRemove = coursesData.findIndex(course => course.id === courseId);
-            // if (indexToRemove !== -1) {
-            //     coursesData.splice(indexToRemove, 1);
-            // }
-
-            // Clear the course description after adding it
             const descriptionElement = document.getElementById(`description${courseId}`);
             descriptionElement.style.display = 'none';
         }

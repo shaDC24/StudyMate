@@ -8,6 +8,7 @@ const db = require('./db'); // Import your database connection
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true })); // Parse form data
+let id=null;
 
 // Set the view engine to EJS
 // Set the views directory
@@ -40,10 +41,12 @@ app.get('/students', async (req, res) => {
 
 app.post('/login', async (req, res) => {
     const { userType, userId, password } = req.body;
+    id=userId;
 
     try {
         // Query the database to retrieve the user's details
-        const user = await db.oneOrNone('SELECT * FROM students WHERE student_id = $1', Number(userId));
+        const user = await db.oneOrNone(`SELECT * FROM ${userType} WHERE ${userType}_id = $1`, Number(userId));
+
 
         console.log('User from database:', user);
         console.log('Password comparison result:', bcrypt.compareSync(password, user.password_hash));
@@ -76,28 +79,15 @@ app.get('/student/enroll-courses', async (req, res) => {
     try {
         // Fetch course information from the database
         const courses = await db.any('SELECT *FROM courses');
-       // res.json(courses);
+        // res.json(courses);
 
-        
+
         res.render('enroll_courses', { userType: 'Student', courses });
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
     }
 });
-// app.use((req, res, next) => {
-//     res.setHeader('Content-Security-Policy', "default-src 'self'; font-src 'self' http://localhost:5000;");
-//     next();
-// });
-
-
-
-
-
-
-
-
-
 
 
 app.get('/student/course-lists', (req, res) => {
@@ -108,8 +98,22 @@ app.get('/teacher/dashboard', (req, res) => {
     res.render('teacher_dashboard', { userType: 'Teacher', options: ['Teaching Courses', 'Grade Students'] });
 });
 
+app.get('/teacher/courses', async (req, res) => {
+    try {
+       
+        const courses = await db.any('SELECT *FROM teacher WHERE teacher_id=$1', Number(id));
+        res.json(courses);
+        res.render('.teacher_course', { userType: 'Teacher', courses });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+
+
 app.get('/guidelineGiver/dashboard', (req, res) => {
-    res.render('guideline_giver_dashboard', { userType: 'Guideline Giver', options: ['Provide Guidance', 'View Requests'] });
+    res.render('guideline_giver_dashboard', { userType: 'Guideline_Giver', options: ['Provide Guidance', 'View Requests'] });
 });
 
 // Serve static files from the 'public' directory
