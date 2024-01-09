@@ -114,7 +114,7 @@ app.get('/teacher/courses', async (req, res) => {
 
 app.get('/course/initiation', async (req, res) => {
     try {
-        res.render('course_initiate', { userType: 'Teacher'});
+        res.render('course_initiate', { userType: 'Teacher' });
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
@@ -124,11 +124,26 @@ app.get('/course/initiation', async (req, res) => {
 app.post('/course/initiation', async (req, res) => {
     const { course_title, course_description } = req.body;
     try {
-        const tname = await db.one('SELECT teacher_name FROM teacher WHERE teacher_id=$1', Number(id));
-        const newcourse = await db.one(`INSERT INTO courses (course_title,course_description,course_creator,teacher_id) VALUES($1,$2,$3,$4) RETURNING *`, [course_title, course_description, tname, Number(id)]);
+        // const tname = await db.one('SELECT teacher_name FROM teacher WHERE teacher_id=$1', Number(id));
+        // const newcourse = await db.one(`INSERT INTO courses (course_title,course_description,course_creator,teacher_id) VALUES($1,$2,$3,$4) RETURNING *`, [course_title, course_description, tname, Number(id)]);
+        // console.log(newcourse);
+        const tname = await db.one('SELECT teacher_name, initiated_courses_name FROM teacher WHERE teacher_id=$1', id);
+
+        const newcourse = await db.one(
+            'INSERT INTO courses (course_title, course_description, course_creator, teacher_id) VALUES($1, $2, $3, $4) RETURNING *',
+            [course_title, course_description, tname.teacher_name, id]
+        );
+
+        // Update the initiated_courses column with the new course title
+        const updatedInitiatedCourses = tname.initiated_courses_name
+            ? `${tname.initiated_courses_name}, ${newcourse.course_title}`
+            : newcourse.course_title;
+
+        await db.none('UPDATE teacher SET initiated_courses_name = $1 WHERE teacher_id = $2', [updatedInitiatedCourses, id]);
+
         console.log(newcourse);
         console.log('Successfully added');
-        
+
         res.redirect('/teacher/courses');
 
     } catch (error) {
