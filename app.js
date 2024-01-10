@@ -75,6 +75,7 @@ app.get('/student/dashboard', (req, res) => {
 
 
 // Update your '/student/enroll-courses' route to fetch course data from the database
+
 app.get('/student/enroll-courses', async (req, res) => {
     try {
         // Fetch course information from the database
