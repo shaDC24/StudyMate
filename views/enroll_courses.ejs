@@ -71,7 +71,7 @@
 
 <script>
     // Pass courses data from server to client-side JavaScript
-    const coursesData = '<%- JSON.stringify(courses) %>';
+    const coursesData =`<%- JSON.stringify(courses).replace(/\\/g, '\\\\').replace(/'/g, "\\'") %>`;// '<%- JSON.stringify(courses) %>';
 
     // Function to toggle course description and author
     function toggleDescription(courseId) {
