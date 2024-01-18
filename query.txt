@@ -1,6 +1,6 @@
-SELECT *FROM student;
-SELECT *FROM courses;
-SELECT *FROM teacher;
+
+
+CREATE DATABASE studymate;
 
 CREATE TABLE Student (
     student_id SERIAL PRIMARY KEY,
@@ -36,16 +36,16 @@ CREATE TABLE courses (
     course_creator VARCHAR(255) NOT NULL,
     enrolled_id INTEGER REFERENCES student(student_id),
     update_timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-   
-    teacher_id INTEGER REFERENCES teacher(teacher_id) -- Adding teacher reference
+   teacher_id INTEGER REFERENCES teacher(teacher_id) -- Adding teacher reference
 );
 
-
+SELECT *FROM student;
+SELECT *FROM courses;
+SELECT *FROM teacher;
 -- Create the teacher table
 CREATE TABLE Teacher (
     teacher_id SERIAL PRIMARY KEY,
-   
-    -- Assuming user_id is a foreign key referencing the user table
+   -- Assuming user_id is a foreign key referencing the user table
     teacher_name VARCHAR(255),
     teacher_proficiency VARCHAR(255),
     teacher_birth_date DATE,

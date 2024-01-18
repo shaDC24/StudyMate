@@ -153,7 +153,17 @@ app.post('/course/initiation', async (req, res) => {
     }
 });
 
-
+app.get('/teacher/lecture', async (req, res) => {
+    try {
+        const courses=await db.any('SELECT *FROM courses WHERE teacher_id = $1',Number(id));
+        console.log(courses);
+        res.render('add_lecture', { userType: 'Teacher',courses:courses });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+})
 
 app.get('/guidelineGiver/dashboard', (req, res) => {
     res.render('guideline_giver_dashboard', { userType: 'Guideline_Giver', options: ['Provide Guidance', 'View Requests'] });
