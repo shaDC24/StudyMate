@@ -35,13 +35,21 @@
                         data-bs-parent="#accordionFlushExample">
                         <div class="accordion-body">
                             <%= courses[i].course_description %>
-                            <br><br>
-                            <a href="">
-                                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                                    data-bs-target="#addLectureModal" style="background-color: green;">
-                                    Add Lecture
-                                </button>
-                            </a>
+
+                                <br><br>
+                                <a href="/initiate/lecture?course_id=<%= courses[i].id %>">
+                                    <button type="button" class="btn btn-primary mx-3" data-bs-toggle="modal"
+                                        data-bs-target="#addLectureModal" style="background-color: green;">
+                                        Add Lecture
+                                    </button>
+                                </a>
+
+                                <a href="/show/lecture?course_id=<%= courses[i].id %>">
+                                    <button style="background-color: darksalmon;">
+                                        Show Lectures
+                                    </button>
+
+                                </a>
                         </div>
                     </div>
                 </div>

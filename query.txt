@@ -1,3 +1,4 @@
+--npm install express multer
 
 
 CREATE DATABASE studymate;
@@ -28,20 +29,7 @@ VALUES (
 	
 	
 	
-CREATE TABLE courses (
-    id SERIAL PRIMARY KEY,
-    course_title VARCHAR(255) NOT NULL,
-    course_description TEXT,
-    creation_timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    course_creator VARCHAR(255) NOT NULL,
-    enrolled_id INTEGER REFERENCES student(student_id),
-    update_timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-   teacher_id INTEGER REFERENCES teacher(teacher_id) -- Adding teacher reference
-);
 
-SELECT *FROM student;
-SELECT *FROM courses;
-SELECT *FROM teacher;
 -- Create the teacher table
 CREATE TABLE Teacher (
     teacher_id SERIAL PRIMARY KEY,
@@ -85,4 +73,26 @@ INSERT INTO teacher (
     )
 VALUES (1, 'John Doe', 'Mathematics', '1990-05-15','1'),
     (2, 'Jane Smith', 'Physics', '1985-09-22','2');
--- The rest of the fields (age, last_uploaded) will be automatically updated by trigge
+-- The rest of the fields (age, last_uploaded) will be automatically updated by TRIGGER
+CREATE TABLE courses (
+    id SERIAL PRIMARY KEY,
+    course_title VARCHAR(255) NOT NULL,
+    course_description TEXT,
+    creation_timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    course_creator VARCHAR(255) NOT NULL,
+    enrolled_id INTEGER REFERENCES student(student_id),
+    update_timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+   teacher_id INTEGER REFERENCES teacher(teacher_id) -- Adding teacher reference
+);
+
+CREATE TABLE Lecture (
+    lecture_id SERIAL PRIMARY KEY,
+    description TEXT,
+    pdf_note BYTEA,
+    lecture_name VARCHAR(255),
+    video BYTEA,
+    upload_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Added timestamp for the time of upload
+    teacher_id INTEGER REFERENCES teacher(teacher_id), -- Assuming there's a Teacher table with teacher_id
+    course_id INTEGER REFERENCES courses(id), -- Assuming there's a Course table with course_id
+    student_ids INTEGER[] -- An array to store multiple student_ids
+);

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Initiate Lecture</title>
+</head>
+
+<body>
+    <h2>Create New Lecture</h2>
+    <form action="/initiate/lecture" method="post" enctype="multipart/form-data">
+        
+        <label for="lectureName">Lecture Name:</label>
+        <input type="text" id="lectureName" name="lectureName" required><br>
+
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" rows="4" required></textarea><br>
+
+        <label for="video">Upload Video:</label>
+        <input type="file" id="video" name="video" accept="video/*"><br>
+
+        <label for="pdfNote">Upload PDF Note:</label>
+        <input type="file" id="pdfNote" name="pdfNote" accept=".pdf"><br>
+
+        <input type="submit" value="Submit">
+    </form>
+</body>
+
+</html>
