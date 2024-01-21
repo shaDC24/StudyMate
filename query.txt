@@ -94,5 +94,111 @@ CREATE TABLE Lecture (
     upload_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Added timestamp for the time of upload
     teacher_id INTEGER REFERENCES teacher(teacher_id), -- Assuming there's a Teacher table with teacher_id
     course_id INTEGER REFERENCES courses(id), -- Assuming there's a Course table with course_id
-    student_ids INTEGER[] -- An array to store multiple student_ids
 );
+
+CREATE TABLE course_enrollment (
+    course_id INTEGER REFERENCES courses(id),
+    student_id INTEGER REFERENCES student(student_id),
+    PRIMARY KEY (course_id, student_id)
+);
+
+ALTER TABLE LECTURE
+DROP COLUMN COURSE_ID;
+
+ALTER TABLE Lecture
+ADD COLUMN course_id INTEGER REFERENCES courses(id),
+ADD CONSTRAINT fk_lecture_course
+FOREIGN KEY (course_id) REFERENCES courses(id);
+
+CREATE TABLE TOPIC (
+    topic_id SERIAL PRIMARY KEY,
+    topic_name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE exam_section (
+    id SERIAL PRIMARY KEY,
+    exam_topic VARCHAR(255) NOT NULL,
+    question_id INTEGER NOT NULL
+);
+
+CREATE TABLE question (
+    id SERIAL PRIMARY KEY,
+    question_statement TEXT NOT NULL
+);
+
+CREATE TABLE answer (
+    id SERIAL PRIMARY KEY,
+    ans_statement TEXT NOT NULL,
+    explanation TEXT
+);
+
+CREATE TABLE choice (
+    id SERIAL PRIMARY KEY,
+    option_text TEXT NOT NULL
+);
+
+CREATE TABLE feedback (
+    feedback_serial SERIAL PRIMARY KEY,
+    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    comment TEXT
+);
+
+CREATE TABLE lecture_progress (
+    lecture_progress_id SERIAL PRIMARY KEY,
+    current_id INTEGER REFERENCES lecture(lecture_id),
+    finished_id INTEGER REFERENCES lecture(lecture_id)
+);
+
+CREATE TABLE exam_performance (
+    exam_id SERIAL PRIMARY KEY,
+    accuracy_pct DECIMAL(5, 2), -- Assuming accuracy percentage can have two decimal places
+    avg_time_per_question INTEGER -- Assuming average time is measured in seconds
+);
+
+CREATE TABLE tracking_section (
+    track_id SERIAL PRIMARY KEY,
+    exam_performance_id INTEGER REFERENCES exam_performance(exam_id),
+    lecture_progress_id INTEGER REFERENCES lecture_progress(lecture_progress_id)
+);
+
+
+CREATE TABLE to_do_list (
+    id SERIAL PRIMARY KEY,
+    task_name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE routine (
+    id SERIAL PRIMARY KEY,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    task_name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE study_info (
+    id SERIAL PRIMARY KEY,
+    routine_id INTEGER REFERENCES routine(id),
+    todo_list_id INTEGER REFERENCES to_do_list(id),
+    study_hour INTEGER REFERENCES study_hour(id)
+);
+
+CREATE TABLE study_hour (
+    id SERIAL PRIMARY KEY,
+    date DATE NOT NULL,
+    hours_studied INTEGER NOT NULL,
+    study_info_id INTEGER REFERENCES study_info(id)
+);
+
+CREATE TABLE guideline_giver (
+    guide_id SERIAL PRIMARY KEY,
+    proficiency VARCHAR(255) NOT NULL,
+    phone_no VARCHAR(15) NOT NULL,
+    university VARCHAR(255) NOT NULL
+);
+
+alter table answer add column question_id INTEGER REFERENCES question(id);
+alter table question add column exam_id INTEGER REFERENCES exam_section(id);
+alter table exam_section add column topic_id INTEGER REFERENCES TOPIC(topic_id);
+alter table choice add column question_id INTEGER REFERENCES question(id);
+alter table courses add column rate_id INTEGER REFERENCES feedback(feedback_serial);
+alter table feedback add column student_id INTEGER REFERENCES student(student_id);
