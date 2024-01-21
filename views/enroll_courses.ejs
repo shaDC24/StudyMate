@@ -47,50 +47,52 @@
 
     <!-- Iterate through courses and display course titles -->
     <% courses.forEach(course=> { %>
-    <div class="course" onclick="toggleDescription('<%= course.id %>')">
-        <div>
-            <h3>
-                <%= course.course_title %>
-            </h3>
-            <p class="course-description" id="description<%= course.id %>">
-                <strong>Description:</strong>
-                <%= course.course_description %><br>
-                <strong>Author:</strong>
-                <%= course.course_creator %>
-            </p>
+        <div class="course" onclick="toggleDescription('<%= course.id %>')">
+            <div>
+                <h3>
+                    <%= course.course_title %>
+                </h3>
+                <p class="course-description" id="description<%= course.id %>">
+                    <strong>Description:</strong>
+                    <%= course.course_description %><br>
+                        <strong>Author:</strong>
+                        <%= course.course_creator %>
+                </p>
+            </div>
+            <button class="add-button" onclick="addCourse('<%= course.id %>')">Add</button>
         </div>
-        <button class="add-button" onclick="addCourse('<%= course.id %>')">Add</button>
-    </div>
-    <% }) %>
+        <% }) %>
 
-    <!-- Added Courses Section -->
-    <div class="added-course" id="addedCoursesSection">
-        <h2>Added Courses</h2>
-        <!-- Added courses will be displayed here -->
-    </div>
+            <!-- Added Courses Section -->
+            <div class="added-course" id="addedCoursesSection">
+                <h2>Added Courses</h2>
+                <!-- Added courses will be displayed here -->
+            </div>
 
-<script>
-    // Pass courses data from server to client-side JavaScript
-    const coursesData =`<%- JSON.stringify(courses).replace(/\\/g, '\\\\').replace(/'/g, "\\'") %>`;// '<%- JSON.stringify(courses) %>';
+            <script>
+                // Pass courses data from server to client-side JavaScript
+                const coursesData = `<%- JSON.stringify(courses).replace(/\\/g, '\\\\').replace(/'/g, "\\'") %>`;// '<%- JSON.stringify(courses) %>';
 
-    // Function to toggle course description and author
-    function toggleDescription(courseId) {
-        const descriptionElement = document.getElementById(`description${courseId}`);
-        descriptionElement.style.display = (descriptionElement.style.display === 'none' || descriptionElement.style.display === '') ? 'block' : 'none';
-    }
+                // Function to toggle course description and author
+                function toggleDescription(courseId) {
+                    const descriptionElement = document.getElementById(`description${courseId}`);
+                    descriptionElement.style.display = (descriptionElement.style.display === 'none' || descriptionElement.style.display === '') ? 'block' : 'none';
+                }
 
-    // Function to add a course
-    function addCourse(courseId) {
-        const addedCoursesSection = document.getElementById('addedCoursesSection');
-        const selectedCourse = JSON.parse(coursesData).find(course => course.id === parseInt(courseId));
+                // Function to add a course
+                function addCourse(courseId) {
+                    console.log("add now");
+                    const addedCoursesSection = document.getElementById('addedCoursesSection');
+                    console.log(courseId);
+                    const selectedCourse = JSON.parse(coursesData).find(course => course.id === parseInt(courseId));
 
-        if (selectedCourse) {
-            // Create a new div element for the added course
-            const addedCourseDiv = document.createElement('div');
-            addedCourseDiv.classList.add('course');
+                    if (selectedCourse) {
+                        // Create a new div element for the added course
+                        const addedCourseDiv = document.createElement('div');
+                        addedCourseDiv.classList.add('course');
 
-            // Set the content of the added course div
-            addedCourseDiv.innerHTML = `
+                        // Set the content of the added course div
+                        addedCourseDiv.innerHTML = `
                 <div>
                     <h3>${selectedCourse.course_title}</h3>
                     <p class="course-description">
@@ -100,14 +102,20 @@
                 </div>
             `;
 
-            // Append the added course div to the added courses section
-            addedCoursesSection.appendChild(addedCourseDiv);
+                        // Append the added course div to the added courses section
+                        addedCoursesSection.appendChild(addedCourseDiv);
 
-            const descriptionElement = document.getElementById(`description${courseId}`);
-            descriptionElement.style.display = 'none';
-        }
-    }
-</script>
+                        const descriptionElement = document.getElementById(`description${courseId}`);
+                        descriptionElement.style.display = 'none';
+
+                        // Send course ID to app.js using AJAX
+                        const xhr = new XMLHttpRequest();
+                        xhr.open('POST', '/student/enroll-courses'); // Change the URL to the appropriate endpoint in app.js
+                        xhr.setRequestHeader('Content-Type', 'application/json');
+                        xhr.send(JSON.stringify({ courseId: parseInt(courseId) }));
+                    }
+                }
+            </script>
 
 </body>
 

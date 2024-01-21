@@ -84,6 +84,18 @@ CREATE TABLE courses (
     update_timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
    teacher_id INTEGER REFERENCES teacher(teacher_id) -- Adding teacher reference
 );
+CREATE TABLE enrollments (
+    enrollment_id SERIAL PRIMARY KEY,
+    student_id INTEGER REFERENCES student(student_id),
+    course_id INTEGER REFERENCES courses(id),
+    enrollment_timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE watched (
+    watched_id SERIAL PRIMARY KEY,
+    student_id INTEGER REFERENCES student(student_id),
+    lecture_id INTEGER REFERENCES Lecture(lecture_id),
+    watched_timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
 
 CREATE TABLE Lecture (
     lecture_id SERIAL PRIMARY KEY,
@@ -94,5 +106,5 @@ CREATE TABLE Lecture (
     upload_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Added timestamp for the time of upload
     teacher_id INTEGER REFERENCES teacher(teacher_id), -- Assuming there's a Teacher table with teacher_id
     course_id INTEGER REFERENCES courses(id), -- Assuming there's a Course table with course_id
-    student_ids INTEGER[] -- An array to store multiple student_ids
+
 );

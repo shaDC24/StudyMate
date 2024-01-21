@@ -1,15 +1,19 @@
 const express = require('express');
 const path = require('path');
-const multer = require('multer');
 const bodyParser = require('body-parser');
+const multer = require('multer');
 const bcrypt = require('bcrypt');
 const db = require('./db'); // Import your database connection
+
+
 
 
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true })); // Parse form data
+app.use(express.json());
 let id = null;
+let C_id = null;
 
 // Set the view engine to EJS
 // Set the views directory
@@ -68,10 +72,22 @@ app.get('/student/dashboard', (req, res) => {
 });
 
 
+app.post('/student/enroll-courses', async (req, res) => {
+    const courseId = req.body.courseId;
+    // Do something with the courseId, such as storing it in a database or processing it 
+    try {
+        const enrollment = await db.one('INSERT INTO enrollments( student_id,course_id) VALUES($1,$2) returning *', [Number(id), Number(courseId)]);
+        console.log(`Enrolling in course with ID: ${courseId}`);
+        res.send('Course enrolled successfully');
+        console.log(enrollment);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
 
 
-
-// Update your '/student/enroll-courses' route to fetch course data from the database
 
 app.get('/student/enroll-courses', async (req, res) => {
     try {
@@ -88,8 +104,9 @@ app.get('/student/enroll-courses', async (req, res) => {
 });
 
 
-app.get('/student/course-lists', (req, res) => {
-    res.render('course_lists', { userType: 'Student' });
+app.get('/student/course-lists', async(req, res) => {
+    const enrolledCourses=await db.any('select *from student s join enrollments e on s.student_id=e.student_id join courses c on c.id=e.course_id where s.student_id=$1;',Number(id));
+    res.render('course_lists', { userType: 'Student',courses:enrolledCourses });
 });
 
 app.get('/teacher/dashboard', (req, res) => {
@@ -100,7 +117,7 @@ app.get('/teacher/courses', async (req, res) => {
     try {
 
         const tData = await db.any('SELECT *FROM teacher WHERE teacher_id=$1', Number(id));
-        const courses = await db.any(`SELECT * FROM courses WHERE  ${tData[0].teacher_id}=${id}`);
+        const courses = await db.any('SELECT *FROM courses WHERE  teacher_id=$1',Number(id));
         console.log(tData);
         console.log(courses);
         res.render('teacher_course', { userType: 'Teacher', Data: tData, courses: courses, res: res });
@@ -159,29 +176,55 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+
+
 // Serve static files from the "uploads" directory
 app.use('/uploads', express.static('uploads'));
 
-// Set up your routes
-app.get('/initiate/lecture', (req, res) => {
-    // Render your ejs file here
-    res.render('lecture_initiate');
+
+app.get('/initiate/lecture', async (req, res) => {
+    C_id = Number(req.query.course_id);
+    console.log(C_id);
+    console.log(req.query); // Check if course_id is present in req.query
+    console.log(req.body);
+    res.render('lecture_initiate', { userType: 'Teacher', course_id: C_id });
 });
 
+
+
 app.post('/initiate/lecture', upload.fields([{ name: 'video', maxCount: 1 }, { name: 'pdfNote', maxCount: 1 }]), async (req, res) => {
-    // Handle form submission here
-    const course_id = Number(req.query.course_id);
+    console.log('Request Body:', req.body);
+    console.log('Request Files:', req.files);
 
     const lectureName = req.body.lectureName;
     const description = req.body.description;
-    const videoFile = req.files['video'][0].buffer; // Access the video file
-    const pdfNoteFile = req.files['pdfNote'][0].buffer; // Access the PDF note file
-    console.log("course id is " + course_id);
-    if (course_id != null || course_id!=undefined) {
-        const newlecture = await db.one(`INSERT INTO Lecture(lecture_name,description,pdf_note,video,teacher_id,course_id) VALUES($1,$2,$3,$4,$5,$6) RETURNING *`, [lectureName, description, videoFile, pdfNoteFile, id, course_id]);
-        console.log(newlecture);}
-    res.send('Lecture initiated successfully!');
+    const videoFileBuffer = req.files['video'][0].buffer;
+    const pdfNoteFileBuffer = req.files['pdfNote'][0].buffer;
+
+
+
+    console.log("course id is " + C_id);
+
+    if (!isNaN(C_id)) {
+        try {
+            // Insert into the database using the appropriate data type (BYTEA in PostgreSQL)
+            const newlecture = await db.one(
+                `INSERT INTO Lecture(lecture_name, description, pdf_note, video, teacher_id, course_id) VALUES($1, $2, $3, $4, $5, $6) RETURNING *`,
+                [lectureName, description, videoFileBuffer, pdfNoteFileBuffer, id, C_id]
+            );
+
+            console.log('New Lecture:', newlecture);
+            res.send('Lecture initiated successfully!');
+        } catch (error) {
+            console.error('Error:', error);
+            res.status(500).send('Error initiating lecture');
+        }
+    } else {
+        res.status(400).send('Invalid course ID');
+    }
 });
+
+
 app.get('/teacher/lecture', async (req, res) => {
     try {
         const courses = await db.any('SELECT *FROM courses WHERE teacher_id = $1', Number(id));

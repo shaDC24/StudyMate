@@ -40,12 +40,9 @@
             <li><strong>Age:</strong>
                 <%= Data[0].age %>
             </li>
-            <li><strong>Last Login Date:</strong>
-                <%= Data[0].last_uploaded.toISOString().split('T')[0] %>
-            </li>
             <!-- Add other relevant information here -->
-            <li><strong>Last Login Time:</strong>
-                <%= Data[0].last_uploaded.toISOString().split('T')[1] %>
+            <li><strong>Last Login:</strong>
+                <%= Data[0].last_login_time %>
             </li>
             <li><strong>Your courses:</strong>
                 <ul>
