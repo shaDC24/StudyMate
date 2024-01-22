@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const multer = require('multer');
 const db = require('./db'); // Import your database connection
 const bcrypt = require('bcrypt');
-// const fs = require('fs');
+ const fs = require('fs');
 
 
 
@@ -227,52 +227,52 @@ app.get('/initiate/lecture', async (req, res) => {
     res.render('lecture_initiate', { userType: 'Teacher', course_id: C_id });
 });
 
-// Set up multer for handling file uploads
-// const storage = multer.memoryStorage();
-// const upload = multer({ storage: storage });
+//Set up multer for handling file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
-// Set up middleware
-// app.use(express.urlencoded({ extended: true }));
-// app.use(express.json());
+//Set up middleware
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
-// // Serve static files (optional, depending on your needs)
-// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Serve static files (optional, depending on your needs)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Handle POST request for initiating a new lecture
-// app.post('/initiate/lecture', upload.fields([{ name: 'video', maxCount: 1 }, { name: 'pdf', maxCount: 1 }]), async (req, res) => {
-//     try {
-//         const { title, description } = req.body;
-//         const videoFile = req.files['video'][0];
-//         const pdfFile = req.files['pdf'][0];
-//         console.log("to post " + id + "  " + C_id);
+//Handle POST request for initiating a new lecture
+app.post('/initiate/lecture', upload.fields([{ name: 'video', maxCount: 1 }, { name: 'pdf', maxCount: 1 }]), async (req, res) => {
+    try {
+        const { title, description } = req.body;
+        const videoFile = req.files['video'][0];
+        const pdfFile = req.files['pdf'][0];
+        console.log("to post " + id + "  " + C_id);
 
-//         //Save lecture data to the database
+        //Save lecture data to the database
 
-//         const newlecture = await db.one(
-//             'INSERT INTO lecture(lecture_name,description,teacher_id,course_id) VALUES($1,$2,$3,$4) RETURNING *',
-//             [title, description, id, C_id]
-//         );
-//         const lectureId=await db.one('select count(*) from lecture');
-//         console.log(newlecture);
-//         console.log(lectureId);
-//         // Save video and pdf files to the file system
-//         saveFile(videoFile, `video_${lectureId.count}.mp4`);
-//         saveFile(pdfFile, `pdf_${lectureId.count}.pdf`);
-//         console.log('Request Body:', req.body);
-//         console.log('Request Files:', req.files);
-//         console.log("course id is " + C_id);
+        const newlecture = await db.one(
+            'INSERT INTO lecture(lecture_name,description,teacher_id,course_id) VALUES($1,$2,$3,$4) RETURNING *',
+            [title, description, id, C_id]
+        );
+        const lectureId=await db.one('select count(*) from lecture');
+        console.log(newlecture);
+        console.log(lectureId);
+        // Save video and pdf files to the file system
+        saveFile(videoFile, `video_${lectureId.count}.mp4`);
+        saveFile(pdfFile, `pdf_${lectureId.count}.pdf`);
+        console.log('Request Body:', req.body);
+        console.log('Request Files:', req.files);
+        console.log("course id is " + C_id);
 
-//         res.status(200).send('Lecture created successfully');
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).send('Internal Server Error');
-//     }
-// });
+        res.status(200).send('Lecture created successfully');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
 
-// function saveFile(file, fileName) {
-//     const filePath = path.join(__dirname, 'uploads', fileName);
-//     fs.writeFileSync(filePath, file.buffer);
-// }
+function saveFile(file, fileName) {
+    const filePath = path.join(__dirname, 'uploads', fileName);
+    fs.writeFileSync(filePath, file.buffer);
+}
 
 
 
