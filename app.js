@@ -88,6 +88,21 @@ app.post('/student/enroll-courses', async (req, res) => {
 });
 
 
+// to check if course is already added or not
+app.get('/student/is-course-added/:courseId', async (req, res) => {
+    const studentId = id; // Assuming you have a user object in your request with the current student's ID
+    const courseId = req.params.courseId;
+
+    try {
+        const result = await db.oneOrNone('SELECT * FROM enrollments WHERE student_id = $1 AND course_id = $2', [studentId, courseId]);
+        res.json({ isAdded: result !== null });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+
 
 app.get('/student/enroll-courses', async (req, res) => {
     try {
@@ -105,7 +120,7 @@ app.get('/student/enroll-courses', async (req, res) => {
 
 
 app.get('/student/course-lists', async(req, res) => {
-    const enrolledCourses=await db.any('select *from student s join enrollments e on s.student_id=e.student_id join courses c on c.id=e.course_id where s.student_id=$1;',Number(id));
+    const enrolledCourses=await db.any('select * from student s join enrollments e on s.student_id=e.student_id join courses c on c.id=e.course_id where s.student_id=$1;',Number(id));
     res.render('course_lists', { userType: 'Student',courses:enrolledCourses });
 });
 

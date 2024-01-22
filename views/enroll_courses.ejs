@@ -71,51 +71,94 @@
 
             <script>
                 // Pass courses data from server to client-side JavaScript
-                const coursesData = `<%- JSON.stringify(courses).replace(/\\/g, '\\\\').replace(/'/g, "\\'") %>`;// '<%- JSON.stringify(courses) %>';
-
+                const coursesData = `<%- JSON.stringify(courses).replace(/\\/g, '\\\\').replace(/'/g, "\\'") %>`;
+                
+                // Function to check if a course has already been added
+                async function isCourseAlreadyAdded(courseId) {
+                    const response = await fetch(`/student/is-course-added/${courseId}`); // Replace with your actual endpoint
+                    const result = await response.json();
+                    return result.isAdded;
+                }
+            
                 // Function to toggle course description and author
                 function toggleDescription(courseId) {
                     const descriptionElement = document.getElementById(`description${courseId}`);
                     descriptionElement.style.display = (descriptionElement.style.display === 'none' || descriptionElement.style.display === '') ? 'block' : 'none';
                 }
-
+            
                 // Function to add a course
-                function addCourse(courseId) {
-                    console.log("add now");
-                    const addedCoursesSection = document.getElementById('addedCoursesSection');
-                    console.log(courseId);
-                    const selectedCourse = JSON.parse(coursesData).find(course => course.id === parseInt(courseId));
+                // ... (Existing code)
 
-                    if (selectedCourse) {
-                        // Create a new div element for the added course
-                        const addedCourseDiv = document.createElement('div');
+// Function to check if a course exists
+async function checkCourseExistence(courseId) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', `/student/is-course-added/${courseId}`);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        const response = JSON.parse(xhr.responseText);
+        resolve(response.isAdded);
+      } else {
+        reject(new Error('Failed to check course existence'));
+      }
+    };
+
+    xhr.onerror = () => {
+      reject(new Error('Failed to check course existence'));
+    };
+
+    xhr.send();
+  });
+}
+
+// Function to add a course
+async function addCourse(courseId) {
+  const addedCoursesSection = document.getElementById('addedCoursesSection');
+  const courseExists = await checkCourseExistence(courseId);
+
+  if (!courseExists) {
+    console.log("add now");
+    const selectedCourse = JSON.parse(coursesData).find(course => course.id === parseInt(courseId));
+
+    if (selectedCourse) {
+                              // Create a new div element for the added course
+                              const addedCourseDiv = document.createElement('div');
                         addedCourseDiv.classList.add('course');
-
+            
                         // Set the content of the added course div
                         addedCourseDiv.innerHTML = `
-                <div>
-                    <h3>${selectedCourse.course_title}</h3>
-                    <p class="course-description">
-                        <strong>Description:</strong> ${selectedCourse.course_description}<br>
-                        <strong>Author:</strong> ${selectedCourse.course_creator}
-                    </p>
-                </div>
-            `;
-
+                        <div>
+                            <h3>${selectedCourse.course_title}</h3>
+                            <p class="course-description">
+                                <strong>Description:</strong> ${selectedCourse.course_description}<br>
+                                <strong>Author:</strong> ${selectedCourse.course_creator}
+                            </p>
+                        </div>
+                    `;
+            
                         // Append the added course div to the added courses section
                         addedCoursesSection.appendChild(addedCourseDiv);
-
+            
                         const descriptionElement = document.getElementById(`description${courseId}`);
                         descriptionElement.style.display = 'none';
-
+            
                         // Send course ID to app.js using AJAX
                         const xhr = new XMLHttpRequest();
                         xhr.open('POST', '/student/enroll-courses'); // Change the URL to the appropriate endpoint in app.js
                         xhr.setRequestHeader('Content-Type', 'application/json');
                         xhr.send(JSON.stringify({ courseId: parseInt(courseId) }));
-                    }
-                }
+    }
+  } else {
+    alert('Course already added.');
+  }
+}
+
+// ... (Existing code)
+
             </script>
+            
 
 </body>
 
