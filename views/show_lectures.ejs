@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Show Lectures</title>
+    <!-- Add your stylesheets or other head elements here -->
+</head>
+
+<body>
+    <h1>Show Lectures for <%= course.course_title %></h1>
+
+    <ul>
+        <% for (let i = 0; i < lectures.length; i++) { %>
+            <li>
+                <strong>Lecture Name:</strong> <%= lectures[i].lecture_name %><br>
+                <strong>Description:</strong> <%= lectures[i].description %><br>
+                
+                <!-- Add video element with source link -->
+                <video width="320" height="240" controls>
+                    <source src="<%= /uploads/lectures[i] %>" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                
+                <!-- Add other lecture details here -->
+            </li>
+        <% } %>
+    </ul>
+
+    <!-- Add a link to navigate back to the courses -->
+    <a href="/teacher/lecture">
+        <button style="background-color: darksalmon;">
+            Back to Courses
+        </button>
+    </a>
+
+    <!-- Add any additional content or styling here -->
+
+</body>
+
+</html>

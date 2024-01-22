@@ -103,6 +103,26 @@ app.get('/student/is-course-added/:courseId', async (req, res) => {
 });
 
 
+// Assuming you have a route like "/show/lecture" in your Express app
+app.get('/show/lecture', async (req, res) => {
+    const courseId = req.query.course_id;
+
+    try {
+        // Fetch lectures associated with the specified course from the database
+        const lectures = await db.any('SELECT * FROM lecture WHERE course_id = $1', courseId);
+
+        // Fetch course details for display
+        const course = await db.one('SELECT * FROM courses WHERE id = $1', courseId);
+
+        // Render the 'show_lectures' view and pass the retrieved lectures and course data
+        res.render('show_lectures', { lectures, course });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+
 
 app.get('/student/enroll-courses', async (req, res) => {
     try {
@@ -242,7 +262,7 @@ app.post('/initiate/lecture', upload.fields([{ name: 'video', maxCount: 1 }, { n
 
 app.get('/teacher/lecture', async (req, res) => {
     try {
-        const courses = await db.any('SELECT *FROM courses WHERE teacher_id = $1', Number(id));
+        const courses = await db.any('SELECT * FROM courses WHERE teacher_id = $1', Number(id));
         console.log(courses);
         res.render('add_lecture', { userType: 'Teacher', courses: courses });
     }
