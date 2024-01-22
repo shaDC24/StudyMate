@@ -108,11 +108,6 @@ CREATE TABLE Lecture (
     course_id INTEGER REFERENCES courses(id), -- Assuming there's a Course table with course_id
 );
 
-CREATE TABLE course_enrollment (
-    course_id INTEGER REFERENCES courses(id),
-    student_id INTEGER REFERENCES student(student_id),
-    PRIMARY KEY (course_id, student_id)
-);
 
 ALTER TABLE LECTURE
 DROP COLUMN COURSE_ID;

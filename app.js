@@ -2,9 +2,9 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const multer = require('multer');
-const bcrypt = require('bcrypt');
 const db = require('./db'); // Import your database connection
-
+const bcrypt = require('bcrypt');
+// const fs = require('fs');
 
 
 
@@ -15,7 +15,6 @@ app.use(express.json());
 let id = null;
 let C_id = null;
 
-// Set the view engine to EJS
 // Set the views directory
 app.set('views', path.join(__dirname, 'views'));
 
@@ -67,11 +66,30 @@ app.post('/login', async (req, res) => {
 
 
 
-app.get('/student/dashboard', (req, res) => {
-    res.render('student_dashboard', { userType: 'Student', options: ['Enroll Courses', 'Course Lists'] });
+app.get('/student/dashboard', async (req, res) => {
+    try {
+        const teacherNames = await db.any('SELECT TEACHER_NAME FROM TEACHER');
+        res.render('student_dashboard', { userType: 'Student', teachers: teacherNames });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+app.get('/api/search/teachers', (req, res) => {
+    const searchTerm = req.query.q.toLowerCase();
+    const matchingTeachers = teachers.filter(teacher => teacher.toLowerCase().includes(searchTerm));
+    res.json(matchingTeachers);
 });
 
-
+// Endpoint for searching courses
+app.get('/api/search/courses', (req, res) => {
+    const searchTerm = req.query.q.toLowerCase();
+    const enrolledcourses=('select *from courses c where id in (select course_id from enrollments e where student_id=$1)',id);
+    const unenrolledcourses=('select * from courses c1 where c1.id in (select c.id from courses c except(select e.course_id from enrollments e where e.student_id=$1))',id);
+    const matchingCourses = courses.filter(course => course.toLowerCase().includes(searchTerm));
+    res.json(matchingCourses);
+});
 app.post('/student/enroll-courses', async (req, res) => {
     const courseId = req.body.courseId;
     // Do something with the courseId, such as storing it in a database or processing it 
@@ -119,9 +137,10 @@ app.get('/student/enroll-courses', async (req, res) => {
 });
 
 
-app.get('/student/course-lists', async(req, res) => {
-    const enrolledCourses=await db.any('select * from student s join enrollments e on s.student_id=e.student_id join courses c on c.id=e.course_id where s.student_id=$1;',Number(id));
-    res.render('course_lists', { userType: 'Student',courses:enrolledCourses });
+app.get('/student/course-lists', async (req, res) => {
+    const enrolledCourses = await db.any('select * from student s join enrollments e on s.student_id=e.student_id join courses c on c.id=e.course_id join teacher t on  t.teacher_id=c.teacher_id where s.student_id=$1;', Number(id));
+    console.log(enrolledCourses);
+    res.render('course_lists', { userType: 'Student', courses: enrolledCourses });
 });
 
 app.get('/teacher/dashboard', (req, res) => {
@@ -132,7 +151,7 @@ app.get('/teacher/courses', async (req, res) => {
     try {
 
         const tData = await db.any('SELECT *FROM teacher WHERE teacher_id=$1', Number(id));
-        const courses = await db.any('SELECT *FROM courses WHERE  teacher_id=$1',Number(id));
+        const courses = await db.any('SELECT *FROM courses WHERE  teacher_id=$1', Number(id));
         console.log(tData);
         console.log(courses);
         res.render('teacher_course', { userType: 'Teacher', Data: tData, courses: courses, res: res });
@@ -179,23 +198,6 @@ app.post('/course/initiation', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
-// Set up Multer to handle file uploads
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/'); // Uploads will be stored in the "uploads" directory
-    },
-    filename: function (req, file, cb) {
-        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-    }
-});
-
-const upload = multer({ storage: storage });
-
-
-
-// Serve static files from the "uploads" directory
-app.use('/uploads', express.static('uploads'));
-
 
 app.get('/initiate/lecture', async (req, res) => {
     C_id = Number(req.query.course_id);
@@ -205,39 +207,54 @@ app.get('/initiate/lecture', async (req, res) => {
     res.render('lecture_initiate', { userType: 'Teacher', course_id: C_id });
 });
 
+// Set up multer for handling file uploads
+// const storage = multer.memoryStorage();
+// const upload = multer({ storage: storage });
+
+// Set up middleware
+// app.use(express.urlencoded({ extended: true }));
+// app.use(express.json());
+
+// // Serve static files (optional, depending on your needs)
+// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Handle POST request for initiating a new lecture
+// app.post('/initiate/lecture', upload.fields([{ name: 'video', maxCount: 1 }, { name: 'pdf', maxCount: 1 }]), async (req, res) => {
+//     try {
+//         const { title, description } = req.body;
+//         const videoFile = req.files['video'][0];
+//         const pdfFile = req.files['pdf'][0];
+//         console.log("to post " + id + "  " + C_id);
+
+//         //Save lecture data to the database
+
+//         const newlecture = await db.one(
+//             'INSERT INTO lecture(lecture_name,description,teacher_id,course_id) VALUES($1,$2,$3,$4) RETURNING *',
+//             [title, description, id, C_id]
+//         );
+//         const lectureId=await db.one('select count(*) from lecture');
+//         console.log(newlecture);
+//         console.log(lectureId);
+//         // Save video and pdf files to the file system
+//         saveFile(videoFile, `video_${lectureId.count}.mp4`);
+//         saveFile(pdfFile, `pdf_${lectureId.count}.pdf`);
+//         console.log('Request Body:', req.body);
+//         console.log('Request Files:', req.files);
+//         console.log("course id is " + C_id);
+
+//         res.status(200).send('Lecture created successfully');
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).send('Internal Server Error');
+//     }
+// });
+
+// function saveFile(file, fileName) {
+//     const filePath = path.join(__dirname, 'uploads', fileName);
+//     fs.writeFileSync(filePath, file.buffer);
+// }
 
 
-app.post('/initiate/lecture', upload.fields([{ name: 'video', maxCount: 1 }, { name: 'pdfNote', maxCount: 1 }]), async (req, res) => {
-    console.log('Request Body:', req.body);
-    console.log('Request Files:', req.files);
-
-    const lectureName = req.body.lectureName;
-    const description = req.body.description;
-    const videoFileBuffer = req.files['video'][0].buffer;
-    const pdfNoteFileBuffer = req.files['pdfNote'][0].buffer;
-
-
-
-    console.log("course id is " + C_id);
-
-    if (!isNaN(C_id)) {
-        try {
-            // Insert into the database using the appropriate data type (BYTEA in PostgreSQL)
-            const newlecture = await db.one(
-                `INSERT INTO Lecture(lecture_name, description, pdf_note, video, teacher_id, course_id) VALUES($1, $2, $3, $4, $5, $6) RETURNING *`,
-                [lectureName, description, videoFileBuffer, pdfNoteFileBuffer, id, C_id]
-            );
-
-            console.log('New Lecture:', newlecture);
-            res.send('Lecture initiated successfully!');
-        } catch (error) {
-            console.error('Error:', error);
-            res.status(500).send('Error initiating lecture');
-        }
-    } else {
-        res.status(400).send('Invalid course ID');
-    }
-});
 
 
 app.get('/teacher/lecture', async (req, res) => {

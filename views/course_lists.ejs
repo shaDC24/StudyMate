@@ -1,4 +1,4 @@
-<!-- views/course_lists.ejs -->
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -23,17 +23,17 @@
     <h2>Hi <%=courses[0].first_name%>!!!</h2>
     <!-- Add the content for the Course Lists page here -->
     <% for (let i=0; i < courses.length; i++) { %>
-        <div class="accordion accordion-flush" id="accordionFlushExample">
+        <div class="accordion accordion-flush" id="accordionFlushExample<%= i %>">
             <div class="accordion-item">
-                <h2 class="accordion-header" id="flush-headingOne">
+                <h2 class="accordion-header" id="flush-heading<%= i %>">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne"
+                        data-bs-target="#flush-collapse<%= i %>" aria-expanded="false" aria-controls="flush-collapse<%= i %>"
                         style="background-color: rgb(230, 225, 219);">
                         <%= courses[i].course_title %>
                     </button>
                 </h2>
-                <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne"
-                    data-bs-parent="#accordionFlushExample">
+                <div id="flush-collapse<%= i %>" class="accordion-collapse collapse" aria-labelledby="flush-heading<%= i %>"
+                    data-bs-parent="#accordionFlushExample<%= i %>">
                     <div class="accordion-body">
                         <%= courses[i].course_description %>
                     </div><br>
@@ -43,7 +43,7 @@
                 </div>
             </div>
         </div>
-        <% } %>
+    <% } %>
 </body>
 
 </html>
