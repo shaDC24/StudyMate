@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const multer = require('multer');
 const db = require('./db'); // Import your database connection
 const bcrypt = require('bcrypt');
- const fs = require('fs');
+const fs = require('fs');
 
 
 
@@ -68,27 +68,46 @@ app.post('/login', async (req, res) => {
 
 app.get('/student/dashboard', async (req, res) => {
     try {
-        const teacherNames = await db.any('SELECT TEACHER_NAME FROM TEACHER');
-        res.render('student_dashboard', { userType: 'Student', teachers: teacherNames });
+
+
+        res.render('student_dashboard', { userType: 'Student' });
     }
     catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
     }
 });
-app.get('/api/search/teachers', (req, res) => {
-    const searchTerm = req.query.q.toLowerCase();
-    const matchingTeachers = teachers.filter(teacher => teacher.toLowerCase().includes(searchTerm));
-    res.json(matchingTeachers);
+app.get('/api/search/teacher', async (req, res) => {
+    try {
+        console.log('api search teacher');
+        const teachers = await db.any('SELECT *FROM teacher');
+        const searchTerm = req.query.q;
+        console.log(searchTerm);
+        const matchingTeachers = teachers.filter(teacher => teacher.teacher_name.toLowerCase().includes(searchTerm));
+        console.log(matchingTeachers);
+        res.json(matchingTeachers);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
 });
 
 // Endpoint for searching courses
-app.get('/api/search/courses', (req, res) => {
-    const searchTerm = req.query.q.toLowerCase();
-    const enrolledcourses=('select *from courses c where id in (select course_id from enrollments e where student_id=$1)',id);
-    const unenrolledcourses=('select * from courses c1 where c1.id in (select c.id from courses c except(select e.course_id from enrollments e where e.student_id=$1))',id);
-    const matchingCourses = courses.filter(course => course.toLowerCase().includes(searchTerm));
-    res.json(matchingCourses);
+app.get('/api/search/course', async (req, res) => {
+    try {
+        const searchTerm = req.query.q.toLowerCase();
+        const courses= await db.any('SELECT *FROM courses');
+        const enrolledcourses = ('select *from courses c where id in (select course_id from enrollments e where student_id=$1)', id);
+        const unenrolledcourses = ('select * from courses c1 where c1.id in (select c.id from courses c except(select e.course_id from enrollments e where e.student_id=$1))', id);
+        const matchingCourses = courses.filter(course => course.course_title.toLowerCase().includes(searchTerm));
+        console.log(matchingCourses);
+        console.log(unenrolledcourses);
+
+        res.json(matchingCourses);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
 });
 app.post('/student/enroll-courses', async (req, res) => {
     const courseId = req.body.courseId;
@@ -126,6 +145,7 @@ app.get('/show/lecture', async (req, res) => {
     const courseId = req.query.course_id;
 
     try {
+        console.log(courseId);
         // Fetch lectures associated with the specified course from the database
         const lectures = await db.any('SELECT * FROM lecture WHERE course_id = $1', courseId);
 
@@ -252,7 +272,7 @@ app.post('/initiate/lecture', upload.fields([{ name: 'video', maxCount: 1 }, { n
             'INSERT INTO lecture(lecture_name,description,teacher_id,course_id) VALUES($1,$2,$3,$4) RETURNING *',
             [title, description, id, C_id]
         );
-        const lectureId=await db.one('select count(*) from lecture');
+        const lectureId = await db.one('select count(*) from lecture');
         console.log(newlecture);
         console.log(lectureId);
         // Save video and pdf files to the file system
@@ -261,8 +281,10 @@ app.post('/initiate/lecture', upload.fields([{ name: 'video', maxCount: 1 }, { n
         console.log('Request Body:', req.body);
         console.log('Request Files:', req.files);
         console.log("course id is " + C_id);
+        console.log(lectureId.count);
 
         res.status(200).send('Lecture created successfully');
+        // res.redirect('show_lecture');
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');

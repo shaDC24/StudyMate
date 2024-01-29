@@ -7,6 +7,7 @@
     <title>Student Dashboard</title>
     <link rel="stylesheet" href="/login.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
 </head>
 
 <body>
@@ -26,7 +27,6 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <!-- ... existing navigation items ... -->
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="#">Home</a>
                     </li>
@@ -52,7 +52,6 @@
                     </li>
                 </ul>
                 <form class="d-flex" role="search">
-                    <!-- Search category dropdown -->
                     <input type="hidden" id="searchCategory" value="">
                     <div class="dropdown me-2">
                         <button class="btn btn-secondary dropdown-toggle" type="button" id="searchCategoryDropdown"
@@ -64,62 +63,93 @@
                             </li>
                             <li><a class="dropdown-item" href="#" onclick="changeSearchCategory('course')">Course</a>
                             </li>
+
                         </ul>
                     </div>
-
-                    <!-- Search input -->
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"
-                        id="searchInput">
-                    <button class="btn btn-outline-success" type="submit" onclick="submitSearch()">Search</button>
+                    <input type="text" id="searchTermInput" placeholder="Enter search term" oninput="searchc()">
+                    <ul id="autocompleteList" class="dropdown-menu" style="display:none;"></ul>
+                    <button class="btn btn-primary" onclick="searchc()">Search</button>
                 </form>
             </div>
         </div>
     </nav>
+
     <div>
         <h1>Welcome <%= userType %>!</h1>
     </div>
 
-
-
     <script>
         function changeSearchCategory(category) {
-            // Update the hidden input field with the selected category
-            document.getElementById('searchCategory').value = category;
+            document.getElementById("searchCategory").value = category;
+            document.getElementById("searchCategoryDropdown").innerText = "Search by " + category.charAt(0).toUpperCase() + category.slice(1);
         }
 
-        function submitSearch() {
-            // Get the selected category from the hidden input field
-            const searchCategory = document.getElementById('searchCategory').value;
+        function searchc() {
+            const category = document.getElementById("searchCategory").value;
+            const searchTerm = document.getElementById("searchTermInput").value;
 
-            // Get the search input value
-            const searchInput = document.getElementById('searchInput').value;
-
-            // Perform search based on the selected category
-            if (searchCategory === 'teacher') {
-                // Make an asynchronous request to the server to get search results for teachers
-                fetch(`/api/search/teachers?q=${searchInput}`)
+            if (category && searchTerm) {
+                // Perform the search and update the results
+                // Example using fetch for demonstration purposes; replace with your actual implementation
+                fetch(`/api/search/${category}?q=${searchTerm}`)
                     .then(response => response.json())
                     .then(data => {
-                        // Display the search results in the UI (replace this with your actual UI update logic)
-                        alert('Search results for teachers: ' + JSON.stringify(data));
+                        displayAutocompleteResults(data, category);
+                        console.log("........................");
+                        console.log(data);
                     })
-                    .catch(error => console.error('Error fetching data:', error));
-            } else if (searchCategory === 'course') {
-                // Make an asynchronous request to the server to get search results for courses
-                fetch(`/api/search/courses?q=${searchInput}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        // Display the search results in the UI (replace this with your actual UI update logic)
-                        alert('Search results for courses: ' + JSON.stringify(data));
-                    })
-                    .catch(error => console.error('Error fetching data:', error));
+                    .catch(error => console.error('Error fetching search results:', error));
+
             } else {
-                alert('Invalid search category');
+                // Clear the results if either category or searchTerm is empty
+                document.getElementById("autocompleteList").innerHTML = '';
             }
         }
 
-    </script>
+        function displayAutocompleteResults(results, category) {
+            const autocompleteList = document.getElementById("autocompleteList");
 
+            // Clear previous results
+            autocompleteList.innerHTML = '';
+            if (category === 'teacher') {
+                if (results.length > 0) {
+                    results.forEach(result => {
+                        const listItem = document.createElement("li");
+                        listItem.innerHTML = `<a class="dropdown-item" href="#" onclick="selectAutocompleteResult('${result.teacher_name}')">${result.teacher_name}</a>`;
+                        autocompleteList.appendChild(listItem);
+                    });
+
+                    // Display the autocomplete list
+                    autocompleteList.style.display = 'block';
+                } else {
+                    // Hide the autocomplete list if no results
+                    autocompleteList.style.display = 'none';
+                }
+            }
+            if (category === 'course') {
+                if (results.length > 0) {
+                    results.forEach(result => {
+                        const listItem = document.createElement("li");
+                        listItem.innerHTML = `<a class="dropdown-item" href="#" onclick="selectAutocompleteResult('${result.course_title}')">${result.course_title}</a>`;
+                        autocompleteList.appendChild(listItem);
+                    });
+
+                    // Display the autocomplete list
+                    autocompleteList.style.display = 'block';
+                } else {
+                    // Hide the autocomplete list if no results
+                    autocompleteList.style.display = 'none';
+                }
+            }
+        }
+
+        function selectAutocompleteResult(result) {
+            // Set the selected result as the value of the search bar
+            document.getElementById("searchTermInput").value = result;
+            // Hide the autocomplete list
+            document.getElementById("autocompleteList").style.display = 'none';
+        }
+    </script>
 </body>
 
 </html>
