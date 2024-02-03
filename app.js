@@ -77,6 +77,7 @@ app.get('/student/dashboard', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
+
 app.get('/api/search/teacher', async (req, res) => {
     try {
         console.log('api search teacher');
@@ -96,7 +97,7 @@ app.get('/api/search/teacher', async (req, res) => {
 app.get('/api/search/course', async (req, res) => {
     try {
         const searchTerm = req.query.q.toLowerCase();
-        const courses= await db.any('SELECT *FROM courses');
+        const courses = await db.any('SELECT *FROM courses');
         const enrolledcourses = ('select *from courses c where id in (select course_id from enrollments e where student_id=$1)', id);
         const unenrolledcourses = ('select * from courses c1 where c1.id in (select c.id from courses c except(select e.course_id from enrollments e where e.student_id=$1))', id);
         const matchingCourses = courses.filter(course => course.course_title.toLowerCase().includes(searchTerm));
@@ -123,7 +124,65 @@ app.post('/student/enroll-courses', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
+app.get('/teacher-search-results', async (req, res) => {
+    try {
+        console.log('teacher-search-results');
+        const searchTerm = req.query.q.toLowerCase();
+        console.log(searchTerm);
+        const teachers = await db.oneOrNone('SELECT *FROM teacher where lower(teacher_name)=$1', searchTerm);
+        if (teachers) {
+            const tid = teachers.teacher_id;
+            console.log(tid);
+            const inputs = await db.any('select t.teacher_name,t.teacher_proficiency,c.course_title,c.course_description from teacher t join courses c on t.teacher_id=c.teacher_id  where t.teacher_id = $1 group by  c.course_title,c.course_description,t.teacher_name, t.teacher_proficiency', tid);
+            console.log(inputs);
+            res.render('individual_dashboarsd', { userType: 'Student', inputs: inputs });
+        }
+        else {
+            alert('Teacher not found');
+            res.redirect('/student/dashboard');
+        }
 
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+app.get('/course-search-results', async (req, res) => {
+    try {
+        console.log('course-search-results');
+        const searchTerm = req.query.q.toLowerCase();
+        console.log(searchTerm);
+        const course = await db.oneOrNone('SELECT *FROM courses where lower(course_title)=$1', searchTerm);
+        const enrolledcourses = ('select *from courses c where id in (select course_id from enrollments e where student_id=$1)', id);
+        const unenrolledcourses = ('select * from courses c1 where c1.id in (select c.id from courses c except(select e.course_id from enrollments e where e.student_id=$1))', id);
+        const tid = course.id;
+        console.log(tid);
+        if (course) {
+
+            const c = await db.one('select count(*) as count from lecture where course_id= $1', tid);
+            console.log("count : " + c.count);
+            if (c.count > 0) {
+                const inputs = await db.any('select * from lecture l join courses c on l.course_id=c.id where c.id=$1;', tid);
+                console.log(inputs);
+                res.render('individual_course_lecture_dashboarsd', { userType: 'Student', inputs: inputs });
+            }
+            else {
+                const inputs = await db.one('select * from courses where id= $1', tid);
+                console.log(inputs);
+                res.render('individual_course_dashboarsd', { userType: 'Student', inputs: inputs });
+
+            }
+        }
+        else {
+            alert('course not found');
+            res.redirect('/student/dashboard');
+        }
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
 
 // to check if course is already added or not
 app.get('/student/is-course-added/:courseId', async (req, res) => {
