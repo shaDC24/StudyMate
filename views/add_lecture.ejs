@@ -5,29 +5,79 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add course</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <!-- Link to Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        /* Add custom styles here */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #343a40;
+        }
+
+        .accordion-button {
+            background-color: #e9ecef;
+            color: #343a40;
+            border-radius: 0;
+            border: none;
+        }
+
+        .accordion-button:focus {
+            box-shadow: none;
+        }
+
+        .accordion-button:not(.collapsed) {
+            background-color: #6c757d;
+            color: #fff;
+        }
+
+        .accordion-body {
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+            border-top: none;
+            border-radius: 0 0 .25rem .25rem;
+            padding: 10px;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+    </style>
 </head>
 
 <body>
-
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
-        integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
-        integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF"
-        crossorigin="anonymous"></script>
-
-    <h1>Your Courses</h1>
-    <ul>
-        <li><strong>Your Have initiated :</strong></li>
-        <% for (let i=0; i < courses.length; i++) { %>
+    <div class="container">
+        <h1>Your Courses</h1>
+        <ul>
+            <li><strong>You Have initiated :</strong></li>
+            <% for (let i=0; i < courses.length; i++) { %>
             <div class="accordion accordion-flush" id="accordionFlushExample<%= i %>">
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="flush-heading<%= i %>">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#flush-collapse<%= i %>" aria-expanded="false"
-                            aria-controls="flush-collapse<%= i %>" style="background-color: rgb(230, 225, 219);">
+                            aria-controls="flush-collapse<%= i %>">
                             <%= courses[i].course_title %>
                         </button>
                     </h2>
@@ -36,27 +86,29 @@
                         <div class="accordion-body">
                             <%= courses[i].course_description %>
 
-                                <br><br>
-                                <a href="/initiate/lecture?course_id=<%= courses[i].id %>">
-                                    <button type="button" class="btn btn-primary mx-3" data-bs-toggle="modal"
-                                        data-bs-target="#addLectureModal" style="background-color: green;">
-                                        Add Lecture
-                                    </button>
-                                </a>
+                            <br><br>
+                            <a href="/initiate/lecture?course_id=<%= courses[i].id %>">
+                                <button type="button" class="btn btn-primary mx-3">
+                                    Add Lecture
+                                </button>
+                            </a>
 
-                                <a href="/show/lecture?course_id=<%= courses[i].id %>">
-                                    <button style="background-color: darksalmon;">
-                                        Show Lectures
-                                    </button>
-
-                                </a>
+                            <a href="/show/lecture?course_id=<%= courses[i].id %>">
+                                <button class="btn btn-secondary">
+                                    Show Lectures
+                                </button>
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
-        <% } %>
+            <% } %>
+        </ul>
+    </div>
 
-    </ul>
+    <!-- Bootstrap JavaScript and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
 </body>
 
 </html>

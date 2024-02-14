@@ -9,9 +9,8 @@
 </head>
 
 <body>
-    <h1 style="color: darkblue;">You have searched for <%= inputs[0].teacher_name %>
-    </h1>
-<br><br>
+    <h1 style="color: darkblue;">You have searched for <%= inputs[0].teacher_name %></h1>
+    <br><br>
     <div class="row">
         <div class="col-4">
             <nav id="navbar-example3" class="h-100 flex-column align-items-stretch pe-4 border-end">
@@ -19,7 +18,7 @@
                     <a class="nav-link" href="#TeacherName">Teacher Name</a>
                     <nav class="nav nav-pills flex-column">
                         <a class="nav-link ms-3 my-1" href="#Proficiency">Proficiency</a>
-                        <a class="nav-link ms-3 my-1" href="#TotalCourses">TotalCourses</a>
+                        <a class="nav-link ms-3 my-1" href="#TotalCourses">Total Courses</a>
                     </nav>
                     <% for (let i=0; i < inputs.length; i++) { %>
                         <li>
@@ -27,7 +26,7 @@
                                 <%= inputs[i].course_title %>
                             </a>
                         </li>
-                        <% } %>
+                    <% } %>
                 </nav>
             </nav>
         </div>
@@ -37,87 +36,62 @@
                 class="scrollspy-example-2" tabindex="0">
                 <div id="TeacherName">
                     <h4>Teacher Name</h4>
-                    <p>The name of the teacher is <%= inputs[0].teacher_name %>
-
-                            <br>
-                            Lorem ipsum, dolor sit amet consectetur
-                            adipisicing elit. Voluptatibus exercitationem
-                            veniam enim beatae, asperiores illum quis architecto quod atque animi similique,
-                            veritatis distinctio quidem, corporis culpa dolorum eaque laboriosam quae.
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione
-                            reiciendis maxime repellat molestiae quam quod dicta explicabo unde veritatis accusantium
-                            quidem
-                            adipisci earum impedit libero dignissimos ea sint, ipsam nemo!
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Laboriosam
-                            dicta eius labore aspernatur rerum tempora excepturi porro ratione dolorem minus odio,
-                            delectus cupiditate
-                            non iusto ad, numquam omnis quis repellendus.
+                    <p>The name of the teacher is <%= inputs[0].teacher_name %><br>
+                        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Voluptatibus exercitationem
+                        veniam enim beatae, asperiores illum quis architecto quod atque animi similique,
+                        veritatis distinctio quidem, corporis culpa dolorum eaque laboriosam quae.
+                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione
+                        reiciendis maxime repellat molestiae quam quod dicta explicabo unde veritatis accusantium
+                        quidem adipisci earum impedit libero dignissimos ea sint, ipsam nemo!
+                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Laboriosam
+                        dicta eius labore aspernatur rerum tempora excepturi porro ratione dolorem minus odio,
+                        delectus cupiditate non iusto ad, numquam omnis quis repellendus.
                     </p>
                 </div>
                 <div id="Proficiency">
                     <h5>Proficiency</h5>
-                    <p>He has proficient in <%= inputs[0].teacher_proficiency %>
-
-                            <br>
-                            Lorem ipsum, dolor sit amet consectetur
-                            adipisicing elit. Voluptatibus exercitationem
-                            veniam enim beatae, asperiores illum quis architecto quod atque animi similique,
-                            veritatis distinctio quidem, corporis culpa dolorum eaque laboriosam quae.
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione
-                            reiciendis maxime repellat molestiae quam quod dicta explicabo unde veritatis accusantium
-                            quidem
-                            adipisci earum impedit libero dignissimos ea sint, ipsam nemo!
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Laboriosam
-                            dicta eius labore aspernatur rerum tempora excepturi porro ratione dolorem minus odio,
-                            delectus cupiditate
-                            non iusto ad, numquam omnis quis repellendus.
+                    <p>He has proficient in <%= inputs[0].teacher_proficiency %><br>
+                        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Voluptatibus exercitationem
+                        veniam enim beatae, asperiores illum quis architecto quod atque animi similique,
+                        veritatis distinctio quidem, corporis culpa dolorum eaque laboriosam quae.
+                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione
+                        reiciendis maxime repellat molestiae quam quod dicta explicabo unde veritatis accusantium
+                        quidem adipisci earum impedit libero dignissimos ea sint, ipsam nemo!
+                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Laboriosam
+                        dicta eius labore aspernatur rerum tempora excepturi porro ratione dolorem minus odio,
+                        delectus cupiditate non iusto ad, numquam omnis quis repellendus.
                     </p>
                 </div>
                 <div id="TotalCourses">
-                    <h5>TotalCourses</h5>
-                    <p>Courses Initiated : <%=inputs.length%>
-
-                            <br>
-                            Lorem ipsum, dolor sit amet consectetur
-                            adipisicing elit. Voluptatibus exercitationem
-                            veniam enim beatae, asperiores illum quis architecto quod atque animi similique,
-                            veritatis distinctio quidem, corporis culpa dolorum eaque laboriosam quae.
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione
-                            reiciendis maxime repellat molestiae quam quod dicta explicabo unde veritatis accusantium
-                            quidem
-                            adipisci earum impedit libero dignissimos ea sint, ipsam nemo!
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Laboriosam
-                            dicta eius labore aspernatur rerum tempora excepturi porro ratione dolorem minus odio,
-                            delectus cupiditate
-                            non iusto ad, numquam omnis quis repellendus.
+                    <h5>Total Courses</h5>
+                    <p>Courses Initiated: <%=inputs.length%><br>
+                        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Voluptatibus exercitationem
+                        veniam enim beatae, asperiores illum quis architecto quod atque animi similique,
+                        veritatis distinctio quidem, corporis culpa dolorum eaque laboriosam quae.
+                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione
+                        reiciendis maxime repellat molestiae quam quod dicta explicabo unde veritatis accusantium
+                        quidem adipisci earum impedit libero dignissimos ea sint, ipsam nemo!
+                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Laboriosam
+                        dicta eius labore aspernatur rerum tempora excepturi porro ratione dolorem minus odio,
+                        delectus cupiditate non iusto ad, numquam omnis quis repellendus.
                     </p>
                 </div>
                 <% for (let i=0; i < inputs.length; i++) { %>
                     <div id="course<%= i %>">
-
-                        <h4>
-                            <%= inputs[i].course_title %>
-                        </h4>
-                        <p>
-                            <%= inputs[i].course_description %>
-                                <br>
-                                Lorem ipsum, dolor sit amet consectetur
-                                adipisicing elit. Voluptatibus exercitationem
-                                veniam enim beatae, asperiores illum quis architecto quod atque animi similique,
-                                veritatis distinctio quidem, corporis culpa dolorum eaque laboriosam quae.
-                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione
-                                reiciendis maxime repellat molestiae quam quod dicta explicabo unde veritatis
-                                accusantium quidem
-                                adipisci earum impedit libero dignissimos ea sint, ipsam nemo!
-                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Laboriosam
-                                dicta eius labore aspernatur rerum tempora excepturi porro ratione dolorem minus odio,
-                                delectus cupiditate
-                                non iusto ad, numquam omnis quis repellendus.
+                        <h4><%= inputs[i].course_title %></h4>
+                        <p><%= inputs[i].course_description %><br>
+                            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Voluptatibus exercitationem
+                            veniam enim beatae, asperiores illum quis architecto quod atque animi similique,
+                            veritatis distinctio quidem, corporis culpa dolorum eaque laboriosam quae.
+                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione
+                            reiciendis maxime repellat molestiae quam quod dicta explicabo unde veritatis
+                            accusantium quidem adipisci earum impedit libero dignissimos ea sint, ipsam nemo!
+                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Laboriosam
+                            dicta eius labore aspernatur rerum tempora excepturi porro ratione dolorem minus odio,
+                            delectus cupiditate non iusto ad, numquam omnis quis repellendus.
                         </p>
-
                     </div>
-                    <% } %>
-
+                <% } %>
             </div>
         </div>
     </div>
@@ -127,9 +101,4 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
         integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF"
         crossorigin="anonymous"></script>
-
-    <!-- Add your custom scripts or links to other scripts as needed -->
     <button class="btn btn-primary mt-3" onclick="window.location.href='/student/dashboard'">Back</button>
-</body>
-
-</html>
