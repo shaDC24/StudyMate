@@ -262,3 +262,53 @@ REFERENCES reply_givers(reply_giver_id, reply_giver_type);
 
 
 
+
+
+-- Add a new table to represent the guidance relationship
+CREATE TABLE guidance (
+    guidance_id SERIAL PRIMARY KEY,
+    guide_id INTEGER REFERENCES guideline_giver(guide_id),
+    student_id INTEGER REFERENCES student(student_id),
+    guidance_start_date DATE,
+    guidance_end_date DATE
+);
+
+-- Add a foreign key constraint to ensure that each student is guided by only one guideline giver at a time
+-- If a student can be guided by multiple guideline givers simultaneously, you may need to adjust this constraint
+ALTER TABLE guidance
+ADD CONSTRAINT unique_guidance_for_student
+UNIQUE (student_id);
+
+CREATE TABLE forum (
+    post_id SERIAL PRIMARY KEY,
+    student_id INTEGER REFERENCES student(student_id),
+    post_content TEXT,
+    post_timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE discussion (
+    discussion_id SERIAL PRIMARY KEY,
+    forum_post_id INTEGER REFERENCES forum(post_id),
+    reply_giver_id INTEGER,
+    reply_giver_type VARCHAR(20), -- This field can indicate whether the reply giver is a 'student', 'teacher', or 'guideline_giver'
+    reply_content TEXT,
+    reply_timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Add a foreign key constraint for the reply giver
+-- Create a table for reply givers
+CREATE TABLE reply_givers (
+    reply_giver_id INTEGER PRIMARY KEY,
+    reply_giver_type VARCHAR(20) NOT NULL
+);
+
+-- Add a unique constraint to the reply_givers table
+ALTER TABLE reply_givers
+ADD CONSTRAINT uq_reply_givers_id_type UNIQUE (reply_giver_id, reply_giver_type);
+
+
+-- Add a foreign key constraint for the reply giver
+ALTER TABLE discussion
+ADD CONSTRAINT fk_reply_giver
+FOREIGN KEY (reply_giver_id, reply_giver_type) 
+REFERENCES reply_givers(reply_giver_id, reply_giver_type);
