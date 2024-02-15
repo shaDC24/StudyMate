@@ -61,26 +61,32 @@
         <h1>Course Lists</h1>
         <h2>Hi <%= courses[0].first_name %>!!!</h2>
         <% for (let i=0; i < courses.length; i++) { %>
-        <div class="accordion accordion-flush" id="accordionFlushExample<%= i %>">
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="flush-heading<%= i %>">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#flush-collapse<%= i %>" aria-expanded="false" aria-controls="flush-collapse<%= i %>">
-                        <%= courses[i].course_title %>
-                    </button>
-                </h2>
-                <div id="flush-collapse<%= i %>" class="accordion-collapse collapse" aria-labelledby="flush-heading<%= i %>"
-                    data-bs-parent="#accordionFlushExample<%= i %>">
-                    <div class="accordion-body">
-                        <%= courses[i].course_description %>
-                    </div>
-                    <div class="teacher">
-                        <%= courses[i].teacher_name %>
+            <div class="accordion accordion-flush" id="accordionFlushExample<%= i %>">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="flush-heading<%= i %>">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#flush-collapse<%= i %>" aria-expanded="false"
+                            aria-controls="flush-collapse<%= i %>">
+                            <%= courses[i].course_title %>
+                        </button>
+                    </h2>
+                    <div id="flush-collapse<%= i %>" class="accordion-collapse collapse"
+                        aria-labelledby="flush-heading<%= i %>" data-bs-parent="#accordionFlushExample<%= i %>">
+                        <div class="accordion-body">
+                            <%= courses[i].course_description %>
+                        </div>
+                        <div class="teacher">
+                            <%= courses[i].teacher_name %>
+                        </div>
+                        <div class="mt-3">
+                            <a href="/show/lecture?course_id=<%= courses[i].id %>">
+                                <button class="btn btn-secondary">Show Lectures</button>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <% } %>
+            <% } %>
     </div>
 
     <!-- Bootstrap JavaScript and Popper.js -->
