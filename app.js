@@ -84,7 +84,7 @@ app.get('/api/search/teacher', async (req, res) => {
         const teachers = await db.any('SELECT *FROM teacher');
         const searchTerm = req.query.q;
         console.log(searchTerm);
-        const matchingTeachers = teachers.filter(teacher => teacher.teacher_name.toLowerCase().includes(searchTerm));
+        const matchingTeachers = teachers.filter(teacher => teacher.teacher_name.toLowerCase().includes(searchTerm.toLowerCase()));
         console.log(matchingTeachers);
         res.json(matchingTeachers);
     } catch (error) {
@@ -219,7 +219,39 @@ app.get('/show/lecture', async (req, res) => {
     }
 });
 
+// Define a function to fetch the exam data from the database
+const getExams = async () => {
+    try {
+      // Connect to the database
+      const client = await pool.connect();
+  
+      // Execute a query to fetch the exams from the exam_section table
+      const result = await client.query('SELECT * FROM exam_section');
+  
+      // Release the client back to the pool
+      client.release();
+  
+      // Return the rows fetched from the database
+      return result.rows;
+    } catch (err) {
+      console.error('Error fetching exams:', err);
+      throw err;
+    }
+  };
 
+app.get('/student/exam-section', async (req, res) => {
+    try {
+        //const exams = await db.any('SELECT * FROM exams');
+        //const exams = await getExams();
+        const courses = await db.any('select * from student s join enrollments e on s.student_id=e.student_id join courses c on c.id=e.course_id where s.student_id=$1;', Number(id));
+        //join teacher t on  t.teacher_id=c.teacher_id
+        console.log(courses);
+        res.render('exam-section', { courses });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
 
 app.get('/student/enroll-courses', async (req, res) => {
     try {

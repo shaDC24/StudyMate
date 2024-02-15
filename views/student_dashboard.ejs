@@ -89,13 +89,14 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="#">Give Feedback</a></li>
-                            <li><a class="dropdown-item" href="#">Exam Section</a></li>
+                            <li><a class="dropdown-item" href="/student/exam-section">Exam Section</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="#">Show Question and Answer</a></li>
                         </ul>
                     </li>
                 </ul>
-                <form class="d-flex">
+                <form class="d-flex" role="search" onsubmit="event.preventDefault(); go_on();">
+                    <input type="hidden" id="searchCategory" value="">
                     <div class="dropdown me-2">
                         <button class="btn btn-secondary dropdown-toggle" type="button" id="searchCategoryDropdown"
                             data-bs-toggle="dropdown" aria-expanded="false">
@@ -109,7 +110,8 @@
                         </ul>
                     </div>
                     <input class="form-control me-2" type="search" id="searchTermInput" placeholder="Enter search term"
-                        aria-label="Search">
+                        aria-label="Search" oninput="searchc()">
+                        <div id="autocompleteList" class="dropdown-menu" aria-labelledby="searchTermInput" style="display: none;"></div>
                     <button class="btn btn-primary" type="button" onclick="go_on()">Search</button>
                 </form>
             </div>
