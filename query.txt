@@ -320,3 +320,17 @@ REFERENCES reply_givers(reply_giver_id, reply_giver_type);
 ALTER TABLE Lecture
 ADD COLUMN videolink TEXT,
 ADD COLUMN pdflink  TEXT;
+
+ALTER TABLE exam_section DROP COLUMN question_id;
+ALTER TABLE exam_section 
+ADD COLUMN course_id INTEGER,
+ADD CONSTRAINT fk_course_id FOREIGN KEY (course_id) REFERENCES courses(id);
+
+ insert into exam_section (exam_topic,course_id) values ('BST',2);
+
+ CREATE TABLE exam (
+    id SERIAL PRIMARY KEY,
+    examSectionId INTEGER,
+    CONSTRAINT fk_examSectionId FOREIGN KEY (examSectionId) REFERENCES exam_section(id)
+);
+

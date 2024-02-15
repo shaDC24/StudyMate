@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam List</title>
+    <!-- Add your CSS styles here for a more attractive layout -->
+    <style>
+        .exam {
+            display: inline-block;
+            margin-right: 20px;
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 2px solid #007bff;
+            border-radius: 50%;
+            text-align: center;
+        }
+        .exam h2 {
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        .start-exam-btn {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 16px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .start-exam-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Exam List</h1>
+    <% if (exams.length > 0) { %>
+        <% exams.forEach(exam => { %>
+            <div class="exam">
+                <h2><%= exam.exam_topic %></h2>
+                <a class="start-exam-btn" href="/start-exam/<%= exam.id %>">Start Exam</a>
+            </div>
+        <% }); %>
+    <% } else { %>
+        <p>No exams available.</p>
+    <% } %>
+</body>
+
+</html>

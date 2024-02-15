@@ -198,6 +198,32 @@ app.get('/student/is-course-added/:courseId', async (req, res) => {
     }
 });
 
+app.get('/student/exam-section/:courseId', async (req, res) => {
+    const courseId = req.params.courseId;
+
+    try {
+        const exams = await db.any('SELECT id,exam_topic FROM exam_section WHERE course_id = $1', Number(courseId));
+        console.log(exams[0]);
+        res.render('examList', { exams });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.get('/start-exam/:examId', async (req, res) => {
+    const examId = req.params.examId;
+
+    try {
+        const question = await db.one('SELECT * FROM question WHERE exam_id = $1', Number(examId));
+        console.log(question);
+        res.render('start_exam', { question });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 
 // Assuming you have a route like "/show/lecture" in your Express app
 app.get('/show/lecture', async (req, res) => {

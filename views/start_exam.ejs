@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Start Exam</title>
+    <style>
+        /* Add your CSS styles here */
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #timer {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .question-container {
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .question-statement {
+            margin-bottom: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            resize: vertical;
+        }
+
+        button {
+            display: block;
+            margin: 0 auto;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Exam</h1>
+        <div id="timer">Time Left: <span id="countdown">00:03:00</span></div>
+        
+        <% if (question) { %>
+            <div class="question-container">
+                <p class="question-number">Question <%= question.question_number %>:</p>
+                <p class="question-statement"><%= question.question_statement %></p>
+                <textarea id="answer" rows="4" cols="50"></textarea>
+            </div>
+            <button onclick="submitAnswer()">Submit</button>
+        <% } else { %>
+            <p>No questions available for this exam.</p>
+        <% } %>
+    </div>
+
+    <script>
+        // Timer functionality
+        var countdown = document.getElementById('countdown');
+        var timer = 180; // 3 minutes in seconds
+
+        function startTimer() {
+            var minutes, seconds;
+
+            var interval = setInterval(function() {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+
+                minutes = minutes < 10 ? '0' + minutes : minutes;
+                seconds = seconds < 10 ? '0' + seconds : seconds;
+
+                countdown.textContent = minutes + ':' + seconds;
+
+                if (--timer < 0) {
+                    clearInterval(interval);
+                    // Optionally, submit the answer automatically when time runs out
+                    // submitAnswer();
+                }
+            }, 1000);
+        }
+
+        startTimer();
+
+        // Function to submit answer
+        function submitAnswer() {
+            const answer = document.getElementById("answer").value;
+            // Send the answer to the server using fetch or another AJAX method
+            fetch('/submit-answer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ answer: answer })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Handle response from server, such as showing confirmation message
+                console.log(data);
+            })
+            .catch(error => console.error('Error submitting answer:', error));
+        }
+    </script>
+</body>
+
+</html>
