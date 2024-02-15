@@ -1,4 +1,6 @@
+ --npm install -y express
 --npm install express multer
+--npm install pg-promise
 
 
 CREATE DATABASE studymate;
@@ -312,3 +314,9 @@ ALTER TABLE discussion
 ADD CONSTRAINT fk_reply_giver
 FOREIGN KEY (reply_giver_id, reply_giver_type) 
 REFERENCES reply_givers(reply_giver_id, reply_giver_type);
+
+
+
+ALTER TABLE Lecture
+ADD COLUMN videolink TEXT,
+ADD COLUMN pdflink  TEXT;

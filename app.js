@@ -318,7 +318,7 @@ app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 //Handle POST request for initiating a new lecture
-app.post('/initiate/lecture', upload.fields([{ name: 'video', maxCount: 1 }, { name: 'pdf', maxCount: 1 }]), async (req, res) => {
+/*app.post('/initiate/lecture', upload.fields([{ name: 'video', maxCount: 1 }, { name: 'pdf', maxCount: 1 }]), async (req, res) => {
     try {
         const { title, description } = req.body;
         const videoFile = req.files['video'][0];
@@ -348,7 +348,38 @@ app.post('/initiate/lecture', upload.fields([{ name: 'video', maxCount: 1 }, { n
         console.error(error);
         res.status(500).send('Internal Server Error');
     }
+});*/
+app.post('/initiate/lecture', upload.fields([{ name: 'video', maxCount: 1 }, { name: 'pdf', maxCount: 1 }]), async (req, res) => {
+    try {
+        const { title, description } = req.body;
+        const videoFile = req.files['video'][0];
+        const pdfFile = req.files['pdf'][0];
+        console.log("to post " + id + "  " + C_id);
+        const lectureId = await db.one('select count(*)+1 as count from lecture');
+        
+        console.log(lectureId);
+
+        // Save video and pdf files to the file system and get modified file names
+        const modifiedVideoFileName = `video_${lectureId.count}_${C_id}_${id}.mp4`; saveFile(videoFile, `video_${lectureId.count}_${C_id}_${id}.mp4`);
+        const modifiedPdfFileName = `pdf_${lectureId.count}_${C_id}_${id}.pdf`; saveFile(pdfFile, `pdf_${lectureId.count}_${C_id}_${id}.pdf`);
+
+        // Save lecture data to the database, including modified file names
+        const newlecture = await db.one(
+            'INSERT INTO lecture(lecture_name, description, teacher_id, course_id, videolink, pdflink) VALUES($1, $2, $3, $4, $5, $6) RETURNING *',
+            [title, description, id, C_id, modifiedVideoFileName, modifiedPdfFileName]
+        );
+
+        console.log(newlecture);
+        console.log("course id is " + C_id);
+
+        res.status(200).send('Lecture created successfully');
+        // res.redirect('show_lecture');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
 });
+
 
 function saveFile(file, fileName) {
     const filePath = path.join(__dirname, 'uploads', fileName);
