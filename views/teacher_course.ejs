@@ -61,6 +61,8 @@
 </head>
 
 <body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+
 
     <div class="container">
         <h1>Welcome, <%= Data[0].teacher_name %>!</h1>
@@ -86,54 +88,44 @@
                 <li><strong>Last Login:</strong>
                     <%= Data[0].last_login_time %>
                 </li>
-                <li><strong>Your courses:</strong>
-                    <ul>
-                        <% for (let i=0; i < courses.length; i++) { %>
-                            <div class="accordion" id="accordion<%= i %>">
-                                <div class="accordion-item">
-                                    <h2 class="accordion-header" id="heading<%= i %>">
-                                        <button class="accordion-button collapsed" type="button"
-                                            data-bs-toggle="collapse" data-bs-target="#collapse<%= i %>"
-                                            aria-expanded="false" aria-controls="collapse<%= i %>">
-                                            <%= courses[i].course_title %>
-                                        </button>
-                                    </h2>
-                                    <div id="collapse<%= i %>" class="accordion-collapse collapse"
-                                        aria-labelledby="heading<%= i %>" data-bs-parent="#accordion<%= i %>">
-                                        <div class="accordion-body">
-                                            <%= courses[i].course_description %>
-                                        </div>
-                                    </div>
-                                    <a href="/initiate/lecture" class="btn btn-primary">Upload Lecture</a>
-                                </div>
-                            </div>
-                            <% } %>
-                    </ul>
-                </li>
             </ul>
-            <a href="/course/initiation" class="btn btn-primary">Initiate Course</a>
+            <h2>Your Courses:</h2>
+            <div class="accordion" id="accordionCourses">
+                <% for (let i=0; i < courses.length; i++) { %>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading<%= i %>">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapse<%= i %>" aria-expanded="false"
+                                aria-controls="collapse<%= i %>">
+                                <%= courses[i].course_title %>
+                            </button>
+                        </h2>
+                        <div id="collapse<%= i %>" class="accordion-collapse collapse" aria-labelledby="heading<%= i %>"
+                            data-bs-parent="#accordionCourses">
+                            <div class="accordion-body">
+                                <%= courses[i].course_description %>
 
+                            </div>
+                        </div>
+                        <div id="collapse<%= i %>" class="accordion-collapse collapse" aria-labelledby="heading<%= i %>"
+                            data-bs-parent="#accordionCourses">
+                            <div class="accordion-body">
+                                <a href="/initiate/lecture" class="btn btn-primary">Upload Lecture</a>
+                            </div>
+                        </div>
+                    </div>
+                    <% } %>
+            </div>
+            <a href="/course/initiation" class="btn btn-primary">Initiate Course</a>
         </div>
     </div>
-
-    <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
         integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p"
         crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF"
         crossorigin="anonymous"></script>
-    <script>
-        // Example of initializing Bootstrap accordion
-        // document.addEventListener('DOMContentLoaded', function () {
-        //     var accordions = document.querySelectorAll('.accordion');
-        //     accordions.forEach(function (accordion) {
-        //         new bootstrap.Collapse(accordion.querySelector('.accordion-collapse'), {
-        //             toggle: true // set to true to allow opening/closing multiple items simultaneously
-        //         });
-        //     });
-        // });
-    </script>
+
 </body>
 
 </html>

@@ -5,9 +5,6 @@ const multer = require('multer');
 const db = require('./db'); // Import your database connection
 const bcrypt = require('bcrypt');
 const fs = require('fs');
-
-
-
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true })); // Parse form data
@@ -15,30 +12,180 @@ app.use(express.json());
 let id = null;
 let C_id = null;
 
-// Set the views directory
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/public', express.static(path.join(__dirname, 'public')));
+
 app.set('views', path.join(__dirname, 'views'));
 
-// Set the view engine to EJS
 app.set('view engine', 'ejs');
 
 
 
-app.get('/', (req, res) => {
-    res.render('login', { error: '' });
-});
 
-app.get('/students', async (req, res) => {
+
+//const nodemailer = require('nodemailer');
+
+
+// Body parser middleware
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+// Handle form submission
+
+
+app.get('/', async (req, res) => {
     try {
-        const students = await db.any('SELECT * FROM students');
-        res.json(students);
-    } catch (error) {
+        const studentcount = await db.one('select count(*) as sc from student');
+        const coursecount = await db.one('select count(*) as cc from courses');
+        const teachercount = await db.one('select count(*) as tc from teacher');
+        const lecturecount = await db.one('select count(*) as lc from lecture');
+        const questioncount = await db.one('select count(*) as qc from question');
+        const sc = studentcount.sc;
+        const cc = coursecount.cc;
+        const tc = teachercount.tc;
+        const lc = lecturecount.lc;
+        const qc = questioncount.qc;
+        res.render('homepage', { sc, tc, cc, lc, qc });
+    }
+    catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
     }
 });
+app.get('/registration', (req, res) => {
+    res.render('registration', { error: '' });
+});
 
 
 
+
+app.post('/registration', async (req, res) => {
+    const { first_name, last_name, gmail, date_of_birth, userType, password_hash, proficiency,university } = req.body;//, mail_password
+    try {
+        // Check if the Gmail already exists in the users table
+        const userExistsQuery = await db.one('SELECT COUNT(*) as c FROM users WHERE gmail = $1 and usertype = $2', [gmail, userType]);
+        const userCount = parseInt(userExistsQuery.c);
+
+        if (userCount > 0 || !gmail) {
+            // Gmail account already exists or invalid Gmail provided
+            const errorMessage = 'Invalid Information.';
+            return res.status(400).json({ message: errorMessage });
+        }
+        else {
+            // Insert the new user data into the users table
+            const newuser = await db.one('INSERT INTO users(user_id, gmail, name, password, USERTYPE) VALUES ((SELECT (COUNT(*)+1) AS c FROM users),$1,$2,$3,$4) RETURNING *', [gmail, first_name + ' ' + last_name, password_hash, userType]);//, mail_password/mail_password,
+            if(userType==='guideline_giver')
+            {
+                const newgg=await db.one('Insert into guideline_giver(proficiency,phone_no,university,password_hash) values ($1,$2,$3,$4) returning *'[proficiency,phone_no,university,password_hash]);
+                console.log(newgg);
+            }
+
+           else if (userType === 'student') {
+                const currentDate = new Date();
+                const dob = new Date(date_of_birth);
+                const age = currentDate.getFullYear() - dob.getFullYear();
+
+                if (age > 25) {
+                    // Offer to become a guideline giver
+                    const newstudent = await db.one('INSERT INTO student (first_name, last_name, date_of_birth, password_hash) VALUES ($1, $2, $3, $4) RETURNING *', [first_name, last_name, date_of_birth, password_hash]);
+                    const newid = await db.one('SELECT student_id FROM student WHERE first_name=$1 AND last_name=$2 AND date_of_birth=$3 AND password_hash=$4', [first_name, last_name, date_of_birth, password_hash]);
+                    console.log('going to insert guideline_giver');
+                    const successMessage = `Account created successfully. Remember your userid ${newid.student_id} and Password ${password_hash} .Your age is ${age} .You can be a guideline giver.If you want to 
+                                               be a guideline giver then click continue`;
+                    return res.status(200).json({ message: successMessage, showGuidelineGiverOption: true });
+                    //res.render('guideline_offer', { first_name, last_name, password_hash });
+                } else {
+                    // Continue registration
+                    const newstudent = await db.one('INSERT INTO student (first_name, last_name, date_of_birth, password_hash) VALUES ($1, $2, $3, $4) RETURNING *', [first_name, last_name, date_of_birth, password_hash]);
+                    const newid = await db.one('SELECT student_id FROM student WHERE first_name=$1 AND last_name=$2 AND date_of_birth=$3 AND password_hash=$4', [first_name, last_name, date_of_birth, password_hash]);
+                    const successMessage = `Account created successfully. Remember your userid ${newid.student_id} and Password ${password_hash} .go to mail.`;
+                    /* const successMessage2 = `Congratulation ${first_name + ' ' + last_name}!!! 
+                                             welcome to studymate....
+                                             you are ${userType}.Account created successfully. Remember your userid ${newid.student_id} and Password ${password_hash} .`;
+     
+                     // Send success email
+                     sendEmail(gmail, 'Registration Successful', successMessage2);*/
+
+                    return res.status(200).json({ message: successMessage });
+                }
+            } else if (userType === 'teacher') {
+                const newteacher = await db.one('INSERT INTO teacher (teacher_name, teacher_proficiency, date_of_birth, password_hash) VALUES ($1, $2, $3, $4) RETURNING *', [first_name + ' ' + last_name, proficiency, date_of_birth, password_hash]);
+                const newid2 = await db.one('SELECT teacher_id FROM teacher WHERE (teacher_name=$1) AND teacher_proficiency=$2 and  date_of_birth=$3 AND password_hash=$4', [first_name + ' ' + last_name, proficiency, date_of_birth, password_hash]);
+                const successMessage = `Account created successfully. Remember your userid ${newid2.teacher_id} and Password ${password_hash}`;
+                /* const successMessage2 = `Congratulation ${first_name + ' ' + last_name}!!! 
+                 welcome to studymate....
+                 you are ${userType}.Account created successfully. Remember your userid ${newid.student_id} and Password ${password_hash} .`;
+                 // Send success email
+                 sendEmail(gmail, 'Registration Successful', successMessage2);*/
+
+                return res.status(200).json({ message: successMessage });
+            }
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send('Internal Server Error');
+    }
+});
+
+// Function to send email
+
+
+// Function to log errors to a file
+/*function logError(error) {
+    const timestamp = new Date().toISOString();
+    const logMessage = `${timestamp}: ${error}\n`;
+
+    fs.appendFile('error.log', logMessage, (err) => {
+        if (err) {
+            console.error('Error writing to error log:', err);
+        }
+    });
+}
+
+Function to send email
+function sendEmail(to, subject, message, res) {
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: 'shatabdi198dc@gmail.com', // Your Gmail email address
+            pass: 'BULUrani198' // Your Gmail password
+        }
+    });
+
+    const mailOptions = {
+        from: 'shatabdi198dc@gmail.com',
+        to,
+        subject,
+        text: message
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.error('Error sending email:', error);
+            logError(error); // Log the error to a file
+            if (res) {
+                res.status(500).json({ error: 'An error occurred while sending the email.' });
+            }
+        } else {
+            console.log('Email sent:', info.response);
+            if (res) {
+                res.status(200).json({ message: 'Email sent successfully.' });
+            }
+        }
+    });
+}*/
+
+
+
+app.get('/login', (req, res) => {
+    res.render('login', { error: '' });
+});
 app.post('/login', async (req, res) => {
     const { userType, userId, password } = req.body;
     id = userId;
@@ -64,7 +211,15 @@ app.post('/login', async (req, res) => {
     }
 });
 
-
+app.get('/students', async (req, res) => {
+    try {
+        const students = await db.any('SELECT * FROM students');
+        res.json(students);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
 
 app.get('/student/dashboard', async (req, res) => {
     try {
@@ -248,22 +403,22 @@ app.get('/show/lecture', async (req, res) => {
 // Define a function to fetch the exam data from the database
 const getExams = async () => {
     try {
-      // Connect to the database
-      const client = await pool.connect();
-  
-      // Execute a query to fetch the exams from the exam_section table
-      const result = await client.query('SELECT * FROM exam_section');
-  
-      // Release the client back to the pool
-      client.release();
-  
-      // Return the rows fetched from the database
-      return result.rows;
+        // Connect to the database
+        const client = await pool.connect();
+
+        // Execute a query to fetch the exams from the exam_section table
+        const result = await client.query('SELECT * FROM exam_section');
+
+        // Release the client back to the pool
+        client.release();
+
+        // Return the rows fetched from the database
+        return result.rows;
     } catch (err) {
-      console.error('Error fetching exams:', err);
-      throw err;
+        console.error('Error fetching exams:', err);
+        throw err;
     }
-  };
+};
 
 app.get('/student/exam-section', async (req, res) => {
     try {
@@ -364,16 +519,7 @@ app.get('/initiate/lecture', async (req, res) => {
     res.render('lecture_initiate', { userType: 'Teacher', course_id: C_id });
 });
 
-//Set up multer for handling file uploads
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
 
-//Set up middleware
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-
-// Serve static files (optional, depending on your needs)
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 //Handle POST request for initiating a new lecture
 /*app.post('/initiate/lecture', upload.fields([{ name: 'video', maxCount: 1 }, { name: 'pdf', maxCount: 1 }]), async (req, res) => {
@@ -414,7 +560,7 @@ app.post('/initiate/lecture', upload.fields([{ name: 'video', maxCount: 1 }, { n
         const pdfFile = req.files['pdf'][0];
         console.log("to post " + id + "  " + C_id);
         const lectureId = await db.one('select count(*)+1 as count from lecture');
-        
+
         console.log(lectureId);
 
         // Save video and pdf files to the file system and get modified file names
@@ -459,10 +605,9 @@ app.get('/teacher/lecture', async (req, res) => {
     }
 });
 
-app.get('/guidelineGiver/dashboard', (req, res) => {
+app.get('/guideline_giver/dashboard', (req, res) => {
     res.render('guideline_giver_dashboard', { userType: 'Guideline_Giver', options: ['Provide Guidance', 'View Requests'] });
 });
-
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, './public')));
 

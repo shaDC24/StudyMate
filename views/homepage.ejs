@@ -1,0 +1,256 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STUDYMATE - Learn, Connect, Succeed</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <style>
+        /* Custom styles specific to this page */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e5ecf4;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            /* background-color: rgba(255, 255, 255, 0.8); */
+            /* Adjust transparency as needed */
+        }
+
+        .jumbotron {
+            background-image: url('public/background.jpg');
+            color: #ffffff;
+            padding: 100px 20px;
+            margin-bottom: 40px;
+        }
+
+        .jumbotron h1,
+        .jumbotron h2,
+        .jumbotron p,
+        .jumbotron a {
+            opacity: 0;
+            animation: fadeIn 2s forwards;
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 30px;
+            font-size: 1.1em;
+            color: #ffffff;
+            background-color: #28a745;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #218838;
+        }
+
+        /* Flexbox to display cards side by side */
+        .card-container {
+            display: flex;
+            justify-content: center;
+            /* Center align the cards horizontally */
+            gap: 20px;
+            /* Add gap between cards */
+            flex-wrap: wrap;
+            /* Allow wrapping to the next line if needed */
+        }
+
+        .card {
+            flex: 1;
+            /* Each card takes equal space */
+            max-width: 18rem;
+            /* Limit the width of each card */
+        }
+
+        .video-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px; /* Adjust margin as needed */
+        }
+
+        video {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <ul class="nav justify-content-end">
+        <li class="nav-item">
+            <a class="nav-link" href="#" id="login-link">Log in</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/registration">Registration</a>
+        </li>
+    </ul>
+
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Do you have an account?</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>If you have an account, click "Yes" to log in, otherwise click "No" to register.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="loginYesBtn">Yes</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="jumbotron">
+            <h1>Welcome to <span id="dynamic-text"></span></h1>
+            <br><br>
+            <h2><span id="dynamic-text2"></span></h2>
+            <br><br><br>
+            <p>Your ultimate destination for learning and success</p>
+            <br><br>
+        </div>
+    </div>
+
+    <div class="video-container">
+        <video width="640" height="360" controls>
+            <source src="uploads/homepage.mkv" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <div class="container card-container">
+        <div class="card">
+            <img src="public/teacher.jpg" class="card-img-top" alt="...">
+            <div class="card-body">
+                <h5 class="card-title">TEACHER</h5>
+                <p class="card-text">There are almost <%=tc%>+ teachers
+                    involved here. They are experienced and the most relevant teachers;</p>
+            </div>
+        </div>
+        <div class="card">
+            <img src="public/course.jpg" class="card-img-top" alt="...">
+            <div class="card-body">
+                <h5 class="card-title">COURSES</h5>
+                <p class="card-text">There are almost <%=cc%> courses
+                    that are very helpful with their content.</p>
+            </div>
+        </div>
+        <div class="card">
+            <img src="public/lecture.jpg" class="card-img-top" alt="...">
+            <div class="card-body">
+                <h5 class="card-title">LECTURES</h5>
+                <p class="card-text">Almost <%=lc%> quick example text to build on mental strength and make up the bulk
+                    of the brain's content.</p>
+            </div>
+        </div>
+        <div class="card">
+            <img src="public/exam.jpg" class="card-img-top" alt="...">
+            <div class="card-body">
+                <h5 class="card-title">EXPLORE</h5>
+                <p class="card-text">Almost <%=qc%> quick example exam to build on preparation and make up the bulk
+                    of the book's content.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const text = "STUDYMATE";
+        const text2 = "Learn, Connect, Succeed";
+
+        // Delay between each letter (in milliseconds)
+        const delay = 100;
+
+        // Get the span element where the text will be displayed
+        const dynamicText = document.getElementById("dynamic-text");
+        const dynamicText2 = document.getElementById("dynamic-text2");
+
+        // Initialize an index to keep track of the current letter being displayed
+        let index = 0;
+        let index2 = 0;
+
+        // Function to display the text letter by letter
+        function displayText() {
+            // Check if all letters have been displayed
+            if (index < text.length) {
+                // Add the next letter to the dynamicText element
+                dynamicText.textContent += text.charAt(index);
+                // Move to the next letter
+                index++;
+                // Call the function recursively after the specified delay
+                setTimeout(displayText, delay);
+            }
+        }
+
+        function displayText2() {
+            // Check if all letters have been displayed
+            if (index2 < text2.length) {
+                // Add the next letter to the dynamicText element
+                dynamicText2.textContent += text2.charAt(index2);
+                // Move to the next letter
+                index2++;
+                // Call the function recursively after the specified delay
+                setTimeout(displayText2, delay);
+            }
+        }
+
+        // Start displaying the text
+        displayText();
+        setTimeout(displayText2, text.length * delay);
+
+        // Add event listener to the login link
+        const loginLink = document.getElementById('login-link');
+        loginLink.addEventListener('click', function () {
+            // Show the login modal
+            const loginModal = new bootstrap.Modal(document.getElementById('loginModal'), {
+                keyboard: false
+            });
+            loginModal.show();
+        });
+
+        // Handle login Yes button click
+        const loginYesBtn = document.getElementById('loginYesBtn');
+        loginYesBtn.addEventListener('click', function () {
+            // Redirect to login page
+            // You can replace '#' with your actual login page URL
+            window.location.href = 'login'; // Replace '#' with your actual login page URL
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+        integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+        integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

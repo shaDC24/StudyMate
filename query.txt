@@ -1,6 +1,7 @@
  --npm install -y express
 --npm install express multer
 --npm install pg-promise
+--npm install nodemailer
 
 
 CREATE DATABASE studymate;
@@ -44,25 +45,7 @@ CREATE TABLE Teacher (
     last_uploaded TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
      password_hash VARCHAR(255)
 );
--- Create a function to calculate age and update the age field
-CREATE OR REPLACE FUNCTION update_teacher_age() RETURNS TRIGGER AS $$ BEGIN NEW.age = EXTRACT(
-        YEAR
-        FROM age(NEW.teacher_birth_date)
-    );
-RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
--- Create a trigger to call the function before insert or update
-CREATE TRIGGER before_insert_or_update_teacher BEFORE
-INSERT
-    OR
-UPDATE ON teacher FOR EACH ROW EXECUTE FUNCTION update_teacher_age();
--- Update the trigger to set teacher_id from user_id
-CREATE OR REPLACE FUNCTION set_teacher_id() RETURNS TRIGGER AS $$ BEGIN IF NEW.teacher_id IS NULL THEN NEW.teacher_id := NEW.user_id;
-END IF;
-RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+
 -- Create a new trigger to set teacher_id before insert
 CREATE TRIGGER before_insert_teacher_set_id BEFORE
 INSERT ON teacher FOR EACH ROW EXECUTE FUNCTION set_teacher_id();
@@ -334,3 +317,89 @@ ADD CONSTRAINT fk_course_id FOREIGN KEY (course_id) REFERENCES courses(id);
     CONSTRAINT fk_examSectionId FOREIGN KEY (examSectionId) REFERENCES exam_section(id)
 );
 
+
+
+alter table guideline_giver add column password_hash varchar(255);
+
+ALTER TABLE guideline_giver
+RENAME COLUMN guide_id TO guideline_giver_id;
+insert into guideline_giver(proficiency,phone_no,university,password_hash) values('Math',01731254534,'BUET','g2');
+
+
+alter table student add column date_of_birth date;
+CREATE OR REPLACE FUNCTION calculate_age()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.age := FLOOR(EXTRACT(YEAR FROM age(NEW.date_of_birth)));
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER age_student_trigger
+BEFORE INSERT ON student
+FOR EACH ROW
+EXECUTE FUNCTION calculate_age();
+insert into student (first_name,last_name,date_of_birth,password_hash)
+values('A','B','2003-01-07','s3');
+
+ALTER TABLE Student
+ALTER COLUMN enrollment_date SET DEFAULT CURRENT_DATE;
+
+CREATE OR REPLACE FUNCTION update_last_login_time()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.last_login_time := CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+CREATE TRIGGER update_last_login_trigger
+BEFORE UPDATE ON Student
+FOR EACH ROW
+WHEN (OLD.password_hash IS DISTINCT FROM NEW.password_hash)
+EXECUTE FUNCTION update_last_login_time();
+
+ALTER TABLE teacher
+RENAME COLUMN teacher_birth_date TO date_of_birth;
+
+
+CREATE TRIGGER update_last_login_trigger
+BEFORE UPDATE ON teacher
+FOR EACH ROW
+WHEN (OLD.password_hash IS DISTINCT FROM NEW.password_hash)
+EXECUTE FUNCTION update_last_login_time();
+
+
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM pg_trigger
+        WHERE tgname = 'before_insert_or_update_teacher'
+    ) THEN
+        DROP TRIGGER before_insert_or_update_teacher ON teacher;
+    END IF;
+END $$;
+
+drop function update_teacher_age();
+-- Create a function to calculate age and update the age field
+CREATE OR REPLACE FUNCTION update_teacher_age() RETURNS TRIGGER AS $$ BEGIN NEW.age = EXTRACT(
+        YEAR
+        FROM age(NEW.date_of_birth)
+    );
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+-- Create a trigger to call the function before insert or update
+CREATE TRIGGER before_insert_or_update_teacher BEFORE
+INSERT
+    OR
+UPDATE ON teacher FOR EACH ROW EXECUTE FUNCTION update_teacher_age();
+-- Update the trigger to set teacher_id from user_id
+CREATE OR REPLACE FUNCTION set_teacher_id() RETURNS TRIGGER AS $$ BEGIN IF NEW.teacher_id IS NULL THEN NEW.teacher_id := NEW.user_id;
+END IF;
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+ALTER TABLE USERS 
+ADD COLUMN USERTYPE VARCHAR(25);
