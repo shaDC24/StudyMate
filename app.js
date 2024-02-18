@@ -66,13 +66,15 @@ app.get('/registration', (req, res) => {
 
 
 app.post('/registration', async (req, res) => {
-    const { first_name, last_name, gmail, date_of_birth, userType, password_hash, proficiency,university } = req.body;//, mail_password
+    const { first_name, last_name, gmail, date_of_birth, userType, password_hash, proficiency, university, phone } = req.body;//, mail_password
     try {
         // Check if the Gmail already exists in the users table
-        const userExistsQuery = await db.one('SELECT COUNT(*) as c FROM users WHERE gmail = $1 and usertype = $2', [gmail, userType]);
-        const userCount = parseInt(userExistsQuery.c);
+        // const userExistsQuery = await db.one('SELECT COUNT(*) as c FROM users WHERE gmail = $1 and usertype = $2', [gmail, userType]);
+        //const userCount = parseInt(userExistsQuery.c);
+        const ucount = await db.one('SELECT IS_User_Exists($1,upper($2)) as c', [gmail, userType]);
+        console.log(ucount.c);
 
-        if (userCount > 0 || !gmail) {
+        if (ucount.c > 0 || !gmail || !userType) {
             // Gmail account already exists or invalid Gmail provided
             const errorMessage = 'Invalid Information.';
             return res.status(400).json({ message: errorMessage });
@@ -80,51 +82,76 @@ app.post('/registration', async (req, res) => {
         else {
             // Insert the new user data into the users table
             const newuser = await db.one('INSERT INTO users(user_id, gmail, name, password, USERTYPE) VALUES ((SELECT (COUNT(*)+1) AS c FROM users),$1,$2,$3,$4) RETURNING *', [gmail, first_name + ' ' + last_name, password_hash, userType]);//, mail_password/mail_password,
-            if(userType==='guideline_giver')
-            {
-                const newgg=await db.one('Insert into guideline_giver(proficiency,phone_no,university,password_hash) values ($1,$2,$3,$4) returning *'[proficiency,phone_no,university,password_hash]);
+            console.log(newuser);
+            if (userType === 'guideline_giver') {
+                const newgg = await db.one('Insert into guideline_giver(proficiency,phone_no,university,password_hash) values ($1,$2,$3,$4) returning *', [proficiency, phone, university, password_hash]);
                 console.log(newgg);
+                const sid = await db.one('SELECT student_id FROM student WHERE first_name=$1 AND last_name=$2 AND date_of_birth=$3 AND password_hash=$4', [first_name, last_name, date_of_birth, password_hash]);
+                const gid = await db.one('SELECT guideline_giver_id FROM most_recent_guide_id  where id=(select count(*) from most_recent_guide_id)');
+                const newstudentguider = await db.one('insert into isaGuidelineGiver(student_id,guideline_giver_id) values($1,$2) returning *', [sid.student_id, gid.guideline_giver_id]);
+
+                console.log(newstudentguider);
+                const successMessage = `Account created successfully. Remember your student userid ${sid.student_id} and guideline_giver user id ${gid.guideline_giver_id} Password ${password_hash} .
+                                           `;
+                return res.status(200).json({ message: successMessage});
             }
 
-           else if (userType === 'student') {
-                const currentDate = new Date();
-                const dob = new Date(date_of_birth);
-                const age = currentDate.getFullYear() - dob.getFullYear();
+            else if (userType === 'student') {
+                const scount = await db.one('SELECT IS_Student_Exists($1, $2, $3) AS c', [first_name, last_name, date_of_birth]);
+                if (scount.c > 0) {
+                    const errorMessage = 'Student already exists.';
+                    return res.status(400).json({ message: errorMessage });
+                }
+                else {
+                    const currentDate = new Date();
+                    const dob = new Date(date_of_birth);
+                    const age = currentDate.getFullYear() - dob.getFullYear();
 
-                if (age > 25) {
-                    // Offer to become a guideline giver
-                    const newstudent = await db.one('INSERT INTO student (first_name, last_name, date_of_birth, password_hash) VALUES ($1, $2, $3, $4) RETURNING *', [first_name, last_name, date_of_birth, password_hash]);
-                    const newid = await db.one('SELECT student_id FROM student WHERE first_name=$1 AND last_name=$2 AND date_of_birth=$3 AND password_hash=$4', [first_name, last_name, date_of_birth, password_hash]);
-                    console.log('going to insert guideline_giver');
-                    const successMessage = `Account created successfully. Remember your userid ${newid.student_id} and Password ${password_hash} .Your age is ${age} .You can be a guideline giver.If you want to 
+                    if (age > 25) {
+                        // Offer to become a guideline giver
+                        const newstudent = await db.one('INSERT INTO student (first_name, last_name, date_of_birth, password_hash) VALUES ($1, $2, $3, $4) RETURNING *', [first_name, last_name, date_of_birth, password_hash]);
+                        const newid = await db.one('SELECT student_id FROM student WHERE first_name=$1 AND last_name=$2 AND date_of_birth=$3 AND password_hash=$4', [first_name, last_name, date_of_birth, password_hash]);
+                        console.log('going to insert guideline_giver');
+                        const successMessage = `Account created successfully. Remember your userid ${newid.student_id} and Password ${password_hash} .Your age is ${age} .You can be a guideline giver.If you want to 
                                                be a guideline giver then click continue`;
-                    return res.status(200).json({ message: successMessage, showGuidelineGiverOption: true });
-                    //res.render('guideline_offer', { first_name, last_name, password_hash });
-                } else {
-                    // Continue registration
-                    const newstudent = await db.one('INSERT INTO student (first_name, last_name, date_of_birth, password_hash) VALUES ($1, $2, $3, $4) RETURNING *', [first_name, last_name, date_of_birth, password_hash]);
-                    const newid = await db.one('SELECT student_id FROM student WHERE first_name=$1 AND last_name=$2 AND date_of_birth=$3 AND password_hash=$4', [first_name, last_name, date_of_birth, password_hash]);
-                    const successMessage = `Account created successfully. Remember your userid ${newid.student_id} and Password ${password_hash} .go to mail.`;
+                        return res.status(200).json({ message: successMessage, showGuidelineGiverOption: true });
+                        //res.render('guideline_offer', { first_name, last_name, password_hash });
+                    } else {
+                        // Continue registration
+                        const newstudent = await db.one('INSERT INTO student (first_name, last_name, date_of_birth, password_hash) VALUES ($1, $2, $3, $4) RETURNING *', [first_name, last_name, date_of_birth, password_hash]);
+                        console.log(newstudent);
+                        const newid = await db.one('SELECT student_id FROM student WHERE first_name=$1 AND last_name=$2 AND date_of_birth=$3 AND password_hash=$4', [first_name, last_name, date_of_birth, password_hash]);
+                        const successMessage = `Account created successfully. Remember your userid ${newid.student_id} and Password ${password_hash} .go to mail.`;
+                        /* const successMessage2 = `Congratulation ${first_name + ' ' + last_name}!!! 
+                                                 welcome to studymate....
+                                                 you are ${userType}.Account created successfully. Remember your userid ${newid.student_id} and Password ${password_hash} .`;
+         
+                         // Send success email
+                         sendEmail(gmail, 'Registration Successful', successMessage2);*/
+
+                        return res.status(200).json({ message: successMessage });
+                    }
+                }
+            } else if (userType === 'teacher') {
+
+                const tcount = await db.one('select IS_Teacher_Exists($1,$2,$3,$4) as c', [first_name, last_name, date_of_birth, proficiency]);
+                if (tcount.c > 0) {
+                    const errorMessage = 'Teacher already exists.';
+                    return res.status(400).json({ message: errorMessage });
+                }
+                else {
+                    const newteacher = await db.one('INSERT INTO teacher (teacher_name, teacher_proficiency, date_of_birth, password_hash) VALUES ($1, $2, $3, $4) RETURNING *', [first_name + ' ' + last_name, proficiency, date_of_birth, password_hash]);
+                    console.log(newteacher);
+                    const newid2 = await db.one('SELECT teacher_id FROM teacher WHERE (teacher_name=$1) AND teacher_proficiency=$2 and  date_of_birth=$3 AND password_hash=$4', [first_name + ' ' + last_name, proficiency, date_of_birth, password_hash]);
+                    const successMessage = `Account created successfully. Remember your userid ${newid2.teacher_id} and Password ${password_hash}`;
                     /* const successMessage2 = `Congratulation ${first_name + ' ' + last_name}!!! 
-                                             welcome to studymate....
-                                             you are ${userType}.Account created successfully. Remember your userid ${newid.student_id} and Password ${password_hash} .`;
-     
+                     welcome to studymate....
+                     you are ${userType}.Account created successfully. Remember your userid ${newid.student_id} and Password ${password_hash} .`;
                      // Send success email
                      sendEmail(gmail, 'Registration Successful', successMessage2);*/
 
                     return res.status(200).json({ message: successMessage });
                 }
-            } else if (userType === 'teacher') {
-                const newteacher = await db.one('INSERT INTO teacher (teacher_name, teacher_proficiency, date_of_birth, password_hash) VALUES ($1, $2, $3, $4) RETURNING *', [first_name + ' ' + last_name, proficiency, date_of_birth, password_hash]);
-                const newid2 = await db.one('SELECT teacher_id FROM teacher WHERE (teacher_name=$1) AND teacher_proficiency=$2 and  date_of_birth=$3 AND password_hash=$4', [first_name + ' ' + last_name, proficiency, date_of_birth, password_hash]);
-                const successMessage = `Account created successfully. Remember your userid ${newid2.teacher_id} and Password ${password_hash}`;
-                /* const successMessage2 = `Congratulation ${first_name + ' ' + last_name}!!! 
-                 welcome to studymate....
-                 you are ${userType}.Account created successfully. Remember your userid ${newid.student_id} and Password ${password_hash} .`;
-                 // Send success email
-                 sendEmail(gmail, 'Registration Successful', successMessage2);*/
-
-                return res.status(200).json({ message: successMessage });
             }
         }
     } catch (error) {
@@ -153,13 +180,13 @@ function sendEmail(to, subject, message, res) {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: 'shatabdi198dc@gmail.com', // Your Gmail email address
-            pass: 'BULUrani198' // Your Gmail password
+            user: '', // Your Gmail email address
+            pass: '' // Your Gmail password
         }
     });
 
     const mailOptions = {
-        from: 'shatabdi198dc@gmail.com',
+        from: '',
         to,
         subject,
         text: message

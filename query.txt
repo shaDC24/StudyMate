@@ -403,3 +403,120 @@ $$ LANGUAGE plpgsql;
 
 ALTER TABLE USERS 
 ADD COLUMN USERTYPE VARCHAR(25);
+
+alter table users drop constraint users_gmail_key;
+
+ ALTER TABLE users
+ADD CONSTRAINT unique_gmail_usertype UNIQUE (gmail, usertype);
+
+CREATE OR REPLACE FUNCTION IS_User_Exists(gmail in VARCHAR, userType in VARCHAR) 
+RETURNS INTEGER 
+AS
+$$
+DECLARE
+    ans INTEGER;
+BEGIN
+    SELECT COUNT(*) INTO ans
+    FROM USERS u
+    WHERE u.GMAIL = IS_User_Exists.gmail
+    AND u.USERTYPE = IS_User_Exists.userType;
+
+    RETURN ans;
+END;
+$$
+LANGUAGE PLPGSQL;
+
+CREATE TABLE isaGuidelineGiver (
+    isaGuidelineGiver_id SERIAL PRIMARY KEY,
+    student_id INT,
+    guideline_giver_id INT,
+    CONSTRAINT unique_student_guideline_giver UNIQUE (student_id, guideline_giver_id),
+    FOREIGN KEY (student_id) REFERENCES student(student_id),
+    FOREIGN KEY (guideline_giver_id) REFERENCES guideline_giver(guideline_giver_id)
+);
+
+CREATE OR REPLACE FUNCTION IS_Student_Exists(first_name in VARCHAR, last_name in VARCHAR, date_of_birth in DATE) 
+RETURNS INTEGER 
+AS
+$$
+DECLARE
+    ans INTEGER;
+BEGIN
+    SELECT COUNT(*) INTO ans
+    FROM STUDENT S
+    WHERE UPPER(S.FIRST_NAME) = UPPER(IS_Student_Exists.first_name)
+    AND UPPER(S.LAST_NAME) = UPPER(IS_Student_Exists.last_name)
+	AND S.DATE_OF_BIRTH=Is_Student_Exists.date_of_birth;
+
+    RETURN ans;
+END;
+$$
+LANGUAGE PLPGSQL;
+
+
+CREATE OR REPLACE FUNCTION IS_Teacher_Exists(first_name in VARCHAR, last_name in VARCHAR, date_of_birth in DATE,teacher_proficiency in VARCHAR) 
+RETURNS INTEGER 
+AS
+$$
+DECLARE
+    ans INTEGER;
+BEGIN
+    SELECT COUNT(*) INTO ans
+    FROM TEACHER T1
+    WHERE UPPER(T1.TEACHER_NAME) = UPPER(IS_Teacher_Exists.first_name||' '||IS_Teacher_Exists.last_name)
+    AND UPPER(T1.TEACHER_PROFICIENCY) = UPPER(IS_Teacher_Exists.teacher_proficiency)
+	AND T1.DATE_OF_BIRTH=IS_Teacher_Exists.date_of_birth;
+
+    RETURN ans;
+END;
+$$
+LANGUAGE PLPGSQL;
+
+
+CREATE TABLE most_recent_guide_id (
+    id SERIAL PRIMARY KEY,
+    guideline_giver_id INTEGER
+);
+
+CREATE OR REPLACE FUNCTION update_most_recent_guide_id(jid IN INTEGER)
+RETURNS INTEGER AS
+$$
+BEGIN
+    UPDATE most_recent_guide_id
+    SET guideline_giver_id = jid;
+    RETURN jid;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION insert_guideline_giver_function()
+RETURNS TRIGGER AS
+$$
+BEGIN
+    INSERT INTO most_recent_guide_id (guideline_giver_id) VALUES (NEW.guideline_giver_id);
+    RETURN NEW;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER after_insert_guideline_giver
+AFTER INSERT ON guideline_giver
+FOR EACH ROW
+EXECUTE FUNCTION insert_guideline_giver_function();
+
+
+INSERT INTO guideline_giver (proficiency, phone_no, university)
+VALUES ('math', '01533496875', 'kuet');
+SELECT guideline_giver_id FROM most_recent_guide_id;
+
+
+
+
+
+
+
+
+
+
+
+
