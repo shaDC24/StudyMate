@@ -94,20 +94,35 @@ app.get('/api/search/teacher', async (req, res) => {
     }
 });
 
-app.post('/submit-answer/:exam_id', (req, res) => {
+app.post('/submit-answer/:exam_id', async (req, res) => {
     // Extract the submitted answers from the request body
     const answers = req.body.answers;
     console.log(answers);
 
-    //print the exam id
-    console.log(req.params);
+    // Extract the exam ID from the request parameters
+    const examId = req.params.exam_id;
+    console.log('Exam ID:', examId);
 
-    // Process the answers as needed
-    // For example, you could save them to a database, perform validation, etc.
+    // Assuming you have the student ID stored in a variable named 'id'
+    const studentId = id; // Replace 'id' with the actual variable holding the student ID
+
+    // Iterate over the submitted answers and insert them into the database
+    for (const questionId in answers) {
+        if (answers.hasOwnProperty(questionId)) {
+            const submittedAnsText = answers[questionId].option_text;
+            try {
+                await db.none('INSERT INTO student_ans(student_id, question_id, submitted_ans_text) VALUES($1, $2, $3)', [Number(id), questionId, submittedAnsText]);
+            } catch (error) {
+                console.error(error);
+                return res.status(500).send('Internal Server Error');
+            }
+        }
+    }
 
     // Respond with a success message
-    res.json({ answers });
+    res.json({ message: 'Answers submitted successfully' });
 });
+
 
 // Endpoint for searching courses
 app.get('/api/search/course', async (req, res) => {

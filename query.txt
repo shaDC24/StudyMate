@@ -324,7 +324,9 @@ ADD COLUMN pdflink  TEXT;
 ALTER TABLE exam_section DROP COLUMN question_id;
 ALTER TABLE exam_section 
 ADD COLUMN course_id INTEGER,
-ADD CONSTRAINT fk_course_id FOREIGN KEY (course_id) REFERENCES courses(id);
+ADD CONSTRAINT fk_course_id FOREIGN KEY (course_id) REFERENCES courses(id); 
+
+--asif shuru maybe (er aager kisu baad ase kina dekhish)
 
  insert into exam_section (exam_topic,course_id) values ('BST',2);
 
@@ -403,3 +405,70 @@ INSERT INTO teacher (
     )
 VALUES ( 'Mr.Smith', 'Science', '1995-06-15','7'),
     ('Miss Nahar', 'Language', '1977-07-22','8');
+
+insert into choice (option_text,question_id) values ('logn',2),('n',2),('1',2),('n^3',2);
+ALTER TABLE question
+ADD COLUMN question_ans VARCHAR(255); -- Adjust the data type and size according to your requirements
+UPDATE question
+SET question_ans = 'logn'
+WHERE id = 1;
+UPDATE question
+SET question_ans = 'logn'
+WHERE id = 2;
+
+CREATE TABLE student_ans (
+    student_id INT,
+    question_id INT,
+    submitted_ans_text TEXT,
+    PRIMARY KEY (student_id, question_id),
+    FOREIGN KEY (student_id) REFERENCES student(student_id),
+    FOREIGN KEY (question_id) REFERENCES question(id)
+);
+
+
+--eta uncommited still
+CREATE OR REPLACE FUNCTION calculate_result(
+    p_exam_id IN NUMBER
+) RETURN NUMBER IS
+    v_total_questions NUMBER;
+    v_correct_answers NUMBER := 0;
+BEGIN
+    -- Get the total number of questions for the exam
+    SELECT COUNT(*) INTO v_total_questions
+    FROM question
+    WHERE exam_id = p_exam_id;
+
+    -- Loop through each question to compare the submitted answer with the correct answer
+    FOR question_rec IN (SELECT id, question_ans FROM question WHERE exam_id = p_exam_id) LOOP
+        -- Retrieve the submitted answer for the current question
+        DECLARE
+            v_submitted_answer VARCHAR2(100); -- Assuming the data type for submitted answers
+        BEGIN
+            -- Retrieve the submitted answer from the table where the user's answers are stored
+            -- Replace 'submitted_answers_table' with the actual name of the table where user's answers are stored
+            SELECT answer INTO v_submitted_answer
+            FROM submitted_answers_table
+            WHERE question_id = question_rec.id;
+        EXCEPTION
+            WHEN NO_DATA_FOUND THEN
+                -- Handle the case where the user has not submitted an answer for this question
+                v_submitted_answer := NULL;
+        END;
+
+        -- Compare the submitted answer with the correct answer
+        IF question_rec.question_ans = v_submitted_answer THEN
+            v_correct_answers := v_correct_answers + 1;
+        END IF;
+    END LOOP;
+
+    -- Calculate the percentage of correct answers
+    RETURN (v_correct_answers / v_total_questions) * 100;
+EXCEPTION
+    WHEN OTHERS THEN
+        -- Handle exceptions as needed
+        RETURN -1; -- Return -1 to indicate failure
+END;
+/
+
+--aro lagbe aage ei exam dise kina sheta check. 
+--asif shesh
