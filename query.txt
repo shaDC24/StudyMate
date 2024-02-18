@@ -334,3 +334,72 @@ ADD CONSTRAINT fk_course_id FOREIGN KEY (course_id) REFERENCES courses(id);
     CONSTRAINT fk_examSectionId FOREIGN KEY (examSectionId) REFERENCES exam_section(id)
 );
 
+insert into choice (option_text,question_id) values ('logn',1);
+insert into choice (option_text,question_id) values ('n',1);
+insert into choice (option_text,question_id) values ('1',1);
+insert into choice (option_text,question_id) values ('n^3',1);
+
+insert into question (question_statement,exam_id) values ('What is the time complexity of BST deletion?',1);
+
+CREATE OR REPLACE FUNCTION is_question_exists_by_statement(
+    p_question_statement VARCHAR
+) RETURNS BOOLEAN
+AS $$
+DECLARE
+    v_count INTEGER;
+BEGIN
+    -- Check if the question exists in the database
+    SELECT COUNT(*)
+    INTO v_count
+    FROM questions
+    WHERE question_statement = p_question_statement;
+
+    -- Return true if the count is greater than 0, indicating the question exists
+    RETURN v_count > 0;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN FALSE; -- Question not found
+    WHEN OTHERS THEN
+        -- Handle exceptions as needed, such as logging errors
+        RETURN FALSE; -- Return false in case of errors
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION insert_question(
+    p_question_statement VARCHAR
+) RETURNS INTEGER 
+AS $$
+DECLARE
+    v_question_id INTEGER;
+BEGIN
+    -- Check if the question already exists
+    IF is_question_exists_by_statement(p_question_statement) THEN
+        -- If the question already exists, return -1 to indicate failure
+        RETURN -1;
+    ELSE
+        -- Insert the question if it doesn't exist
+        INSERT INTO questions (question_statement)
+        VALUES (p_question_statement)
+        RETURNING id INTO v_question_id;
+        
+        -- Return the ID of the inserted question
+        RETURN v_question_id;
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        -- Handle exceptions if any
+        RETURN -1; -- Return -1 to indicate failure
+END;
+$$ LANGUAGE plpgsql;
+
+INSERT INTO TEACHER (TEACHER_NAME,PASSWORD_HASH) VALUES ('DR.ALAM',3);
+INSERT INTO TEACHER (TEACHER_ID,TEACHER_NAME,PASSWORD_HASH) VALUES (4,'DR.KHAN',4);
+INSERT INTO TEACHER (TEACHER_NAME,PASSWORD_HASH) VALUES ('DR.HASAN',6);
+INSERT INTO teacher (
+        teacher_name,
+        teacher_proficiency,
+        teacher_birth_date,password_hash
+    )
+VALUES ( 'Mr.Smith', 'Science', '1995-06-15','7'),
+    ('Miss Nahar', 'Language', '1977-07-22','8');

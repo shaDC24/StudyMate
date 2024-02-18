@@ -5,6 +5,7 @@ const multer = require('multer');
 const db = require('./db'); // Import your database connection
 const bcrypt = require('bcrypt');
 const fs = require('fs');
+const e = require('express');
 
 
 
@@ -91,6 +92,21 @@ app.get('/api/search/teacher', async (req, res) => {
         console.error(error);
         res.status(500).send('Internal Server Error');
     }
+});
+
+app.post('/submit-answer/:exam_id', (req, res) => {
+    // Extract the submitted answers from the request body
+    const answers = req.body.answers;
+    console.log(answers);
+
+    //print the exam id
+    console.log(req.params);
+
+    // Process the answers as needed
+    // For example, you could save them to a database, perform validation, etc.
+
+    // Respond with a success message
+    res.json({ answers });
 });
 
 // Endpoint for searching courses
@@ -215,9 +231,22 @@ app.get('/start-exam/:examId', async (req, res) => {
     const examId = req.params.examId;
 
     try {
-        const question = await db.one('SELECT * FROM question WHERE exam_id = $1', Number(examId));
+        const question = await db.any('SELECT * FROM question WHERE exam_id = $1', Number(examId));
         console.log(question);
         res.render('start_exam', { question });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.get('/api/choice/:questionId', async (req, res) => {
+    const questionId = req.params.questionId;
+
+    try {
+        const choices = await db.any('SELECT * FROM choice WHERE question_id = $1', Number(questionId));
+        console.log(choices);
+        res.json(choices);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
