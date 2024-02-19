@@ -5,6 +5,10 @@ const multer = require('multer');
 const db = require('./db'); // Import your database connection
 const bcrypt = require('bcrypt');
 const fs = require('fs');
+const e = require('express');
+
+
+
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true })); // Parse form data
@@ -275,6 +279,69 @@ app.get('/api/search/teacher', async (req, res) => {
     }
 });
 
+app.post('/submit-answer/:exam_id', async (req, res) => {
+    // Extract the submitted answers from the request body
+    const answers = req.body.answers;
+    console.log(answers);
+
+    // Extract the exam ID from the request parameters
+    const examId = req.params.exam_id;
+    console.log('Exam ID:', examId);
+
+    // Assuming you have the student ID stored in a variable named 'id'
+    const studentId = id; // Replace 'id' with the actual variable holding the student ID
+
+    try {
+        // Iterate over the submitted answers and insert them into the database
+        for (const questionId in answers) {
+            if (answers.hasOwnProperty(questionId)) {
+                const submittedAnsText = answers[questionId].option_text;
+                await db.none('INSERT INTO student_ans(student_id, question_id, submitted_ans_text) VALUES($1, $2, $3)', [Number(id), questionId, submittedAnsText]);
+            }
+        }
+
+        // Call the stored procedure to calculate the result
+        let totalQuestions;
+        let correctAnswers;
+        let percentage;
+
+        // Call the stored procedure and retrieve the result using a DO statement
+        await db.task(async (t) => {
+            const result = await t.oneOrNone('CALL calculate_result($1, $2,$3,$4)', [examId, Number(id),totalQuestions,correctAnswers]);
+            totalQuestions = result.p_total_questions;
+            correctAnswers = result.p_correct_answers;
+            percentage = (correctAnswers / totalQuestions) * 100;
+
+            console.log('Total Questions:', totalQuestions);
+            console.log('Correct Answers:', correctAnswers);
+            console.log('Percentage:', percentage);
+            
+            // Redirect to the exam result page with query parameters
+            console.log('Redirecting to exam result page');
+            //res.redirect(`/exam-result/${examId}?correct=${correctAnswers}&total=${totalQuestions}`);
+            res.status(200).json({ totalQuestions: totalQuestions, correctAnswers: correctAnswers, percentage: percentage, examId: examId});
+            //res.redirect(`/teacher/dashboard`);
+            console.log('Redirected');
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+
+app.get('/exam-result/:examId', (req, res) => {
+    const correctAnswers = req.query.correct;
+    const totalQuestions = req.query.total;
+    const percentage = (correctAnswers / totalQuestions) * 100;
+
+    res.render('result', { correctAnswers, totalQuestions, percentage });
+});
+
+
+
+
 // Endpoint for searching courses
 app.get('/api/search/course', async (req, res) => {
     try {
@@ -397,9 +464,22 @@ app.get('/start-exam/:examId', async (req, res) => {
     const examId = req.params.examId;
 
     try {
-        const question = await db.one('SELECT * FROM question WHERE exam_id = $1', Number(examId));
+        const question = await db.any('SELECT * FROM question WHERE exam_id = $1', Number(examId));
         console.log(question);
         res.render('start_exam', { question });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.get('/api/choice/:questionId', async (req, res) => {
+    const questionId = req.params.questionId;
+
+    try {
+        const choices = await db.any('SELECT * FROM choice WHERE question_id = $1', Number(questionId));
+        console.log(choices);
+        res.json(choices);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });

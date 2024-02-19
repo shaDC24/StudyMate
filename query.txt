@@ -307,15 +307,9 @@ ADD COLUMN pdflink  TEXT;
 ALTER TABLE exam_section DROP COLUMN question_id;
 ALTER TABLE exam_section 
 ADD COLUMN course_id INTEGER,
-ADD CONSTRAINT fk_course_id FOREIGN KEY (course_id) REFERENCES courses(id);
+ADD CONSTRAINT fk_course_id FOREIGN KEY (course_id) REFERENCES courses(id); 
 
- insert into exam_section (exam_topic,course_id) values ('BST',2);
 
- CREATE TABLE exam (
-    id SERIAL PRIMARY KEY,
-    examSectionId INTEGER,
-    CONSTRAINT fk_examSectionId FOREIGN KEY (examSectionId) REFERENCES exam_section(id)
-);
 
 
 
@@ -516,6 +510,166 @@ SELECT guideline_giver_id FROM most_recent_guide_id;
 
 
 
+--asif shuru maybe (er aager kisu baad ase kina dekhish)
+
+ insert into exam_section (exam_topic,course_id) values ('BST',2); (eita ase tor maybe dekhish)
+
+ CREATE TABLE exam (
+    id SERIAL PRIMARY KEY,
+    examSectionId INTEGER,
+    CONSTRAINT fk_examSectionId FOREIGN KEY (examSectionId) REFERENCES exam_section(id)
+); (eitao ase tor maybe dekhish)
+
+
+
+
+
+
+insert into choice (option_text,question_id) values ('logn',1);
+insert into choice (option_text,question_id) values ('n',1);
+insert into choice (option_text,question_id) values ('1',1);
+insert into choice (option_text,question_id) values ('n^3',1);
+
+insert into question (question_statement,exam_id) values ('What is the time complexity of BST deletion?',1);
+
+CREATE OR REPLACE FUNCTION is_question_exists_by_statement(
+    p_question_statement VARCHAR
+) RETURNS BOOLEAN
+AS $$
+DECLARE
+    v_count INTEGER;
+BEGIN
+    -- Check if the question exists in the database
+    SELECT COUNT(*)
+    INTO v_count
+    FROM questions
+    WHERE question_statement = p_question_statement;
+
+    -- Return true if the count is greater than 0, indicating the question exists
+    RETURN v_count > 0;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN FALSE; -- Question not found
+    WHEN OTHERS THEN
+        -- Handle exceptions as needed, such as logging errors
+        RETURN FALSE; -- Return false in case of errors
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION insert_question(
+    p_question_statement VARCHAR
+) RETURNS INTEGER 
+AS $$
+DECLARE
+    v_question_id INTEGER;
+BEGIN
+    -- Check if the question already exists
+    IF is_question_exists_by_statement(p_question_statement) THEN
+        -- If the question already exists, return -1 to indicate failure
+        RETURN -1;
+    ELSE
+        -- Insert the question if it doesn't exist
+        INSERT INTO questions (question_statement)
+        VALUES (p_question_statement)
+        RETURNING id INTO v_question_id;
+        
+        -- Return the ID of the inserted question
+        RETURN v_question_id;
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        -- Handle exceptions if any
+        RETURN -1; -- Return -1 to indicate failure
+END;
+$$ LANGUAGE plpgsql;
+
+INSERT INTO TEACHER (TEACHER_NAME,PASSWORD_HASH) VALUES ('DR.ALAM',3);
+INSERT INTO TEACHER (TEACHER_ID,TEACHER_NAME,PASSWORD_HASH) VALUES (4,'DR.KHAN',4);
+INSERT INTO TEACHER (TEACHER_NAME,PASSWORD_HASH) VALUES ('DR.HASAN',6);
+INSERT INTO teacher (
+        teacher_name,
+        teacher_proficiency,
+        teacher_birth_date,password_hash
+    )
+VALUES ( 'Mr.Smith', 'Science', '1995-06-15','7'),
+    ('Miss Nahar', 'Language', '1977-07-22','8');
+
+insert into choice (option_text,question_id) values ('logn',2),('n',2),('1',2),('n^3',2);
+ALTER TABLE question
+ADD COLUMN question_ans VARCHAR(255); -- Adjust the data type and size according to your requirements
+UPDATE question
+SET question_ans = 'logn'
+WHERE id = 1;
+UPDATE question
+SET question_ans = 'logn'
+WHERE id = 2;
+
+CREATE TABLE student_ans (
+    student_id INT,
+    question_id INT,
+    submitted_ans_text TEXT,
+    PRIMARY KEY (student_id, question_id),
+    FOREIGN KEY (student_id) REFERENCES student(student_id),
+    FOREIGN KEY (question_id) REFERENCES question(id)
+);
+
+
+CREATE OR REPLACE PROCEDURE calculate_result(
+    p_exam_id INTEGER,
+    OUT p_total_questions INTEGER,
+    OUT p_correct_answers INTEGER
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_correct_answers INTEGER := 0;
+    v_submitted_answer TEXT;
+    question_rec RECORD;
+BEGIN
+    -- Initialize variables
+    p_total_questions := 0;
+    p_correct_answers := 0;
+
+    -- Get the total number of questions for the exam
+    SELECT COUNT(*) INTO p_total_questions
+    FROM question
+    WHERE exam_id = p_exam_id;
+
+    -- Loop through each question to compare the submitted answer with the correct answer
+    FOR question_rec IN
+        SELECT id, question_ans
+        FROM question
+        WHERE exam_id = p_exam_id
+    LOOP
+        -- Retrieve the submitted answer for the current question
+        BEGIN
+            -- Retrieve the submitted answer from the table where the user's answers are stored
+            SELECT answer INTO v_submitted_answer
+            FROM student_ans
+            WHERE question_id = question_rec.id;
+
+        EXCEPTION
+            WHEN NO_DATA_FOUND THEN
+                -- Handle the case where the user has not submitted an answer for this question
+                v_submitted_answer := NULL;
+        END;
+
+        -- Compare the submitted answer with the correct answer
+        IF question_rec.question_ans = v_submitted_answer THEN
+            v_correct_answers := v_correct_answers + 1;
+        END IF;
+    END LOOP;
+
+    -- Set the total number of correct answers
+    p_correct_answers := v_correct_answers;
+EXCEPTION
+    WHEN OTHERS THEN
+        -- Handle exceptions as needed
+        p_total_questions := -1; -- Return -1 to indicate failure for total questions
+        p_correct_answers := -1; -- Return -1 to indicate failure for correct answers
+END;
+$$;
 
 
 
@@ -523,3 +677,39 @@ SELECT guideline_giver_id FROM most_recent_guide_id;
 
 
 
+CREATE OR REPLACE FUNCTION check_previous_entry()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Check if there is a previous entry for the same student_id and question_id
+    IF EXISTS (
+        SELECT 1 FROM student_ans
+        WHERE student_id = NEW.student_id AND question_id = NEW.question_id
+    ) THEN
+        -- Raise an alert
+        RAISE NOTICE 'A previous entry exists for the same student and question.';
+
+        -- Here you can customize the behavior based on your requirement
+        -- For example, you can prompt the user or proceed automatically
+
+        -- To automatically proceed and overwrite the previous entry
+         DELETE FROM student_ans WHERE student_id = NEW.student_id AND question_id = NEW.question_id;
+
+        -- To prompt the user, you can't directly interact with the user interface from the trigger
+        -- You might consider logging an entry or sending a message to a messaging system
+    END IF;
+
+    -- Ensure the trigger continues to the actual insert
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER before_student_ans_insert
+BEFORE INSERT ON student_ans
+FOR EACH ROW
+EXECUTE FUNCTION check_previous_entry();
+
+
+
+ 
+--asif shesh
