@@ -319,6 +319,8 @@ ADD CONSTRAINT fk_course_id FOREIGN KEY (course_id) REFERENCES courses(id);
 
 
 
+--shatabdi
+
 alter table guideline_giver add column password_hash varchar(255);
 
 ALTER TABLE guideline_giver
@@ -509,6 +511,7 @@ INSERT INTO guideline_giver (proficiency, phone_no, university)
 VALUES ('math', '01533496875', 'kuet');
 SELECT guideline_giver_id FROM most_recent_guide_id;
 
+--shatabdi
 
 
 
