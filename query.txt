@@ -426,7 +426,6 @@ CREATE TABLE student_ans (
 );
 
 
---eta uncommited still (not now)
 CREATE OR REPLACE PROCEDURE calculate_result(
     p_exam_id INTEGER,
     OUT p_total_questions INTEGER,
@@ -488,7 +487,7 @@ $$;
 
 
 
---delete kortesi ektu
+
 CREATE OR REPLACE FUNCTION check_previous_entry()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -515,7 +514,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
---delete kortesi ektu
+
 CREATE TRIGGER before_student_ans_insert
 BEFORE INSERT ON student_ans
 FOR EACH ROW
@@ -523,9 +522,5 @@ EXECUTE FUNCTION check_previous_entry();
 
 
 
-
-
-
-
---aro lagbe aage ei exam dise kina sheta check. 
+ 
 --asif shesh
