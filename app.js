@@ -122,12 +122,12 @@ app.post('/registration', async (req, res) => {
                         console.log(newstudent);
                         const newid = await db.one('SELECT student_id FROM student WHERE first_name=$1 AND last_name=$2 AND date_of_birth=$3 AND password_hash=$4', [first_name, last_name, date_of_birth, password_hash]);
                         const successMessage = `Account created successfully. Remember your userid ${newid.student_id} and Password ${password_hash} .go to mail.`;
-                        /* const successMessage2 = `Congratulation ${first_name + ' ' + last_name}!!! 
+                         const successMessage2 = `Congratulation ${first_name + ' ' + last_name}!!! 
                                                  welcome to studymate....
                                                  you are ${userType}.Account created successfully. Remember your userid ${newid.student_id} and Password ${password_hash} .`;
          
                          // Send success email
-                         sendEmail(gmail, 'Registration Successful', successMessage2);*/
+                         //sendEmail(gmail, 'Registration Successful', successMessage2);
 
                         return res.status(200).json({ message: successMessage });
                     }
