@@ -106,22 +106,55 @@ app.post('/submit-answer/:exam_id', async (req, res) => {
     // Assuming you have the student ID stored in a variable named 'id'
     const studentId = id; // Replace 'id' with the actual variable holding the student ID
 
-    // Iterate over the submitted answers and insert them into the database
-    for (const questionId in answers) {
-        if (answers.hasOwnProperty(questionId)) {
-            const submittedAnsText = answers[questionId].option_text;
-            try {
+    try {
+        // Iterate over the submitted answers and insert them into the database
+        for (const questionId in answers) {
+            if (answers.hasOwnProperty(questionId)) {
+                const submittedAnsText = answers[questionId].option_text;
                 await db.none('INSERT INTO student_ans(student_id, question_id, submitted_ans_text) VALUES($1, $2, $3)', [Number(id), questionId, submittedAnsText]);
-            } catch (error) {
-                console.error(error);
-                return res.status(500).send('Internal Server Error');
             }
         }
-    }
 
-    // Respond with a success message
-    res.json({ message: 'Answers submitted successfully' });
+        // Call the stored procedure to calculate the result
+        let totalQuestions;
+        let correctAnswers;
+        let percentage;
+
+        // Call the stored procedure and retrieve the result using a DO statement
+        await db.task(async (t) => {
+            const result = await t.oneOrNone('CALL calculate_result($1, $2,$3,$4)', [examId, Number(id),totalQuestions,correctAnswers]);
+            totalQuestions = result.p_total_questions;
+            correctAnswers = result.p_correct_answers;
+            percentage = (correctAnswers / totalQuestions) * 100;
+
+            console.log('Total Questions:', totalQuestions);
+            console.log('Correct Answers:', correctAnswers);
+            console.log('Percentage:', percentage);
+            
+            // Redirect to the exam result page with query parameters
+            console.log('Redirecting to exam result page');
+            //res.redirect(`/exam-result/${examId}?correct=${correctAnswers}&total=${totalQuestions}`);
+            res.status(200).json({ totalQuestions: totalQuestions, correctAnswers: correctAnswers, percentage: percentage, examId: examId});
+            //res.redirect(`/teacher/dashboard`);
+            console.log('Redirected');
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
 });
+
+
+app.get('/exam-result/:examId', (req, res) => {
+    const correctAnswers = req.query.correct;
+    const totalQuestions = req.query.total;
+    const percentage = (correctAnswers / totalQuestions) * 100;
+
+    res.render('result', { correctAnswers, totalQuestions, percentage });
+});
+
+
 
 
 // Endpoint for searching courses

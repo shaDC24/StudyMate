@@ -426,29 +426,41 @@ CREATE TABLE student_ans (
 );
 
 
---eta uncommited still
-CREATE OR REPLACE FUNCTION calculate_result(
-    p_exam_id IN NUMBER
-) RETURN NUMBER IS
-    v_total_questions NUMBER;
-    v_correct_answers NUMBER := 0;
+--eta uncommited still (not now)
+CREATE OR REPLACE PROCEDURE calculate_result(
+    p_exam_id INTEGER,
+    OUT p_total_questions INTEGER,
+    OUT p_correct_answers INTEGER
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_correct_answers INTEGER := 0;
+    v_submitted_answer TEXT;
+    question_rec RECORD;
 BEGIN
+    -- Initialize variables
+    p_total_questions := 0;
+    p_correct_answers := 0;
+
     -- Get the total number of questions for the exam
-    SELECT COUNT(*) INTO v_total_questions
+    SELECT COUNT(*) INTO p_total_questions
     FROM question
     WHERE exam_id = p_exam_id;
 
     -- Loop through each question to compare the submitted answer with the correct answer
-    FOR question_rec IN (SELECT id, question_ans FROM question WHERE exam_id = p_exam_id) LOOP
+    FOR question_rec IN
+        SELECT id, question_ans
+        FROM question
+        WHERE exam_id = p_exam_id
+    LOOP
         -- Retrieve the submitted answer for the current question
-        DECLARE
-            v_submitted_answer VARCHAR2(100); -- Assuming the data type for submitted answers
         BEGIN
             -- Retrieve the submitted answer from the table where the user's answers are stored
-            -- Replace 'submitted_answers_table' with the actual name of the table where user's answers are stored
             SELECT answer INTO v_submitted_answer
-            FROM submitted_answers_table
+            FROM student_ans
             WHERE question_id = question_rec.id;
+
         EXCEPTION
             WHEN NO_DATA_FOUND THEN
                 -- Handle the case where the user has not submitted an answer for this question
@@ -461,14 +473,59 @@ BEGIN
         END IF;
     END LOOP;
 
-    -- Calculate the percentage of correct answers
-    RETURN (v_correct_answers / v_total_questions) * 100;
+    -- Set the total number of correct answers
+    p_correct_answers := v_correct_answers;
 EXCEPTION
     WHEN OTHERS THEN
         -- Handle exceptions as needed
-        RETURN -1; -- Return -1 to indicate failure
+        p_total_questions := -1; -- Return -1 to indicate failure for total questions
+        p_correct_answers := -1; -- Return -1 to indicate failure for correct answers
 END;
-/
+$$;
+
+
+
+
+
+
+--delete kortesi ektu
+CREATE OR REPLACE FUNCTION check_previous_entry()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Check if there is a previous entry for the same student_id and question_id
+    IF EXISTS (
+        SELECT 1 FROM student_ans
+        WHERE student_id = NEW.student_id AND question_id = NEW.question_id
+    ) THEN
+        -- Raise an alert
+        RAISE NOTICE 'A previous entry exists for the same student and question.';
+
+        -- Here you can customize the behavior based on your requirement
+        -- For example, you can prompt the user or proceed automatically
+
+        -- To automatically proceed and overwrite the previous entry
+         DELETE FROM student_ans WHERE student_id = NEW.student_id AND question_id = NEW.question_id;
+
+        -- To prompt the user, you can't directly interact with the user interface from the trigger
+        -- You might consider logging an entry or sending a message to a messaging system
+    END IF;
+
+    -- Ensure the trigger continues to the actual insert
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+--delete kortesi ektu
+CREATE TRIGGER before_student_ans_insert
+BEFORE INSERT ON student_ans
+FOR EACH ROW
+EXECUTE FUNCTION check_previous_entry();
+
+
+
+
+
+
 
 --aro lagbe aage ei exam dise kina sheta check. 
 --asif shesh

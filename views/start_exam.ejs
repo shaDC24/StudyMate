@@ -154,6 +154,11 @@ function submitAnswer() {
         // Handle the response from the server
         console.log(data); // For example, log the response data
         console.log(answers);
+        const examId = data.examId;
+    const correctAnswers = data.correctAnswers;
+    const totalQuestions = data.totalQuestions;
+    window.location.href = `/exam-result/${examId}?correct=${correctAnswers}&total=${totalQuestions}`;
+
     })
     .catch(error => console.error('Error submitting answers:', error)); // Handle errors
 }
