@@ -627,39 +627,6 @@ app.get('/initiate/lecture', async (req, res) => {
 });
 
 
-
-//Handle POST request for initiating a new lecture
-/*app.post('/initiate/lecture', upload.fields([{ name: 'video', maxCount: 1 }, { name: 'pdf', maxCount: 1 }]), async (req, res) => {
-    try {
-        const { title, description } = req.body;
-        const videoFile = req.files['video'][0];
-        const pdfFile = req.files['pdf'][0];
-        console.log("to post " + id + "  " + C_id);
-
-        //Save lecture data to the database
-
-        const newlecture = await db.one(
-            'INSERT INTO lecture(lecture_name,description,teacher_id,course_id) VALUES($1,$2,$3,$4) RETURNING *',
-            [title, description, id, C_id]
-        );
-        const lectureId = await db.one('select count(*) from lecture');
-        console.log(newlecture);
-        console.log(lectureId);
-        // Save video and pdf files to the file system
-        saveFile(videoFile, `video_${lectureId.count}.mp4`);
-        saveFile(pdfFile, `pdf_${lectureId.count}.pdf`);
-        console.log('Request Body:', req.body);
-        console.log('Request Files:', req.files);
-        console.log("course id is " + C_id);
-        console.log(lectureId.count);
-
-        res.status(200).send('Lecture created successfully');
-        // res.redirect('show_lecture');
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Internal Server Error');
-    }
-});*/
 app.post('/initiate/lecture', upload.fields([{ name: 'video', maxCount: 1 }, { name: 'pdf', maxCount: 1 }]), async (req, res) => {
     try {
         const { title, description } = req.body;
@@ -715,6 +682,26 @@ app.get('/teacher/lecture', async (req, res) => {
 app.get('/guideline_giver/dashboard', (req, res) => {
     res.render('guideline_giver_dashboard', { userType: 'Guideline_Giver', options: ['Provide Guidance', 'View Requests'] });
 });
+
+
+//shatabdi start the guideline giver part
+
+app.get('/student/show_guideline_givers', async (req, res) => {
+    try {
+        
+        res.render('show_guideline_giver', {});
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+//shatabdi end
+
+
+
+
+
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, './public')));
 
@@ -739,3 +726,4 @@ app.all('*', (req, res) => {
 app.listen(5000, () => {
     console.log('Listening on port 5000');
 });
+
