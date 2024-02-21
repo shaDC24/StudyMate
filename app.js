@@ -279,6 +279,18 @@ app.get('/api/search/teacher', async (req, res) => {
     }
 });
 
+app.get('/exam_section/results',async(req,res)=>{
+    try{
+        const result = await db.any('select * from result where student_id=$1',id);
+        console.log(result);
+        res.render('show_result',{result});
+    }
+    catch(error){
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 app.post('/submit-answer/:exam_id', async (req, res) => {
     // Extract the submitted answers from the request body
     const answers = req.body.answers;
@@ -315,6 +327,8 @@ app.post('/submit-answer/:exam_id', async (req, res) => {
             console.log('Total Questions:', totalQuestions);
             console.log('Correct Answers:', correctAnswers);
             console.log('Percentage:', percentage);
+
+            await db.none('INSERT INTO result(student_id, exam_id,  correct_answers,total_questions) VALUES($1, $2, $3, $4)', [Number(id), examId,  correctAnswers, totalQuestions]);
             
             // Redirect to the exam result page with query parameters
             console.log('Redirecting to exam result page');
@@ -574,6 +588,43 @@ app.get('/teacher/courses', async (req, res) => {
         console.log(tData);
         console.log(courses);
         res.render('teacher_course', { userType: 'Teacher', Data: tData, courses: courses, res: res });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+app.get('/add-exam/:courseId', async (req, res) => {
+    const courseId = req.params.courseId;
+    console.log(courseId);
+    res.render('add_exam', { courseId });
+});
+
+app.post('/add-exam', async (req, res) => {
+    const { exam_topic, exam_duration, courseId,questions,options ,correct_answers} = req.body;
+    console.log(courseId);
+    console.log(questions);
+    console.log(options);
+    console.log(correct_answers);
+    let newexam;
+    try {
+         newexam = await db.one('INSERT INTO exam_section(exam_topic, exam_duration, course_id) VALUES($1, $2, $3) RETURNING *', [exam_topic, exam_duration, courseId]);
+        console.log(newexam);
+        res.redirect('/teacher/dashboard');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+    try{
+        for (let i = 0; i < questions.length; i++) {
+            const newquestion = await db.one('INSERT INTO question(question_statement, exam_id, question_ans) VALUES($1, $2, $3) RETURNING *', [questions[i], newexam.id, correct_answers[i]]);
+            console.log(newquestion);
+            for (let j = 0; j < options[i].length; j++) {
+                const newoption = await db.one('INSERT INTO choice(option_text, question_id) VALUES($1, $2) RETURNING *', [options[i][j], newquestion.id]);
+                console.log(newoption);
+            }
+        }
+    
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');

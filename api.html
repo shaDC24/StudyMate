@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Random User Data</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+
+<div id="user-info">
+  <h2>User Info</h2>
+  <img id="user-image" src="" alt="User Image">
+</div>
+
+<script>
+  $(document).ready(function() {
+    // AJAX request
+    $.ajax({
+      url: 'https://randomuser.me/api/',
+      dataType: 'json',
+      success: function(data) {
+        // Extract picture URL from results array
+        var pictureUrl = data.results[0].picture.large;
+        // Update the src attribute of the img element
+        $('#user-image').attr('src', pictureUrl);
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
