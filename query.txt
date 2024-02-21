@@ -724,4 +724,4 @@ EXECUTE FUNCTION check_previous_entry();
 ALTER TABLE exam_section
 ADD COLUMN exam_duration INTEGER; -- Change the data type as needed
 
-
+update  exam_section set exam_duration = 1;

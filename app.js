@@ -479,8 +479,10 @@ app.get('/start-exam/:examId', async (req, res) => {
 
     try {
         const question = await db.any('SELECT * FROM question WHERE exam_id = $1', Number(examId));
+        const duration = await db.one('SELECT exam_duration FROM exam_section WHERE id = $1', Number(examId));
         console.log(question);
-        res.render('start_exam', { question });
+        console.log(duration);
+        res.render('start_exam', { question, duration });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
