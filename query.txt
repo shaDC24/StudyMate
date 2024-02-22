@@ -727,6 +727,30 @@ ADD COLUMN exam_duration INTEGER; -- Change the data type as needed
 
 update  exam_section set exam_duration = 1;
 
+DO $$
+DECLARE
+    v_video_link TEXT;
+    lecture_rec RECORD;
+BEGIN
+    FOR lecture_rec IN SELECT lecture_id, course_id, teacher_id FROM lecture LOOP
+        v_video_link := '/uploads/video_' || lecture_rec.lecture_id || '_' || lecture_rec.course_id || '_' || lecture_rec.teacher_id || '.mp4';
+        
+        UPDATE lecture
+        SET videolink = v_video_link
+        WHERE lecture_id = lecture_rec.lecture_id;
+        
+        COMMIT; -- Commit after each update to persist changes immediately
+    END LOOP;
+END;
+$$;
+
+update lecture set course_id = 3 where course_id is null;
+update lecture set teacher_id = 1 where teacher_id is null;
+update lecture set videolink = '<iframe width="560" height="315" src='https://www.youtube.com/watch?v=KLuTLF3x9sA' where videolink is null;
+
+--asif shesh
+
+
 --shatabdi guideline giver
 CREATE TABLE sendrequest (
     id SERIAL PRIMARY KEY,
