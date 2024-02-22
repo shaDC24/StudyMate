@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Connected Students</title>
+</head>
+<body>
+  <h1>Connected Students</h1>
+  <div class="chat-container">
+    <% connectedStudents.forEach(student => { %>
+      <div class="chat-message" onclick="openChat('<%= student.student_id %>')">
+        <img class="chat-icon" src="/public/studenticon.png" alt="Student Icon">
+        <div class="chat-info">
+          <span class="chat-text received"><%= student.first_name %> <%= student.last_name %></span>
+          <span class="student-id">(ID: <%= student.student_id %>)</span> 
+        </div>
+      </div>
+    <% }); %>
+  </div>
+
+  <script>
+    // Function to open chat with student
+    function openChat(studentId) {
+      window.location.href = '/open-chat/' + studentId;
+    }
+  </script>
+</body>
+</html>
+
+ 

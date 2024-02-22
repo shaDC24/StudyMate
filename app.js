@@ -5,14 +5,11 @@ const multer = require('multer');
 const db = require('./db'); // Import your database connection
 const bcrypt = require('bcrypt');
 const fs = require('fs');
-const e = require('express');
-
-
-
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true })); // Parse form data
 app.use(express.json());
+//app.use(bodyParser.json());
 let id = null;
 let C_id = null;
 
@@ -97,7 +94,7 @@ app.post('/registration', async (req, res) => {
                 console.log(newstudentguider);
                 const successMessage = `Account created successfully. Remember your student userid ${sid.student_id} and guideline_giver user id ${gid.guideline_giver_id} Password ${password_hash} .
                                            `;
-                return res.status(200).json({ message: successMessage});
+                return res.status(200).json({ message: successMessage });
             }
 
             else if (userType === 'student') {
@@ -126,12 +123,12 @@ app.post('/registration', async (req, res) => {
                         console.log(newstudent);
                         const newid = await db.one('SELECT student_id FROM student WHERE first_name=$1 AND last_name=$2 AND date_of_birth=$3 AND password_hash=$4', [first_name, last_name, date_of_birth, password_hash]);
                         const successMessage = `Account created successfully. Remember your userid ${newid.student_id} and Password ${password_hash} .go to mail.`;
-                         const successMessage2 = `Congratulation ${first_name + ' ' + last_name}!!! 
+                        const successMessage2 = `Congratulation ${first_name + ' ' + last_name}!!! 
                                                  welcome to studymate....
                                                  you are ${userType}.Account created successfully. Remember your userid ${newid.student_id} and Password ${password_hash} .`;
-         
-                         // Send success email
-                         //sendEmail(gmail, 'Registration Successful', successMessage2);
+
+                        // Send success email
+                        //sendEmail(gmail, 'Registration Successful', successMessage2);
 
                         return res.status(200).json({ message: successMessage });
                     }
@@ -307,7 +304,7 @@ app.post('/submit-answer/:exam_id', async (req, res) => {
 
         // Call the stored procedure and retrieve the result using a DO statement
         await db.task(async (t) => {
-            const result = await t.oneOrNone('CALL calculate_result($1, $2,$3,$4)', [examId, Number(id),totalQuestions,correctAnswers]);
+            const result = await t.oneOrNone('CALL calculate_result($1, $2,$3,$4)', [examId, Number(id), totalQuestions, correctAnswers]);
             totalQuestions = result.p_total_questions;
             correctAnswers = result.p_correct_answers;
             percentage = (correctAnswers / totalQuestions) * 100;
@@ -315,11 +312,11 @@ app.post('/submit-answer/:exam_id', async (req, res) => {
             console.log('Total Questions:', totalQuestions);
             console.log('Correct Answers:', correctAnswers);
             console.log('Percentage:', percentage);
-            
+
             // Redirect to the exam result page with query parameters
             console.log('Redirecting to exam result page');
             //res.redirect(`/exam-result/${examId}?correct=${correctAnswers}&total=${totalQuestions}`);
-            res.status(200).json({ totalQuestions: totalQuestions, correctAnswers: correctAnswers, percentage: percentage, examId: examId});
+            res.status(200).json({ totalQuestions: totalQuestions, correctAnswers: correctAnswers, percentage: percentage, examId: examId });
             //res.redirect(`/teacher/dashboard`);
             console.log('Redirected');
         });
@@ -487,16 +484,14 @@ app.get('/api/choice/:questionId', async (req, res) => {
 });
 
 
-// Assuming you have a route like "/show/lecture" in your Express app
+
 app.get('/show/lecture', async (req, res) => {
     const courseId = req.query.course_id;
 
     try {
         console.log(courseId);
-        // Fetch lectures associated with the specified course from the database
-        const lectures = await db.any('SELECT * FROM lecture WHERE course_id = $1', courseId);
 
-        // Fetch course details for display
+        const lectures = await db.any('SELECT * FROM lecture WHERE course_id = $1', courseId);
         const course = await db.one('SELECT * FROM courses WHERE id = $1', courseId);
 
         // Render the 'show_lectures' view and pass the retrieved lectures and course data
@@ -679,33 +674,217 @@ app.get('/teacher/lecture', async (req, res) => {
     }
 });
 
-app.get('/guideline_giver/dashboard', (req, res) => {
-    res.render('guideline_giver_dashboard', { userType: 'Guideline_Giver', options: ['Provide Guidance', 'View Requests'] });
-});
 
 
 //shatabdi start the guideline giver part
 
-app.get('/student/show_guideline_givers', async (req, res) => {
+app.get('/guideline_giver/dashboard', async (req, res) => {
     try {
-        
-        res.render('show_guideline_giver', {});
+
+        const requestcount = await db.oneOrNone('select count(*) as c from sendrequest where guideline_giver_id=$1 and isadded=$2', [id, 'false']);
+        console.log('gggggggg');
+        console.log(requestcount);
+        res.render('guideline_giver_dashboard', { userType: 'Guideline_Giver', requestcount: requestcount.c, messagecount: 0 });
     }
     catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
     }
 });
+
+app.get('/student/show_guideline_givers', async (req, res) => {
+    try {
+        const cnt = await db.one('select count(*) as c from (select student_id from isaguidelinegiver where student_id=$1)', id);
+        const rcnt = await db.one('select count(*) as rc from sendrequest where student_id = $1', id);
+        if (cnt.c == 0) {
+            if (rcnt.rc == 0) {
+                const sendrequest = await db.manyOrNone('select *from sendrequest where student_id = $1', id);
+                console.log(rcnt.rc);
+                const guidelineGivers = await db.manyOrNone('select *from guideline_giver g join isaguidelinegiver ig on g.guideline_giver_id=ig.guideline_giver_id join student s on s.student_id=ig.student_id');
+                console.log(guidelineGivers);
+                res.render('show_guideline_giver', { userType: 'student', guidelineGivers: guidelineGivers, isgg: 0, sendrequest: sendrequest });
+            }
+            else {
+                console.log(rcnt.rc);
+                const guidelineGivers = await db.manyOrNone('select *from guideline_giver g join isaguidelinegiver ig on g.guideline_giver_id=ig.guideline_giver_id join student s on s.student_id=ig.student_id');
+                const sendrequest = await await db.manyOrNone('select *from sendrequest where student_id = $1', id);
+                console.log(guidelineGivers);
+                console.log(sendrequest);
+                res.render('show_guideline_giver', { userType: 'student', guidelineGivers: guidelineGivers, isgg: 0, sendrequest: sendrequest });
+            }
+        }
+        else {
+            if (rcnt.rc == 0) {
+                console.log('elseeeeee');
+                const sendrequest = await db.manyOrNone('select *from sendrequest where student_id = $1', id);
+                const guidelineGivers = await db.manyOrNone('select *from guideline_giver g join isaguidelinegiver ig on g.guideline_giver_id=ig.guideline_giver_id join student s on s.student_id=ig.student_id');
+                const gg = await db.oneOrNone('select guideline_giver_id from isaguidelinegiver where student_id=$1', id);
+                console.log(gg.guideline_giver_id);
+                res.render('show_guideline_giver', { userType: 'student', guidelineGivers: guidelineGivers, isgg: gg.guideline_giver_id, sendrequest: sendrequest });
+            }
+            else {
+                const sendrequest = await db.manyOrNone('select *from sendrequest where student_id = $1', id);
+                console.log('elseeeeee');
+                const guidelineGivers = await db.manyOrNone('select *from guideline_giver g join isaguidelinegiver ig on g.guideline_giver_id=ig.guideline_giver_id join student s on s.student_id=ig.student_id');
+                const gg = await db.oneOrNone('select guideline_giver_id from isaguidelinegiver where student_id=$1', id);
+                console.log(gg.guideline_giver_id);
+                res.render('show_guideline_giver', { userType: 'student', guidelineGivers: guidelineGivers, isgg: gg.guideline_giver_id, sendrequest: sendrequest });
+            }
+        }
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+
+app.post('/send-request', async (req, res) => {
+    try {
+        console.log('pppppp');
+        const guidelineGiver = req.body;
+        console.log(guidelineGiver);
+        const guidelineId = guidelineGiver.guideline_giver_id;
+        console.log(guidelineId);
+        const newrequest = await db.one('insert into sendrequest(guideline_giver_id,student_id) values($1,$2) returning *', [guidelineId, id]);
+        console.log(newrequest);
+        res.status(200).send('Request sent to guideline giver successfully.');
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+app.get('/view_request', async (req, res) => {
+    try {
+        const ggname = await db.manyOrNone('select first_name, last_name from sendrequest sr join isaguidelinegiver igg on sr.guideline_giver_id=igg.guideline_giver_id join student s on s.student_id=igg.student_id where sr.guideline_giver_id=$1 ', id);
+        const viewrequest = await db.manyOrNone('select *from sendrequest sr join student s on sr.student_id=s.student_id where sr.guideline_giver_id =$1 and isadded=$2', [id, 'false']);
+        console.log(viewrequest);
+        console.log(ggname);
+        res.render('view_request', { viewrequest, ggname });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+app.post('/accept-request', async (req, res) => {
+    const { requestId, action } = req.body;
+    console.log(`Request ID: ${requestId}, Action: ${action}`);
+
+    try {
+        // Update the database
+        await db.query('UPDATE sendrequest SET isadded=$1 WHERE id=$2', ['accepted', requestId]);
+        console.log('Request updated successfully.');
+        res.status(200).send('Request updated successfully.');
+    } catch (error) {
+        console.error('Error updating request:', error);
+        res.status(500).send('Error updating request.');
+    }
+});
+
+app.post('/reject-request', async (req, res) => {
+    const { requestId, action } = req.body;
+    console.log(`Request ID: ${requestId}, Action: ${action}`);
+
+    try {
+        // Update the database
+        await db.query('DELETE FROM sendrequest WHERE id=$1', [requestId]);
+        console.log('Request deleted successfully.');
+        res.status(200).send('Request deleted successfully.');
+    } catch (error) {
+        console.error('Error updating request:', error);
+        res.status(500).send('Error updating request.');
+    }
+});
+
+app.post('/send-message', async (req, res) => {
+    try {
+
+        const { messageText } = req.body;
+        const studentId = id;
+        const guidelineGiverId = req.query.guidelineGiverId;
+
+        const newmessage = await db.query('INSERT INTO messages (from_student_id, to_guideline_giver_id, message_text, sender_role) VALUES ($1, $2, $3, $4) returning *',
+            [studentId, guidelineGiverId, messageText, 'sender']);
+
+
+        res.status(200).send('Message sent successfully.');
+    } catch (error) {
+        // If an error occurs, send a failure response
+        console.error('Error sending message:', error);
+        res.status(500).send('Error sending message.');
+    }
+});
+
+
+app.get('/student/message', async (req, res) => {
+    try {
+        // Retrieve the guideline giver ID from query parameters
+        const guidelineGiverId = req.query.guidelineGiverId;
+        console.log(guidelineGiverId);
+        const messages = await db.manyOrNone('select *from messages where from_student_id=$1 and  to_guideline_giver_id=$2', [id, guidelineGiverId]);
+        res.render('student_message', { messages });
+    } catch (error) {
+        console.error('Error rendering student message page:', error);
+        res.status(500).send('Error rendering student message page.');
+    }
+});
+
+app.get('/connected_students', async (req, res) => {
+    try {
+        const connectedStudents = await db.any('SELECT * from sendrequest sr join student s on s.student_id=sr.student_id where sr.guideline_giver_id=$1', id);
+        console.log(connectedStudents);
+        res.render('connected_students', { connectedStudents });
+    } catch (error) {
+        console.error('Error rendering connected students page:', error);
+        res.status(500).send('Error rendering connected students page.');
+    }
+});
+
+
+
+app.post('/open-chat/:studentId', async (req, res) => {
+    try {
+        const { studentId } = req.params;
+        const { messageText } = req.body;
+        console.log('Sending message to student ID:', studentId);
+        console.log('Message:', messageText);
+
+        // Here you should insert the new message into your database
+        const newmsg=await db.any('INSERT INTO messages (from_student_id, to_guideline_giver_id, message_text, sender_role) VALUES ($1, $2, $3, $4) returning *',[studentId,id,messageText,'receiver']);
+        // Placeholder response for now
+        res.status(200).json({ message: `Message sent to student ID: ${studentId}` }); // Sending a JSON response
+    } catch (error) {
+        console.error('Error sending message:', error);
+        res.status(500).json({ error: 'Error sending message.' }); // Sending a JSON response with error message
+    }
+});
+
+app.get('/open-chat/:studentId', async (req, res) => {
+    try {
+        const studentId = req.params.studentId;
+        console.log('Opening chat for student ID:', studentId);
+        // Fetch chat messages for the given student ID from the database
+        const messages = await db.manyOrNone('SELECT * FROM messages WHERE from_student_id=$1 AND to_guideline_giver_id=$2', [studentId, id]);
+        console.log('Retrieved messages:', messages);
+        res.render('open_chat', { messages, studentId }); // Pass studentId to the template
+    } catch (error) {
+        console.error('Error opening chat:', error);
+        res.status(500).send('Error opening chat.');
+    }
+});
+
+
 //shatabdi end
 
 
 
 
 
-// Serve static files from the 'public' directory
+
 app.use(express.static(path.join(__dirname, './public')));
 
-// Define routes
+
 app.get('/', (req, res) => {
     console.log('User hit');
     res.render('login');
@@ -722,7 +901,6 @@ app.all('*', (req, res) => {
     res.status(404).send('<h1>Resource not found</h1>');
 });
 
-// Listen on port 5000
 app.listen(5000, () => {
     console.log('Listening on port 5000');
 });

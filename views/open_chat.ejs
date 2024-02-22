@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with Student</title>
+  
+    <style>
+        .message-container {
+            overflow-y: scroll; /* Add scroll for long chats */
+            max-height: 400px; /* Adjust max height as needed */
+        }
+
+        .message {
+            max-width: 70%; 
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .sender {
+            align-self: flex-end; /* Align sender messages to the right */
+            background-color: #007bff; /* Blue color for sender messages */
+            color: white; /* White text for sender messages */
+        }
+
+        .receiver {
+            align-self: flex-start; /* Align receiver messages to the left */
+            background-color: #f0f0f0; /* Light gray color for receiver messages */
+            color: black; /* Black text for receiver messages */
+        }
+
+        .message-text {
+            margin: 0; /* Remove default margin for better spacing */
+        }
+    </style>
+</head>
+<body>
+    <h1>Messages</h1>
+    <div class="chat-container">
+        <!-- Display previous messages -->
+        <div class="message-container">
+            <% messages.forEach(message => { %>
+                <!-- Check if the message is from the sender or receiver -->
+                <div class="message <%= message.sender_role === 'sender' ? 'sender' : 'receiver' %>">
+                    <p class="message-text"><%= message.message_text %></p>
+                </div>
+            <% }); %>
+        </div>
+
+        <!-- Form for sending new messages -->
+        <form id="message-form">
+            <input type="text" id="message-input" class="message-input" placeholder="Type your message...">
+            <button type="submit" class="send-button">Send</button>
+        </form>
+    </div>
+
+    <script>
+        const messageForm = document.getElementById('message-form');
+        const messageInput = document.getElementById('message-input');
+
+        messageForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const messageText = messageInput.value.trim();
+
+            try {
+                const response = await fetch(`/open-chat/<%= studentId %>`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ messageText })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to send message');
+                }
+
+                // Clear input field after sending message
+                messageInput.value = '';
+
+                // Optionally, you can handle the response here
+                const data = await response.json();
+                console.log('Response:', data);
+            } catch (error) {
+                console.error('Error sending message:', error);
+            }
+        });
+    </script>
+</body>
+</html>
+
+
