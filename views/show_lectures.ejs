@@ -41,10 +41,20 @@
             color: #333;
         }
 
-        video {
+        .video-container {
+            position: relative;
             width: 100%;
-            border-radius: 5px;
-            margin-top: 10px;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+        }
+
+        .video-container video,
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
         }
 
         a {
@@ -79,10 +89,16 @@
                 <strong>Lecture Name:</strong> <%= lectures[i].lecture_name %><br>
                 <strong>Description:</strong> <%= lectures[i].description %><br>
                 
-                <video width="320" height="240" controls>
-                    <source src="/uploads/video_<%= lectures[i].lecture_id %>_<%= lectures[i].course_id %>_<%= lectures[i].teacher_id %>.mp4" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
+                <div class="video-container">
+                    <% if (lectures[i].videolink.includes('youtube.com') || lectures[i].videolink.includes('youtu.be')) { %>
+                        <iframe width="560" height="315" src="https://www.youtube.com/embed/VIDEO_ID?privacy=1" frameborder="0" allowfullscreen></iframe>
+                    <% } else { %>
+                        <video controls>
+                            <source src="<%= lectures[i].videolink %>" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    <% } %>
+                </div>
             </li>
         <% } %>
     </ul>
