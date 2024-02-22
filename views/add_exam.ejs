@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Exam</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            padding-top: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .option-input {
+            margin-bottom: 10px;
+        }
+
+        .add-option-btn {
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Add Exam</h1>
+        <form action="/add-exam" method="POST">
+            <input type="hidden" name="courseId" value="<%= courseId %>">
+            <div class="form-group">
+                <label for="examTopic">Exam Topic</label>
+                <input type="text" class="form-control" id="examTopic" name="exam_topic" required>
+            </div>
+            <div class="form-group">
+                <label for="examDuration">Exam Duration (in minutes)</label>
+                <input type="number" class="form-control" id="examDuration" name="exam_duration" required>
+            </div>
+
+            <h2>Questions</h2>
+            <div id="questions">
+                <div class="form-group question-group">
+                    <label for="question1">Question 1</label>
+                    <input type="text" class="form-control" id="question1" name="questions[]" required>
+                    <div class="option-inputs"> <!-- Initialize option inputs div -->
+                        <input type="text" class="form-control" name="options[0][]" placeholder="Option 1" required>
+                        <input type="text" class="form-control" name="options[0][]" placeholder="Option 2" required>
+                    </div>
+                    <label for="correctAnswer1">Correct Answer</label>
+                    <input type="text" class="form-control" id="correctAnswer1" name="correct_answers[0]" placeholder="Correct Answer for Question 1" required>
+                    <button type="button" class="btn btn-primary add-option-btn">Add Option</button>
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-primary" id="addQuestionBtn">Add Question</button>
+            <button type="submit" class="btn btn-success">Submit</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const addQuestionBtn = document.getElementById('addQuestionBtn');
+            const questionsContainer = document.getElementById('questions');
+
+            let questionCount = 1;
+
+            addQuestionBtn.addEventListener('click', function () {
+                questionCount++;
+
+                const newQuestionGroup = document.createElement('div');
+                newQuestionGroup.classList.add('form-group', 'question-group');
+
+                const newQuestionLabel = document.createElement('label');
+                newQuestionLabel.textContent = `Question ${questionCount}`;
+
+                const newQuestionInput = document.createElement('input');
+                newQuestionInput.type = 'text';
+                newQuestionInput.classList.add('form-control');
+                newQuestionInput.name = `questions[]`;
+                newQuestionInput.placeholder = `Question ${questionCount}`;
+                newQuestionInput.required = true;
+
+                const optionInputsDiv = document.createElement('div');
+                optionInputsDiv.classList.add('option-inputs');
+
+                const addOptionBtn = document.createElement('button');
+                addOptionBtn.type = 'button';
+                addOptionBtn.classList.add('btn', 'btn-primary', 'add-option-btn');
+                addOptionBtn.textContent = 'Add Option';
+
+                addOptionBtn.addEventListener('click', function () {
+                    const newOptionInput = document.createElement('div');
+                    newOptionInput.classList.add('option-input');
+                    newOptionInput.innerHTML = `
+                        <input type="text" class="form-control" name="options[${questionCount - 1}][]" placeholder="Option ${optionInputsDiv.children.length + 1}" required>
+                    `;
+                    optionInputsDiv.appendChild(newOptionInput);
+                });
+
+                const correctAnswerLabel = document.createElement('label');
+                correctAnswerLabel.textContent = 'Correct Answer';
+
+                const correctAnswerInput = document.createElement('input');
+                correctAnswerInput.type = 'text';
+                correctAnswerInput.classList.add('form-control');
+                correctAnswerInput.id = `correctAnswer${questionCount}`;
+                correctAnswerInput.name = `correct_answers[${questionCount - 1}]`;
+                correctAnswerInput.placeholder = `Correct Answer for Question ${questionCount}`;
+                correctAnswerInput.required = true;
+
+                newQuestionGroup.appendChild(newQuestionLabel);
+                newQuestionGroup.appendChild(newQuestionInput);
+                newQuestionGroup.appendChild(optionInputsDiv);
+                newQuestionGroup.appendChild(correctAnswerLabel);
+                newQuestionGroup.appendChild(correctAnswerInput);
+                newQuestionGroup.appendChild(addOptionBtn);
+
+                questionsContainer.appendChild(newQuestionGroup);
+            });
+
+            const initialAddOptionBtn = document.querySelector('.add-option-btn');
+            initialAddOptionBtn.addEventListener('click', function () {
+                const newOptionInput = document.createElement('div');
+                newOptionInput.classList.add('option-input');
+                newOptionInput.innerHTML = `
+                    <input type="text" class="form-control" name="options[0][]" placeholder="Option ${initialAddOptionBtn.previousElementSibling.children.length + 1}" required>
+                `;
+                initialAddOptionBtn.previousElementSibling.appendChild(newOptionInput);
+            });
+        });
+    </script>
+
+</body>
+
+</html>

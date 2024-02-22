@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Result Chart</title>
+    <!-- Include Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa; /* Light gray background */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #fff; /* White container background */
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* Shadow effect */
+        }
+
+        h1 {
+            text-align: center;
+            color: #007bff; /* Blue header text */
+            margin-bottom: 20px;
+        }
+
+        #lineChart {
+            width: 600px; /* Adjust width as needed */
+            height: 400px; /* Adjust height as needed */
+            margin: 0 auto; /* Center the chart horizontally */
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Result Chart</h1>
+
+        <!-- Hidden input field to store result data -->
+        <input type="hidden" id="resultData" value="<%= JSON.stringify(result) %>">
+
+        <!-- Canvas element to render the line chart -->
+        <canvas id="lineChart"></canvas>
+    </div>
+
+    <script>
+        // Initialize the chart after the page has loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Parse the result data from the hidden input field
+            const resultData = JSON.parse(document.getElementById('resultData').value);
+
+            // Extract data for plotting the line graph
+            const labels = resultData.map(entry => entry.result_id); // Use result IDs as labels
+            const percentages = resultData.map(entry => (entry.correct_answers / entry.total_questions) * 100);
+
+            // Render the line graph using Chart.js
+            var ctx = document.getElementById('lineChart').getContext('2d');
+            var lineChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Percentage',
+                        data: percentages,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)', /* Pink background color */
+                        borderColor: 'rgba(255, 99, 132, 1)', /* Pink border color */
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Exam Number', // Label for the x-axis
+                                color: '#007bff', // Blue color for the label
+                                font: {
+                                    size: 16, // Font size
+                                    weight: 'bold' // Bold font weight
+                                }
+                            },
+                            grid: {
+                                display: false // Hide gridlines for x-axis
+                            }
+                        },
+                        y: {
+                            beginAtZero: true, // Start the y-axis from 0
+                            title: {
+                                display: true,
+                                text: 'Percentage (%)', // Label for the y-axis
+                                color: '#007bff', // Blue color for the label
+                                font: {
+                                    size: 16, // Font size
+                                    weight: 'bold' // Bold font weight
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

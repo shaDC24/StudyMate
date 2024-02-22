@@ -69,7 +69,7 @@
     <div class="container">
         <h1>Exam</h1>
         <div id="timer">Time Left: <span id="countdown">00:04:00</span></div>
-
+        <input type="hidden" id="duration" value="<%= duration.exam_duration %>">
         <% if (question && question.length > 0) { %>
             <% question.forEach((questionn, index) => { %>
                 <div class="question-container">
@@ -89,21 +89,20 @@
     <script>
         // Timer functionality
         var countdown = document.getElementById('countdown');
-        var timer = 180; // 3 minutes in seconds
 
-        function startTimer() {
+        function startTimer(duration) {
             var minutes, seconds;
 
             var interval = setInterval(function () {
-                minutes = parseInt(timer / 60, 10);
-                seconds = parseInt(timer % 60, 10);
+                minutes = parseInt(duration / 60, 10);
+                seconds = parseInt(duration % 60, 10);
 
                 minutes = minutes < 10 ? '0' + minutes : minutes;
                 seconds = seconds < 10 ? '0' + seconds : seconds;
 
                 countdown.textContent = minutes + ':' + seconds;
 
-                if (--timer < 0) {
+                if (--duration == 0) {
                     clearInterval(interval);
                     // Optionally, submit the answer automatically when time runs out
                     submitAnswer(); // Call the submitAnswer function with the exam ID
@@ -111,115 +110,107 @@
             }, 1000);
         }
 
-        startTimer();
-
         // Function to submit answer
- // Function to submit answer
-function submitAnswer() {
-    // Initialize an object to store answers for each question along with their text
-    const answers = {};
+        function submitAnswer() {
+            // Initialize an object to store answers for each question along with their text
+            const answers = {};
 
-    // Loop through each question container
-    document.querySelectorAll('.question-container').forEach((container, index) => {
-        // Get the question ID
-        const questionId = container.querySelector('.questionId').value;
+            // Loop through each question container
+            document.querySelectorAll('.question-container').forEach((container, index) => {
+                // Get the question ID
+                const questionId = container.querySelector('.questionId').value;
 
-        // Find the selected option for this question
-        const selectedOption = container.querySelector(`input[name="answer-${index}"]:checked`);
+                // Find the selected option for this question
+                const selectedOption = container.querySelector(`input[name="answer-${index}"]:checked`);
 
-        // If an option is selected, store its value and text as the answer for this question
-        if (selectedOption) {
-            answers[questionId] = {
-                id: selectedOption.value, // Store the ID of the selected option
-                option_text: selectedOption.nextElementSibling.textContent.trim() // Store the text of the selected option
-            };
-        } else {
-            // If no option is selected, you may handle this case according to your application logic
-            answers[questionId] = null; // Or any other placeholder value
+                // If an option is selected, store its value and text as the answer for this question
+                if (selectedOption) {
+                    answers[questionId] = {
+                        id: selectedOption.value, // Store the ID of the selected option
+                        option_text: selectedOption.nextElementSibling.textContent.trim() // Store the text of the selected option
+                    };
+                } else {
+                    // If no option is selected, you may handle this case according to your application logic
+                    answers[questionId] = null; // Or any other placeholder value
+                }
+            });
+
+            // Send the answers object to the server using fetch with POST method
+            fetch(`/submit-answer/${Number(examId)}`, { // Correct interpolation of examId
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    answers: answers
+                })
+            })
+            .then(response => response.json()) // Parse the response as JSON
+            .then(data => {
+                // Handle the response from the server
+                console.log(data); // For example, log the response data
+                console.log(answers);
+                const examId = data.examId;
+                const correctAnswers = data.correctAnswers;
+                const totalQuestions = data.totalQuestions;
+                window.location.href = `/exam-result/${examId}?correct=${correctAnswers}&total=${totalQuestions}`;
+
+            })
+            .catch(error => console.error('Error submitting answers:', error)); // Handle errors
         }
-    });
-
-    // Send the answers object to the server using fetch with POST method
-    fetch(`/submit-answer/${Number(examId)}`, { // Correct interpolation of examId
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            answers: answers
-        })
-    })
-    .then(response => response.json()) // Parse the response as JSON
-    .then(data => {
-        // Handle the response from the server
-        console.log(data); // For example, log the response data
-        console.log(answers);
-        const examId = data.examId;
-    const correctAnswers = data.correctAnswers;
-    const totalQuestions = data.totalQuestions;
-    window.location.href = `/exam-result/${examId}?correct=${correctAnswers}&total=${totalQuestions}`;
-
-    })
-    .catch(error => console.error('Error submitting answers:', error)); // Handle errors
-}
-
-
 
         // Fetch options for the question
-        
-
- // Fetch options for the question
-function fetchOptions(questionId,index) {
-    fetch(`/api/choice/${questionId}`)
-        .then(response => response.json())
-        .then(data => {
-            const optionsContainer = document.getElementById(`options-container-${index}`);
-            console.log(optionsContainer);
-            // Clear existing options
-            optionsContainer.innerHTML = '';
-            // Add options as radio buttons
-            data.forEach(choice => {
-                const optionInput = document.createElement('input');
-                optionInput.type = 'radio';
-                optionInput.name = `answer-${index}`; // Use the same name for radio buttons to group them
-                optionInput.value = choice.id;
-                optionInput.id = `choice-${choice.id}`;
-                const optionLabel = document.createElement('label');
-                optionLabel.htmlFor = `choice-${choice.id}`;
-                optionLabel.textContent = choice.option_text;
-                optionsContainer.appendChild(optionInput);
-                optionsContainer.appendChild(optionLabel);
-                optionsContainer.appendChild(document.createElement('br')); // Add line break
+        function fetchOptions(questionId, index) {
+            fetch(`/api/choice/${questionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const optionsContainer = document.getElementById(`options-container-${index}`);
+                    console.log(optionsContainer);
+                    // Clear existing options
+                    optionsContainer.innerHTML = '';
+                    // Add options as radio buttons
+                    data.forEach(choice => {
+                        const optionInput = document.createElement('input');
+                        optionInput.type = 'radio';
+                        optionInput.name = `answer-${index}`; // Use the same name for radio buttons to group them
+                        optionInput.value = choice.id;
+                        optionInput.id = `choice-${choice.id}`;
+                        const optionLabel = document.createElement('label');
+                        optionLabel.htmlFor = `choice-${choice.id}`;
+                        optionLabel.textContent = choice.option_text;
+                        optionsContainer.appendChild(optionInput);
+                        optionsContainer.appendChild(optionLabel);
+                        optionsContainer.appendChild(document.createElement('br')); // Add line break
+                    });
+                })
+                .catch(error => console.error('Error fetching options:', error));
+        }
+        var examId;
+        // Call fetchOptions after the DOM has loaded
+        document.addEventListener("DOMContentLoaded", function() {
+            
+            document.querySelectorAll('.questionId').forEach(function(questionIdInput, index) {
+                const questionId = questionIdInput.value;
+                console.log(index);
+                fetchOptions(questionId, index);
             });
-        })
-        .catch(error => console.error('Error fetching options:', error));
-}
+            document.querySelectorAll('.examId').forEach(function(examIdInput, index) {
+                examId = examIdInput.value;
+                console.log(examId);
+            });
 
-// Function to submit the form
-function submitForm() {
-    // You can handle the form submission here
-    // For example:
-    const form = document.getElementById('exam-form');
-    form.submit();
-}
+            // Define the duration variable outside the event listener
+            let duration;
+            const durationInput = document.getElementById('duration');
+            if (durationInput) {
+                duration = parseInt(durationInput.value);
+            } else {
+                duration = 0; // Set a default value if durationInput is not found
+            }
 
-// Call fetchOptions after the DOM has loaded
-// Fetch options for each question
-
-var examId;
-document.addEventListener("DOMContentLoaded", function() {
-    document.querySelectorAll('.questionId').forEach(function(questionIdInput, index) {
-        const questionId = questionIdInput.value;
-        console.log(index);
-        fetchOptions(questionId, index);
-    });
-    document.querySelectorAll('.examId').forEach(function(examIdInput, index) {
-         examId = examIdInput.value;
-        console.log(examId);
-    });
-    startTimer(); // Start the timer after fetching options
-});
-
+            // Call startTimer after defining the duration variable
+            startTimer(duration * 60);
+        });
     </script>
 </body>
 

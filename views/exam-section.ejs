@@ -69,7 +69,7 @@
 <body>
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container">
             <a class="navbar-brand" href="#">Exam Section</a>
             <!-- Toggle Button -->
@@ -83,13 +83,13 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                        <a class="nav-link active" aria-current="page" href="/student/dashboard">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/exam_section/exams">Exams</a>
+                        <a class="nav-link" href="/exam_section/result">Result</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/exam_section/results">Results</a>
+                        <a class="nav-link" href="/exam_section/results">Progress</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
@@ -105,9 +105,13 @@
                     </li>
                 </ul>
 
+                <!-- Show All Button -->
+                <button class="btn btn-primary me-2" id="showAllBtn">Show All</button>
+
                 <!-- Search Form -->
-                <form class="d-flex">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <form class="d-flex" id="searchForm">
+                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"
+                        id="searchInput">
                     <button class="btn btn-primary" type="submit">Search</button>
                 </form>
             </div>
@@ -121,47 +125,76 @@
             <p>Prepare for your exams, view results, and more.</p>
         </div>
 
-
-    <!-- Exam List -->
-<div class="row">
-    <% courses.forEach(course => { %>
-        <div class="col-md-4">
-            <div class="card mb-4 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title"><%= course.course_title %></h5>
-                    <p class="card-text"><%= course.course_description %></p>
-                    <a href="/student/exam-section/<%= course.id %>/" class="btn btn-primary">Take Exam</a>
+        <!-- Exam List -->
+        <div class="row" id="examList">
+            <% courses.forEach(course => { %>
+            <div class="col-md-4">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title"><%= course.course_title %></h5>
+                        <p class="card-text"><%= course.course_description %></p>
+                        <a href="/student/exam-section/<%= course.id %>/" class="btn btn-primary">Take Exam</a>
+                    </div>
                 </div>
             </div>
+            <% }); %>
         </div>
-    <% }); %>
-</div>
-
-
+    </div>
 
     <!-- Include Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Embedded JavaScript to fetch exams for enrolled courses -->
     <script>
-        // Fetch exams for enrolled courses
-        // Replace this with actual AJAX call to fetch exams for enrolled courses
-        // Dummy data for demonstration purposes
-        var exams = [
-            { exam_topic: 'Mathematics Exam' },
-            { exam_topic: 'Physics Exam' },
-            { exam_topic: 'Biology Exam' },
-            { exam_topic: 'Chemistry Exam' },
-            { exam_topic: 'History Exam' }
-        ];
+        // Search functionality
+        var searchForm = document.getElementById('searchForm');
+        var searchInput = document.getElementById('searchInput');
+        var examList = document.getElementById('examList');
+        var originalCourses = JSON.parse('<%- JSON.stringify(courses) %>');
+        var courses = originalCourses;
 
-        // Rendering exams
-        var examList = document.querySelector('.list-group');
-        exams.forEach(exam => {
-            var listItem = document.createElement('li');
-            listItem.classList.add('list-group-item');
-            listItem.textContent = exam.exam_topic;
-            examList.appendChild(listItem);
+        function renderCourses(courses) {
+            examList.innerHTML = ''; // Clear previous content
+            courses.forEach(course => {
+                var colDiv = document.createElement('div');
+                colDiv.classList.add('col-md-4');
+                var cardDiv = document.createElement('div');
+                cardDiv.classList.add('card', 'mb-4', 'shadow-sm');
+                var cardBodyDiv = document.createElement('div');
+                cardBodyDiv.classList.add('card-body');
+                var titleElement = document.createElement('h5');
+                titleElement.classList.add('card-title');
+                titleElement.textContent = course.course_title;
+                var descElement = document.createElement('p');
+                descElement.classList.add('card-text');
+                descElement.textContent = course.course_description;
+                var linkElement = document.createElement('a');
+                linkElement.classList.add('btn', 'btn-primary');
+                linkElement.href = "/student/exam-section/" + course.id + "/";
+                linkElement.textContent = 'Take Exam';
+                cardBodyDiv.appendChild(titleElement);
+                cardBodyDiv.appendChild(descElement);
+                cardBodyDiv.appendChild(linkElement);
+                cardDiv.appendChild(cardBodyDiv);
+                colDiv.appendChild(cardDiv);
+                examList.appendChild(colDiv);
+            });
+        }
+
+        searchForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            var searchTerm = searchInput.value.trim().toLowerCase();
+            courses = originalCourses.filter(function (course) {
+                return course.course_title.toLowerCase().includes(searchTerm) || course.course_description.toLowerCase().includes(searchTerm);
+            });
+            renderCourses(courses);
+        });
+
+        // Show All Button Functionality
+        const showAllBtn = document.getElementById('showAllBtn');
+
+        showAllBtn.addEventListener('click', function () {
+            renderCourses(originalCourses);
         });
     </script>
 </body>
