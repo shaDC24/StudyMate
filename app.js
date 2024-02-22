@@ -291,6 +291,18 @@ app.get('/exam_section/results',async(req,res)=>{
     }
 });
 
+app.get('/exam_section/result',async(req,res)=>{
+    try{
+        const result = await db.any('select * from result r join exam_section e on r.exam_id = e.id join courses c on e.course_id = c.id where student_id=$1',id);
+        console.log(result);
+        res.render('show_results',{result});
+    }
+    catch(error){
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 app.post('/submit-answer/:exam_id', async (req, res) => {
     // Extract the submitted answers from the request body
     const answers = req.body.answers;
@@ -551,6 +563,17 @@ app.get('/student/exam-section', async (req, res) => {
         //join teacher t on  t.teacher_id=c.teacher_id
         console.log(courses);
         res.render('exam-section', { courses });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+app.get('/exam-section/exams', async (req, res) => {
+    try {
+        const exams = await db.any('SELECT * FROM exam_section');
+        console.log(exams);
+        res.render('exams', { exams });
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
