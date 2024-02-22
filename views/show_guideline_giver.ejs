@@ -1,11 +1,133 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Guideline Giver list</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+
+        .card {
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            background-color: #e6e1db;
+            color: #343a40;
+            font-weight: bold;
+        }
+
+        .card-body {
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: .25rem;
+            padding: 10px;
+        }
+
+        .teacher {
+            font-weight: bold;
+        }
+
+        .send-request-btn {
+            background-color: green;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .request-sent {
+            background-color: gray;
+            cursor: default;
+        }
+    </style>
 </head>
+
 <body>
-    <h1>jjjjjjjj</h1>
+    <div class="container">
+        <h1>All guideline givers</h1>
+
+        <div class="row">
+            <% for (let i=0; i < guidelineGivers.length; i++) { %>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <%= guidelineGivers[i].guideline_giver_id%>
+                        </div>
+                        <div class="card-header">
+                            <%= guidelineGivers[i].first_name +' '+ guidelineGivers[i].last_name%>
+                        </div>
+                        <div class="card-body">
+                            <div class="teacher">
+                                <%= guidelineGivers[i].university%>
+                            </div>
+                            <p><%= guidelineGivers[i].phone_no%></p>
+                            <div class="text-center">
+                                <% if (isgg === guidelineGivers[i].guideline_giver_id) { %>
+                                    <p style="background-color: cornflowerblue;">You are also a guideline giver</p>
+                                <% } else { %>
+                                    <% if (sendrequest.length > 0) { %>
+                                        <% let requestAccepted = false; %>
+                                        <% for (let j=0; j < sendrequest.length; j++) { %>
+                                            <% if (guidelineGivers[i].guideline_giver_id === sendrequest[j].guideline_giver_id) { %>
+                                                <% if (sendrequest[j].isadded === 'accepted') { %>
+                                                    <button class="send-request-btn normal" onclick="window.location.href = '/student/message?guidelineGiverId=<%= guidelineGivers[i].guideline_giver_id %>';"><i class="fas fa-envelope"></i></button>
+                                                    <% requestAccepted = true; %>
+                                                    <% break; %>
+                                                <% } else if (sendrequest[j].isadded === 'false') { %>
+                                                    <button class="send-request-btn request-sent">Request Sent</button>
+                                                    <% requestAccepted = true; %>
+                                                    <% break; %>
+                                                <% } %>
+                                            <% } %>
+                                        <% } %>
+                                        <% if (!requestAccepted) { %>
+                                            <button class="send-request-btn normal" onclick="sendRequest(this, <%= JSON.stringify(guidelineGivers[i]) %>)">Send Request</button>
+                                        <% } %>
+                                    <% } else { %>
+                                        <button class="send-request-btn normal" onclick="sendRequest(this, <%= JSON.stringify(guidelineGivers[i]) %>)">Send Request</button>
+                                    <% } %>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+        <button> <a href="/student/dashboard"> Back </a></button>
+    </div>
+
+    <script>
+        function sendRequest(button, guidelineGiver) {
+            // Assuming guidelineGiver contains necessary information like ID, name, etc.
+            // Here, you can make an AJAX request to send the request to the guideline giver
+            // You can customize this according to your backend API
+            // Example AJAX request
+            const request = new XMLHttpRequest();
+            request.open('POST', '/send-request'); // Modify the URL according to your backend API
+            request.setRequestHeader('Content-Type', 'application/json');
+            request.onreadystatechange = function () {
+                if (request.readyState === 4 && request.status === 200) {
+                    // If the request is successful, redirect to the message page with the guideline giver ID
+                    window.location.href = `/student/message?guidelineGiverId=${guidelineGiver.guideline_giver_id}`;
+                }
+            };
+            request.send(JSON.stringify(guidelineGiver));
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 </body>
+
 </html>
+
+

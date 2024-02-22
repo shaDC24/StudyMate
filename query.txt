@@ -710,6 +710,7 @@ EXECUTE FUNCTION check_previous_entry();
 
 
 
+ 
  --asif startt 
  CREATE TABLE result (
     result_id SERIAL PRIMARY KEY,
@@ -749,3 +750,24 @@ update lecture set videolink = '<iframe width="560" height="315" src='https://ww
 
 --asif shesh
 
+
+--shatabdi guideline giver
+CREATE TABLE sendrequest (
+    id SERIAL PRIMARY KEY,
+    guideline_giver_id INT,
+    student_id INT,
+    FOREIGN KEY (guideline_giver_id) REFERENCES guideline_giver(guideline_giver_id),
+    FOREIGN KEY (student_id) REFERENCES student(student_id),
+    UNIQUE(guideline_giver_id, student_id)
+);
+
+CREATE TABLE messages (
+    id SERIAL PRIMARY KEY,
+    from_student_id INT REFERENCES student(student_id),
+    to_guideline_giver_id INT REFERENCES guideline_giver(guideline_giver_id),
+    message_text TEXT,
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+ALTER TABLE messages
+ADD COLUMN sender_role text;
+--shatabdi guideline giver shesh
