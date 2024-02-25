@@ -878,12 +878,14 @@ app.post('/reject-request', async (req, res) => {
 app.post('/send-message', async (req, res) => {
     try {
 
-        const { messageText } = req.body;
+        // const { messageText } = req.body;
+        const { message, guidelineGiverId } = req.body;
         const studentId = id;
-        const guidelineGiverId = req.query.guidelineGiverId;
+        // const guidelineGiverId = req.query.guidelineGiverId;
 
-        const newmessage = await db.query('INSERT INTO messages (from_student_id, to_guideline_giver_id, message_text, sender_role) VALUES ($1, $2, $3, $4) returning *',
-            [studentId, guidelineGiverId, messageText, 'sender']);
+        const newmessage = await db.one('INSERT INTO messages (from_student_id, to_guideline_giver_id, message_text, sender_role) VALUES ($1, $2, $3, $4) returning *',
+            [studentId, guidelineGiverId, message, 'sender']);
+            console.log(newmessage);
 
 
         res.status(200).send('Message sent successfully.');
@@ -893,20 +895,53 @@ app.post('/send-message', async (req, res) => {
         res.status(500).send('Error sending message.');
     }
 });
+// app.get('/student/message', async (req, res) => {
+//     try {
+//         // Retrieve the guideline giver ID from query parameters
+//         const guidelineGiverId = req.query.guidelineGiverId;
+//         console.log("/student/message" + guidelineGiverId);
+//         const messages = await db.manyOrNone('select * from messages where from_student_id=$1 and to_guideline_giver_id=$2', [id, guidelineGiverId]);
+//         //res.json(messages); // Send JSON response instead of rendering a template
+//         res.render('student_message', { messages, guidelineGiverId});
+//     } catch (error) {
+//         console.error('Error sending messages:', error);
+//         res.status(500).json({ error: 'Error retrieving messages' });
+//     }
+// });
+
 
 
 app.get('/student/message', async (req, res) => {
     try {
         // Retrieve the guideline giver ID from query parameters
         const guidelineGiverId = req.query.guidelineGiverId;
-        console.log(guidelineGiverId);
+        console.log("/student/message"+guidelineGiverId);
         const messages = await db.manyOrNone('select *from messages where from_student_id=$1 and  to_guideline_giver_id=$2', [id, guidelineGiverId]);
-        res.render('student_message', { messages });
+        res.render('messaging', { messages, guidelineGiverId});
     } catch (error) {
         console.error('Error rendering student message page:', error);
         res.status(500).send('Error rendering student message page.');
     }
 });
+
+app.get('/get-messages', async (req, res) => {
+    try {
+        // Retrieve the guideline giver ID from query parameters
+        const guidelineGiverId = req.query.guidelineGiverId;
+        console.log("/student/message" + guidelineGiverId);
+        
+        // Fetch messages from the database
+        const messages = await db.manyOrNone('SELECT * FROM messages WHERE to_guideline_giver_id = $1', [guidelineGiverId]);
+        
+        // Send the messages as JSON
+        res.json({ messages });
+    } catch (error) {
+        console.error('Error fetching messages:', error);
+        res.status(500).json({ error: 'Failed to fetch messages' });
+    }
+});
+
+
 
 app.get('/connected_students', async (req, res) => {
     try {
@@ -924,12 +959,12 @@ app.get('/connected_students', async (req, res) => {
 app.post('/open-chat/:studentId', async (req, res) => {
     try {
         const { studentId } = req.params;
-        const { messageText } = req.body;
+        const { message } = req.body;
         console.log('Sending message to student ID:', studentId);
-        console.log('Message:', messageText);
+        console.log('Message:', message);
 
         // Here you should insert the new message into your database
-        const newmsg=await db.any('INSERT INTO messages (from_student_id, to_guideline_giver_id, message_text, sender_role) VALUES ($1, $2, $3, $4) returning *',[studentId,id,messageText,'receiver']);
+        const newmsg = await db.any('INSERT INTO messages (from_student_id, to_guideline_giver_id, message_text, sender_role) VALUES ($1, $2, $3, $4) returning *', [studentId, id, message, 'receiver']);
         // Placeholder response for now
         res.status(200).json({ message: `Message sent to student ID: ${studentId}` }); // Sending a JSON response
     } catch (error) {
@@ -940,17 +975,18 @@ app.post('/open-chat/:studentId', async (req, res) => {
 
 app.get('/open-chat/:studentId', async (req, res) => {
     try {
-        const studentId = req.params.studentId;
+        const { studentId } = req.params;
         console.log('Opening chat for student ID:', studentId);
         // Fetch chat messages for the given student ID from the database
         const messages = await db.manyOrNone('SELECT * FROM messages WHERE from_student_id=$1 AND to_guideline_giver_id=$2', [studentId, id]);
         console.log('Retrieved messages:', messages);
-        res.render('open_chat', { messages, studentId }); // Pass studentId to the template
+        res.json({ messages }); // Sending messages as JSON
     } catch (error) {
         console.error('Error opening chat:', error);
-        res.status(500).send('Error opening chat.');
+        res.status(500).json({ error: 'Error opening chat.' }); // Sending a JSON response with error message
     }
 });
+
 
 
 //shatabdi end
