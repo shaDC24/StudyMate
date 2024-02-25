@@ -760,6 +760,8 @@ CREATE TABLE sendrequest (
     FOREIGN KEY (student_id) REFERENCES student(student_id),
     UNIQUE(guideline_giver_id, student_id)
 );
+ALTER TABLE sendrequest
+ADD COLUMN isadded VARCHAR(25) DEFAULT 'false';
 
 CREATE TABLE messages (
     id SERIAL PRIMARY KEY,
