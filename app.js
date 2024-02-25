@@ -227,7 +227,7 @@ app.post('/login', async (req, res) => {
         console.log('Password comparison result:', bcrypt.compareSync(password, user.password_hash));
 
         if (user && password === user.password_hash) {
-            // Password matches, redirect to the dashboard based on user type
+            console.log(userType);
             res.redirect(`/${userType}/dashboard`);
         } else {
             // Invalid credentials
