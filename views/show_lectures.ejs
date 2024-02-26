@@ -8,105 +8,112 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-color: #f2f2f2;
             margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
             padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
         h1 {
             text-align: center;
             color: #333;
-            margin-bottom: 30px;
         }
 
         ul {
             list-style: none;
             padding: 0;
-            margin: 0;
         }
 
         li {
-            background-color: #fff;
+            background-color: #f9f9f9;
+            margin-bottom: 10px;
+            padding: 15px;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin-bottom: 20px;
+            cursor: pointer;
         }
 
         li:hover {
-            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        strong {
-            color: #333;
+            background-color: #eaeaea;
         }
 
         .video-container {
-            position: relative;
-            width: 100%;
-            height: 0;
-            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            display: none;
+            margin-top: 10px;
         }
 
-        .video-container video,
-        .video-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
+        iframe,
+        video {
             width: 100%;
-            height: 100%;
-        }
-
-        a {
-            text-decoration: none;
-            display: inline-block;
-            margin-top: 20px;
+            height: 315px;
+            border-radius: 8px;
         }
 
         button {
+            display: block;
+            margin: 20px auto;
             padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
             border: none;
-            border-radius: 5px;
-            background-color: #007bff;
-            color: #fff;
-            font-size: 16px;
+            border-radius: 4px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
         }
 
         button:hover {
-            background-color: #0056b3;
+            background-color: #45a049;
         }
     </style>
 </head>
 
 <body>
-    <h1>Show Lectures for <%= course.course_title %></h1>
+    <div class="container">
+        <h1>Show Lectures for <%= course.course_title %></h1>
 
-    <ul>
-        <% for (let i = 0; i < lectures.length; i++) { %>
-            <li>
-                <strong>Lecture Name:</strong> <%= lectures[i].lecture_name %><br>
-                <strong>Description:</strong> <%= lectures[i].description %><br>
-                
-                <div class="video-container">
-                    <% if (lectures[i].videolink.includes('youtube.com') || lectures[i].videolink.includes('youtu.be')) { %>
-                        <iframe width="560" height="315" src="https://www.youtube.com/embed/VIDEO_ID?privacy=1" frameborder="0" allowfullscreen></iframe>
-                    <% } else { %>
-                        <video controls>
-                            <source src="<%= lectures[i].videolink %>" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                    <% } %>
-                </div>
-            </li>
-        <% } %>
-    </ul>
+        <ul>
+            <% for (let i = 0; i < lectures.length; i++) { %>
+                <li onclick="showDetails(<%= i %>)">
+                    <strong>Lecture Name:</strong> <%= lectures[i].lecture_name %><br>
+                    <strong>Description:</strong> <%= lectures[i].description %><br>
+                    <%= lectures[i].videolink %><br>
+                    <div class="video-container" id="video<%= i %>">
+                        <% if (lectures[i].videolink.includes('youtube.com') || lectures[i].videolink.includes('youtu.be')) { %>
+                            <iframe width="560" height="315" src="https://www.youtube.com/embed/VIDEO_ID?privacy=1" frameborder="0" allowfullscreen></iframe>
+                        <% } else { %>
+                            <video controls>
+                                <source src="/uploads/<%= lectures[i].videolink %>" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        <% } %>
+                    </div>
+                </li>
+            <% } %>
+        </ul>
 
-    <a href="/teacher/lecture">
-        <button>Back to Courses</button>
-    </a>
+        <a href="/teacher/lecture">
+            <button>Back to Courses</button>
+        </a>
+    </div>
 
+    <script>
+        function showDetails(index) {
+            var videoContainer = document.getElementById('video' + index);
+            if (videoContainer.style.display === 'none') {
+                videoContainer.style.display = 'block';
+            } else {
+                videoContainer.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 
 </html>
+
+
