@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard for Exam <%= exam_id %></title>
+    <!-- Add your CSS styles here -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        h2 {
+            text-align: center;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            color: #333;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tbody tr:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Leaderboard for Exam <%= exam_id %></h1>
+    <h2>Exam Topic: <%= leaderboardData[0].exam_topic %></h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Student ID</th>
+                <th>Student Name</th>
+                <th>Percentage Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% leaderboardData.forEach((data, index) => { %>
+                <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= data.student_id %></td>
+                    <td><%= data.first_name %></td>
+                    <td><%= parseFloat(data.percentage_score).toFixed(2) %> %</td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</body>
+</html>
