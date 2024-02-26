@@ -772,7 +772,7 @@ app.get('/guideline_giver/dashboard', async (req, res) => {
 
 app.get('/student/show_guideline_givers', async (req, res) => {
     try {
-        const cnt = await db.one('select count(*) as c from (select student_id from isaguidelinegiver where student_id=$1)', id);
+        const cnt = await db.one('select count(*) as c from isaguidelinegiver where student_id=$1', id);
         const rcnt = await db.one('select count(*) as rc from sendrequest where student_id = $1', id);
         if (cnt.c == 0) {
             if (rcnt.rc == 0) {
@@ -784,7 +784,7 @@ app.get('/student/show_guideline_givers', async (req, res) => {
             }
             else {
                 console.log(rcnt.rc);
-                const guidelineGivers = await db.manyOrNone('select *from guideline_giver g join isaguidelinegiver ig on g.guideline_giver_id=ig.guideline_giver_id join student s on s.student_id=ig.student_id');
+                const guidelineGivers = await db.manyOrNone('select * from guideline_giver g join isaguidelinegiver ig on g.guideline_giver_id=ig.guideline_giver_id join student s on s.student_id=ig.student_id');
                 const sendrequest = await await db.manyOrNone('select *from sendrequest where student_id = $1', id);
                 console.log(guidelineGivers);
                 console.log(sendrequest);
