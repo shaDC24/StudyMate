@@ -519,10 +519,10 @@ app.get('/show/lecture', async (req, res) => {
     try {
         console.log(courseId);
         // Fetch lectures associated with the specified course from the database
-        const lectures = await db.any('SELECT * FROM lecture WHERE course_id = $1', courseId);
+        const lectures = await db.any('SELECT * FROM lecture WHERE course_id = $1 and teacher_id=$2', [courseId,id]);
 
         // Fetch course details for display
-        const course = await db.one('SELECT * FROM courses WHERE id = $1', courseId);
+        const course = await db.one('SELECT * FROM courses WHERE id = $1and teacher_id=$2', [courseId,id]);
 
         // Render the 'show_lectures' view and pass the retrieved lectures and course data
         res.render('show_lectures', { lectures, course });
