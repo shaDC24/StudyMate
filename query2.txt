@@ -1,0 +1,35 @@
+-- asif leaderboard
+CREATE TABLE topper (
+    id SERIAL PRIMARY KEY,
+    exam_id INT REFERENCES exam_section(id),
+    student_id INT REFERENCES student(student_id)
+);
+
+CREATE OR REPLACE PROCEDURE find_and_update_toppers()
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    exam_record RECORD;
+    topper_record RECORD;
+BEGIN
+    -- Loop through distinct exam IDs in the result table
+    FOR exam_record IN SELECT DISTINCT exam_id FROM result LOOP
+        -- Find the top scorer for each exam
+        SELECT INTO topper_record * 
+        FROM result 
+        WHERE exam_id = exam_record.exam_id 
+        ORDER BY correct_answers DESC 
+        LIMIT 1;
+        
+        -- Check if the top scorer exists
+        IF topper_record IS NOT NULL THEN
+            -- Insert or update the topper record in the topper table
+            INSERT INTO topper (exam_id, student_id) VALUES (topper_record.exam_id, topper_record.student_id)
+            ON CONFLICT (exam_id)
+            DO UPDATE SET student_id = topper_record.student_id;
+        END IF;
+    END LOOP;
+END;
+$$;
+
+ALTER TABLE topper ADD CONSTRAINT unique_exam_id UNIQUE (exam_id);

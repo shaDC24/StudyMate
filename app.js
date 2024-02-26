@@ -816,6 +816,78 @@ app.get('/student/show_guideline_givers', async (req, res) => {
     }
 });
 
+app.get('/leaderboard', async (req, res) => {
+    try {
+        // Retrieve leaderboard data from the database
+        const leaderboardData = await db.query(`
+            SELECT 
+                s.student_id,
+                s.first_name,
+                AVG(r.correct_answers * 100.0 / r.total_questions) AS percentage_score
+            FROM 
+                student s
+            INNER JOIN 
+                result r ON s.student_id = r.student_id
+            GROUP BY 
+                s.student_id, s.first_name
+            ORDER BY 
+                percentage_score DESC;
+        `);
+
+        // Render leaderboard EJS template with leaderboard data
+        res.render('leaderboard', { leaderboardData });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+app.get('/leaderboard/:exam_id', async (req, res) => {
+    try {
+        const { exam_id } = req.params;
+
+        // Call the stored procedure to find and update the exam-wise toppers
+        await db.query('CALL find_and_update_toppers()');
+
+        // Retrieve leaderboard data for the specified exam_id from the topper table
+        const leaderboardData = await db.query(`
+            SELECT 
+                s.student_id,
+                s.first_name,
+                (r.correct_answers * 100.0 / r.total_questions) AS percentage_score,
+                es.exam_topic
+            FROM 
+                topper t
+            INNER JOIN 
+                student s ON t.student_id = s.student_id
+            INNER JOIN 
+                result r ON t.exam_id = r.exam_id AND t.student_id = r.student_id
+            INNER JOIN 
+                exam_section es on es.id = t.exam_id    
+            WHERE 
+                t.exam_id = $1
+            ORDER BY 
+                r.correct_answers/r.total_questions DESC;
+        `, [exam_id]);
+
+        // Render leaderboard EJS template with exam_id wise leaderboard data
+        res.render('leaderboard_exam_id_wise', { exam_id, leaderboardData });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+app.get('/exam-wise-leaderboard',async(req,res)=>{
+    try{
+        const exams = await db.query(`select * from exam_section`);
+        res.render(`listExams`,{exams});
+    }
+    catch(error){
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
 
 app.post('/send-request', async (req, res) => {
     try {
