@@ -227,7 +227,7 @@ app.post('/login', async (req, res) => {
         console.log('Password comparison result:', bcrypt.compareSync(password, user.password_hash));
 
         if (user && password === user.password_hash) {
-            // Password matches, redirect to the dashboard based on user type
+            console.log(userType);
             res.redirect(`/${userType}/dashboard`);
         } else {
             // Invalid credentials
@@ -276,25 +276,25 @@ app.get('/api/search/teacher', async (req, res) => {
     }
 });
 
-app.get('/exam_section/results',async(req,res)=>{
-    try{
-        const result = await db.any('select * from result where student_id=$1',id);
+app.get('/exam_section/results', async (req, res) => {
+    try {
+        const result = await db.any('select * from result where student_id=$1', id);
         console.log(result);
-        res.render('show_result',{result});
+        res.render('show_result', { result });
     }
-    catch(error){
+    catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
     }
 });
 
-app.get('/exam_section/result',async(req,res)=>{
-    try{
-        const result = await db.any('select * from result r join exam_section e on r.exam_id = e.id join courses c on e.course_id = c.id where student_id=$1',id);
+app.get('/exam_section/result', async (req, res) => {
+    try {
+        const result = await db.any('select * from result r join exam_section e on r.exam_id = e.id join courses c on e.course_id = c.id where student_id=$1', id);
         console.log(result);
-        res.render('show_results',{result});
+        res.render('show_results', { result });
     }
-    catch(error){
+    catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
     }
@@ -337,8 +337,8 @@ app.post('/submit-answer/:exam_id', async (req, res) => {
             console.log('Correct Answers:', correctAnswers);
             console.log('Percentage:', percentage);
 
-            await db.none('INSERT INTO result(student_id, exam_id,  correct_answers,total_questions) VALUES($1, $2, $3, $4)', [Number(id), examId,  correctAnswers, totalQuestions]);
-            
+            await db.none('INSERT INTO result(student_id, exam_id,  correct_answers,total_questions) VALUES($1, $2, $3, $4)', [Number(id), examId, correctAnswers, totalQuestions]);
+
             // Redirect to the exam result page with query parameters
             console.log('Redirecting to exam result page');
             //res.redirect(`/exam-result/${examId}?correct=${correctAnswers}&total=${totalQuestions}`);
@@ -623,21 +623,21 @@ app.get('/add-exam/:courseId', async (req, res) => {
 });
 
 app.post('/add-exam', async (req, res) => {
-    const { exam_topic, exam_duration, courseId,questions,options ,correct_answers} = req.body;
+    const { exam_topic, exam_duration, courseId, questions, options, correct_answers } = req.body;
     console.log(courseId);
     console.log(questions);
     console.log(options);
     console.log(correct_answers);
     let newexam;
     try {
-         newexam = await db.one('INSERT INTO exam_section(exam_topic, exam_duration, course_id) VALUES($1, $2, $3) RETURNING *', [exam_topic, exam_duration, courseId]);
+        newexam = await db.one('INSERT INTO exam_section(exam_topic, exam_duration, course_id) VALUES($1, $2, $3) RETURNING *', [exam_topic, exam_duration, courseId]);
         console.log(newexam);
         res.redirect('/teacher/dashboard');
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
     }
-    try{
+    try {
         for (let i = 0; i < questions.length; i++) {
             const newquestion = await db.one('INSERT INTO question(question_statement, exam_id, question_ans) VALUES($1, $2, $3) RETURNING *', [questions[i], newexam.id, correct_answers[i]]);
             console.log(newquestion);
@@ -646,7 +646,7 @@ app.post('/add-exam', async (req, res) => {
                 console.log(newoption);
             }
         }
-    
+
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
@@ -878,12 +878,14 @@ app.post('/reject-request', async (req, res) => {
 app.post('/send-message', async (req, res) => {
     try {
 
-        const { messageText } = req.body;
+        // const { messageText } = req.body;
+        const { message, guidelineGiverId } = req.body;
         const studentId = id;
-        const guidelineGiverId = req.query.guidelineGiverId;
+        // const guidelineGiverId = req.query.guidelineGiverId;
 
-        const newmessage = await db.query('INSERT INTO messages (from_student_id, to_guideline_giver_id, message_text, sender_role) VALUES ($1, $2, $3, $4) returning *',
-            [studentId, guidelineGiverId, messageText, 'sender']);
+        const newmessage = await db.one('INSERT INTO messages (from_student_id, to_guideline_giver_id, message_text, sender_role) VALUES ($1, $2, $3, $4) returning *',
+            [studentId, guidelineGiverId, message, 'sender']);
+        console.log(newmessage);
 
 
         res.status(200).send('Message sent successfully.');
@@ -894,23 +896,41 @@ app.post('/send-message', async (req, res) => {
     }
 });
 
-
 app.get('/student/message', async (req, res) => {
     try {
         // Retrieve the guideline giver ID from query parameters
         const guidelineGiverId = req.query.guidelineGiverId;
-        console.log(guidelineGiverId);
+        console.log("/student/message" + guidelineGiverId);
         const messages = await db.manyOrNone('select *from messages where from_student_id=$1 and  to_guideline_giver_id=$2', [id, guidelineGiverId]);
-        res.render('student_message', { messages });
+        res.render('messaging', { messages, guidelineGiverId });
     } catch (error) {
         console.error('Error rendering student message page:', error);
         res.status(500).send('Error rendering student message page.');
     }
 });
 
+app.get('/get-messages', async (req, res) => {
+    try {
+        // Retrieve the guideline giver ID from query parameters
+        const guidelineGiverId = req.query.guidelineGiverId;
+        console.log("/student/message" + guidelineGiverId);
+
+        // Fetch messages from the database
+        const messages = await db.manyOrNone('SELECT * FROM messages WHERE to_guideline_giver_id = $1 and from_student_id=$2', [guidelineGiverId, id]);
+
+        // Send the messages as JSON
+        res.json({ messages });
+    } catch (error) {
+        console.error('Error fetching messages:', error);
+        res.status(500).json({ error: 'Failed to fetch messages' });
+    }
+});
+
+
+
 app.get('/connected_students', async (req, res) => {
     try {
-        const connectedStudents = await db.any('SELECT * from sendrequest sr join student s on s.student_id=sr.student_id where sr.guideline_giver_id=$1', id);
+        const connectedStudents = await db.any('SELECT * from sendrequest sr join student s on s.student_id=sr.student_id where sr.guideline_giver_id=$1 and isadded=$2', [id, 'accepted']);
         console.log(connectedStudents);
         res.render('connected_students', { connectedStudents });
     } catch (error) {
@@ -924,13 +944,14 @@ app.get('/connected_students', async (req, res) => {
 app.post('/open-chat/:studentId', async (req, res) => {
     try {
         const { studentId } = req.params;
-        const { messageText } = req.body;
+        const { message } = req.body;
         console.log('Sending message to student ID:', studentId);
-        console.log('Message:', messageText);
+        console.log('Message:', message);
 
         // Here you should insert the new message into your database
-        const newmsg=await db.any('INSERT INTO messages (from_student_id, to_guideline_giver_id, message_text, sender_role) VALUES ($1, $2, $3, $4) returning *',[studentId,id,messageText,'receiver']);
+        const newmsg = await db.any('INSERT INTO messages (from_student_id, to_guideline_giver_id, message_text, sender_role) VALUES ($1, $2, $3, $4) returning *', [studentId, id, message, 'receiver']);
         // Placeholder response for now
+        console.log(newmsg);
         res.status(200).json({ message: `Message sent to student ID: ${studentId}` }); // Sending a JSON response
     } catch (error) {
         console.error('Error sending message:', error);
@@ -938,19 +959,38 @@ app.post('/open-chat/:studentId', async (req, res) => {
     }
 });
 
-app.get('/open-chat/:studentId', async (req, res) => {
+app.get('/get-chat/:studentId', async (req, res) => {
     try {
-        const studentId = req.params.studentId;
+        const { studentId } = req.params;
         console.log('Opening chat for student ID:', studentId);
         // Fetch chat messages for the given student ID from the database
         const messages = await db.manyOrNone('SELECT * FROM messages WHERE from_student_id=$1 AND to_guideline_giver_id=$2', [studentId, id]);
         console.log('Retrieved messages:', messages);
-        res.render('open_chat', { messages, studentId }); // Pass studentId to the template
+        //res.json({messages});
+        res.render('open_chat', { studentId: studentId, messages: messages });
     } catch (error) {
         console.error('Error opening chat:', error);
-        res.status(500).send('Error opening chat.');
+        res.status(500).json({ error: 'Error opening chat.' }); // Sending a JSON response with error message
     }
 });
+
+
+app.get('/open-chat/:studentId', async (req, res) => {
+    try {
+        const { studentId } = req.params;
+        console.log('Opening chat for student ID:', studentId);
+        // Fetch chat messages for the given student ID from the database
+        const messages = await db.manyOrNone('SELECT * FROM messages WHERE from_student_id=$1 AND to_guideline_giver_id=$2', [studentId, id]);
+        console.log('Retrieved messages:', messages);
+        res.json({ messages });
+        // res.render('open_chat', { studentId: studentId, messages: messages });
+    } catch (error) {
+        console.error('Error opening chat:', error);
+        res.status(500).json({ error: 'Error opening chat.' }); // Sending a JSON response with error message
+    }
+});
+
+
 
 
 //shatabdi end

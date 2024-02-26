@@ -36,17 +36,25 @@
         }
 
         .send-request-btn {
-            background-color: green;
-            color: #fff;
-            border: none;
             padding: 5px 10px;
             border-radius: 5px;
             cursor: pointer;
         }
 
-        .request-sent {
+        .send-request-btn.normal {
+            background-color: green;
+            color: #fff;
+            border: none;
+        }
+
+        .send-request-btn.request-sent {
             background-color: gray;
             cursor: default;
+        }
+
+        .msg-icon {
+            color: cornflowerblue;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -59,41 +67,53 @@
             <% for (let i=0; i < guidelineGivers.length; i++) { %>
                 <div class="col-md-4">
                     <div class="card">
-                        <div class="card-header">
-                            <%= guidelineGivers[i].guideline_giver_id%>
-                        </div>
+                       
                         <div class="card-header">
                             <%= guidelineGivers[i].first_name +' '+ guidelineGivers[i].last_name%>
                         </div>
                         <div class="card-body">
-                            <div class="teacher">
-                                <%= guidelineGivers[i].university%>
+                            <div class="card-header">
+                                Guideline Giver's Id : <%= guidelineGivers[i].guideline_giver_id%>
                             </div>
-                            <p><%= guidelineGivers[i].phone_no%></p>
+                            <br><br>
+                            <div class="teacher">
+                                Guideline Giver's University :<%= guidelineGivers[i].university%>
+                            </div>
+                            <br>
+                                Guideline Giver's Phone no :<%= guidelineGivers[i].phone_no%>
+                                <br><br>   
                             <div class="text-center">
                                 <% if (isgg === guidelineGivers[i].guideline_giver_id) { %>
                                     <p style="background-color: cornflowerblue;">You are also a guideline giver</p>
                                 <% } else { %>
                                     <% if (sendrequest.length > 0) { %>
-                                        <% let requestAccepted = false; %>
+                                        <% let requestSent = false; %>
                                         <% for (let j=0; j < sendrequest.length; j++) { %>
                                             <% if (guidelineGivers[i].guideline_giver_id === sendrequest[j].guideline_giver_id) { %>
-                                                <% if (sendrequest[j].isadded === 'accepted') { %>
-                                                    <button class="send-request-btn normal" onclick="window.location.href = '/student/message?guidelineGiverId=<%= guidelineGivers[i].guideline_giver_id %>';"><i class="fas fa-envelope"></i></button>
-                                                    <% requestAccepted = true; %>
-                                                    <% break; %>
-                                                <% } else if (sendrequest[j].isadded === 'false') { %>
-                                                    <button class="send-request-btn request-sent">Request Sent</button>
-                                                    <% requestAccepted = true; %>
-                                                    <% break; %>
+                                                <% if (sendrequest[j].isadded === 'false') { %>
+                                                    <button id="sendBtn_<%= guidelineGivers[i].guideline_giver_id %>"
+                                                        class="send-request-btn request-sent" disabled>Request Sent</button>
+                                                    <% requestSent = true; %>
+                                                <% } else if (sendrequest[j].isadded === 'accepted') { %>
+                                         
+                                            <!-- Inside the card-body where the message icon is -->
+                                                <button class="send-request-btn normal" onclick="openChat('<%= guidelineGivers[i].guideline_giver_id %>')">
+                                                    <i class="fas fa-envelope"></i>
+                                                </button>
+
+                                                    <% requestSent = true; %>
                                                 <% } %>
                                             <% } %>
                                         <% } %>
-                                        <% if (!requestAccepted) { %>
-                                            <button class="send-request-btn normal" onclick="sendRequest(this, <%= JSON.stringify(guidelineGivers[i]) %>)">Send Request</button>
+                                        <% if (!requestSent) { %>
+                                            <button id="sendBtn_<%= guidelineGivers[i].guideline_giver_id %>"
+                                                class="send-request-btn normal"
+                                                onclick="sendRequest(this, <%= JSON.stringify(guidelineGivers[i]) %>)">Send Request</button>
                                         <% } %>
                                     <% } else { %>
-                                        <button class="send-request-btn normal" onclick="sendRequest(this, <%= JSON.stringify(guidelineGivers[i]) %>)">Send Request</button>
+                                        <button id="sendBtn_<%= guidelineGivers[i].guideline_giver_id %>"
+                                            class="send-request-btn normal"
+                                            onclick="sendRequest(this, <%= JSON.stringify(guidelineGivers[i]) %>)">Send Request</button>
                                     <% } %>
                                 <% } %>
                             </div>
@@ -107,21 +127,34 @@
 
     <script>
         function sendRequest(button, guidelineGiver) {
-            // Assuming guidelineGiver contains necessary information like ID, name, etc.
-            // Here, you can make an AJAX request to send the request to the guideline giver
-            // You can customize this according to your backend API
-            // Example AJAX request
+            console.log('send request');
+            console.log(guidelineGiver);
             const request = new XMLHttpRequest();
             request.open('POST', '/send-request'); // Modify the URL according to your backend API
             request.setRequestHeader('Content-Type', 'application/json');
             request.onreadystatechange = function () {
-                if (request.readyState === 4 && request.status === 200) {
-                    // If the request is successful, redirect to the message page with the guideline giver ID
-                    window.location.href = `/student/message?guidelineGiverId=${guidelineGiver.guideline_giver_id}`;
-                }
+               
+                        if (request.readyState === 4 && request.status === 200) {
+                        button.classList.remove('normal');
+                        button.classList.add('request-sent');
+                        button.innerHTML = 'Request Sent';
+                        button.disabled = true;
+                    }
+
+                
             };
             request.send(JSON.stringify(guidelineGiver));
         }
+// Function to open the chat section
+                    function openChat(guidelineGiverId) {
+                        // You can pass the guidelineGiverId to identify the recipient
+                        // Here you can toggle the visibility of the chat section or open a modal
+                        // For example:
+                        window.location.href = '/student/message?guidelineGiverId=' + guidelineGiverId;
+                    }
+
+       
+
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
@@ -129,5 +162,9 @@
 </body>
 
 </html>
+
+
+
+
 
 
