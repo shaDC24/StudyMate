@@ -511,40 +511,49 @@ app.get('/api/choice/:questionId', async (req, res) => {
     }
 });
 
-
-
-app.get('/show/lecture', async (req, res) => {
+app.get('/student/show/lecture', async (req, res) => {
     const courseId = req.query.course_id;
 
     try {
-        console.log(courseId);
-        // Fetch lectures associated with the specified course from the database
-        const lectures = await db.any('SELECT * FROM lecture WHERE course_id = $1 and teacher_id=$2', [courseId,id]);
-
-        // Fetch course details for display
-        const course = await db.one('SELECT * FROM courses WHERE id = $1and teacher_id=$2', [courseId,id]);
-
-        // Render the 'show_lectures' view and pass the retrieved lectures and course data
-        res.render('show_lectures', { lectures, course });
+        console.log('course id '+courseId);
+      
+        const lecturecount = await db.any('SELECT count(*) as c FROM lecture WHERE course_id = $1', [courseId]);
+        const lectures = await db.any('SELECT * FROM lecture WHERE course_id = $1', [courseId]);
+        console.log("lecture count "+lecturecount.c);
+        const course = await db.one('SELECT * FROM courses WHERE id = $1', [courseId]);
+        const lc = lecturecount.c;
+        res.render('student_show_lecture', { lectures, course, lc });
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
     }
 });
 
-// Define a function to fetch the exam data from the database
+app.get('/show/lecture', async (req, res) => {
+    const courseId = req.query.course_id;
+
+    try {
+        console.log('course id '+courseId);
+      
+        const lecturecount = await db.any('SELECT count(*) as c FROM lecture WHERE course_id = $1', [courseId]);
+        const lectures = await db.any('SELECT * FROM lecture WHERE course_id = $1', [courseId]);
+        console.log("lecture coujnt "+lecturecount.c);
+        const course = await db.one('SELECT * FROM courses WHERE id = $1', [courseId]);
+        const lc = lecturecount.c;
+        res.render('show_lectures', { lectures, course, lc });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+
 const getExams = async () => {
     try {
-        // Connect to the database
+      
         const client = await pool.connect();
-
-        // Execute a query to fetch the exams from the exam_section table
         const result = await client.query('SELECT * FROM exam_section');
-
-        // Release the client back to the pool
         client.release();
-
-        // Return the rows fetched from the database
         return result.rows;
     } catch (err) {
         console.error('Error fetching exams:', err);
@@ -593,9 +602,21 @@ app.get('/student/enroll-courses', async (req, res) => {
 
 
 app.get('/student/course-lists', async (req, res) => {
+    // const studentId = req.query.studentId;
     const enrolledCourses = await db.any('select * from student s join enrollments e on s.student_id=e.student_id join courses c on c.id=e.course_id join teacher t on  t.teacher_id=c.teacher_id where s.student_id=$1;', Number(id));
     console.log(enrolledCourses);
-    res.render('course_lists', { userType: 'Student', courses: enrolledCourses });
+
+    res.render('course_lists', { userType: 'Student', courses: enrolledCourses, studentId: Number(id) });
+
+});
+app.get('/student/courselistsagain',async(req,res)=>{
+    
+    const enrolledCourses = await db.any('select * from student s join enrollments e on s.student_id=e.student_id join courses c on c.id=e.course_id join teacher t on  t.teacher_id=c.teacher_id where s.student_id=$1;', Number(id));
+    console.log(enrolledCourses);
+   // console.log(studentId);
+    res.render('course_lists', { userType: 'Student', courses: enrolledCourses, studentId: Number(id) });
+
+
 });
 
 app.get('/teacher/dashboard', (req, res) => {
@@ -878,12 +899,12 @@ app.get('/leaderboard/:exam_id', async (req, res) => {
     }
 });
 
-app.get('/exam-wise-leaderboard',async(req,res)=>{
-    try{
+app.get('/exam-wise-leaderboard', async (req, res) => {
+    try {
         const exams = await db.query(`select * from exam_section`);
-        res.render(`listExams`,{exams});
+        res.render(`listExams`, { exams });
     }
-    catch(error){
+    catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
     }
