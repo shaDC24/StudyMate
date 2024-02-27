@@ -33,3 +33,131 @@ END;
 $$;
 
 ALTER TABLE topper ADD CONSTRAINT unique_exam_id UNIQUE (exam_id);
+
+-- Drop the previous procedure if it exists
+DROP PROCEDURE IF EXISTS find_and_update_toppers;
+
+-- Create the new procedure
+CREATE OR REPLACE PROCEDURE find_and_update_toppers()
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    exam_record RECORD;
+    topper_cursor CURSOR FOR
+        SELECT exam_id, student_id
+        FROM (
+            SELECT 
+                exam_id, 
+                student_id,
+                ROW_NUMBER() OVER(PARTITION BY exam_id ORDER BY correct_answers DESC) AS rank
+            FROM result
+        ) ranked_results
+        WHERE rank <= 3;
+    topper_record RECORD;
+BEGIN
+    -- Open the cursor
+    OPEN topper_cursor;
+    
+    -- Fetch and process each row from the cursor
+    LOOP
+        FETCH topper_cursor INTO topper_record;
+        EXIT WHEN NOT FOUND;
+
+        -- Insert or update the topper record in the topper table
+        INSERT INTO topper (exam_id, student_id) VALUES (topper_record.exam_id, topper_record.student_id)
+        ON CONFLICT (exam_id)
+        DO UPDATE SET student_id = topper_record.student_id;
+    END LOOP;
+
+    -- Close the cursor
+    CLOSE topper_cursor;
+END;
+$$;
+
+
+ALTER TABLE TOPPER
+DROP CONSTRAINT unique_exam_id;
+
+
+ALTER TABLE topper
+DROP CONSTRAINT IF EXISTS unique_exam_student,
+ADD CONSTRAINT unique_exam_student
+UNIQUE (exam_id, student_id);
+
+
+-- First, drop the existing unique constraint on (exam_id, student_id)
+ALTER TABLE topper DROP CONSTRAINT IF EXISTS unique_exam_student;
+
+-- Add a rank column to the topper table
+ALTER TABLE topper ADD COLUMN rank INT;
+
+-- Add a composite unique constraint on (exam_id, student_id, rank)
+ALTER TABLE topper ADD CONSTRAINT topper_exam_student_rank_unique UNIQUE (exam_id, student_id, rank);
+
+-- Now, modify the find_and_update_toppers procedure to update the rank accordingly
+CREATE OR REPLACE PROCEDURE find_and_update_toppers()
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    exam_record RECORD;
+    topper_record RECORD;
+    rank_count INT := 0;
+BEGIN
+    -- Loop through distinct exam IDs in the result table
+    FOR exam_record IN SELECT DISTINCT exam_id FROM result LOOP
+        -- Reset the rank count for each exam
+        rank_count := 0;
+
+        -- Find the top scorers for each exam
+        FOR topper_record IN (
+            SELECT student_id
+            FROM result
+            WHERE exam_id = exam_record.exam_id
+            ORDER BY correct_answers DESC
+        ) LOOP
+            -- Increment the rank count
+            rank_count := rank_count + 1;
+
+            -- Insert or update the topper record in the topper table
+            INSERT INTO topper (exam_id, student_id, rank)
+            VALUES (exam_record.exam_id, topper_record.student_id, rank_count)
+            ON CONFLICT (exam_id, student_id)
+            DO UPDATE SET rank = EXCLUDED.rank;
+        END LOOP;
+    END LOOP;
+END;
+$$;
+
+ALTER TABLE topper DROP CONSTRAINT topper_exam_student_rank_unique;
+
+ALTER TABLE topper ADD CONSTRAINT topper_exam_id_rank_key UNIQUE (exam_id, rank);
+
+CREATE OR REPLACE PROCEDURE find_and_update_toppers()
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    exam_record RECORD;
+    topper_record RECORD;
+    rank_counter INTEGER;
+BEGIN
+    -- Loop through distinct exam IDs in the result table
+    FOR exam_record IN SELECT DISTINCT exam_id FROM result LOOP
+        rank_counter := 1; -- Initialize rank counter for each exam
+        -- Find the top 3 scorers for each exam
+        FOR topper_record IN 
+            SELECT * 
+            FROM result 
+            WHERE exam_id = exam_record.exam_id 
+            ORDER BY correct_answers DESC 
+            LIMIT 3
+        LOOP
+            -- Insert or update the topper record in the topper table
+            INSERT INTO topper (exam_id, student_id, rank) 
+            VALUES (topper_record.exam_id, topper_record.student_id, rank_counter)
+            ON CONFLICT (exam_id, rank)
+            DO UPDATE SET student_id = EXCLUDED.student_id;
+            rank_counter := rank_counter + 1; -- Increment rank counter
+        END LOOP;
+    END LOOP;
+END;
+$$;

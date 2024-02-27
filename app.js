@@ -870,9 +870,9 @@ app.get('/leaderboard/:exam_id', async (req, res) => {
         // Call the stored procedure to find and update the exam-wise toppers
         await db.query('CALL find_and_update_toppers()');
 
-        // Retrieve leaderboard data for the specified exam_id from the topper table
+        // Retrieve top scorer for each student in the specified exam from the topper table
         const leaderboardData = await db.query(`
-            SELECT 
+            SELECT DISTINCT ON (t.student_id)
                 s.student_id,
                 s.first_name,
                 (r.correct_answers * 100.0 / r.total_questions) AS percentage_score,
@@ -882,13 +882,13 @@ app.get('/leaderboard/:exam_id', async (req, res) => {
             INNER JOIN 
                 student s ON t.student_id = s.student_id
             INNER JOIN 
-                result r ON t.exam_id = r.exam_id AND t.student_id = r.student_id
+                result r ON t.exam_id = r.exam_id AND t.student_id = r.student_id 
             INNER JOIN 
-                exam_section es on es.id = t.exam_id    
+                exam_section es ON es.id = t.exam_id    
             WHERE 
                 t.exam_id = $1
             ORDER BY 
-                r.correct_answers/r.total_questions DESC;
+                t.student_id, r.correct_answers/r.total_questions DESC;
         `, [exam_id]);
 
         // Render leaderboard EJS template with exam_id wise leaderboard data
