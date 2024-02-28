@@ -11,15 +11,20 @@
             background-color: #f2f2f2;
             margin: 0;
             padding: 0;
+            display: flex;
         }
 
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
+        .sidebar {
+            width: 200px;
             background-color: #fff;
-            border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-right: 1px solid #ddd;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
         }
 
         h1 {
@@ -45,7 +50,7 @@
         }
 
         .video-container {
-            display: none;
+            /* display: none; */
             margin-top: 10px;
         }
 
@@ -74,46 +79,72 @@
 </head>
 
 <body>
-    <div class="container">
-        <h1>Show Lectures for <%= course.course_title %></h1>
-
+    <div class="sidebar">
+        <h1> <%= course.course_title %></h1>
         <ul>
             <% for (let i = 0; i < lectures.length; i++) { %>
-                <li onclick="showDetails(<%= i %>)">
-                    <strong>Lecture Name:</strong> <%= lectures[i].lecture_name %><br>
-                    <strong>Description:</strong> <%= lectures[i].description %><br>
-                    <%= lectures[i].videolink %><br>
-                    <div class="video-container" id="video<%= i %>">
-                        <% if (lectures[i].videolink.includes('youtube.com') || lectures[i].videolink.includes('youtu.be')) { %>
-                            <iframe width="560" height="315" src="https://www.youtube.com/embed/VIDEO_ID?privacy=1" frameborder="0" allowfullscreen></iframe>
-                        <% } else { %>
-                            <video controls>
-                                <source src="/uploads/<%= lectures[i].videolink %>" type="video/mp4">
-                                Your browser does not support the video tag.
-                            </video>
-                        <% } %>
-                    </div>
+                <li onclick="showDetails( `<%=i%>` )">
+                    <%= lectures[i].lecture_name %>
                 </li>
             <% } %>
         </ul>
-
         <a href="/teacher/lecture">
             <button>Back to Courses</button>
         </a>
     </div>
+    
+ 
+    
+
+    <div class="main-content">
+        
+        <h1>Lecture for <%= course.course_title %></h1>
+        <div id="lectureDetails">
+            <!-- Lecture details will be displayed here -->
+        </div>
+
+       
+    </div>
 
     <script>
-        function showDetails(index) {
-            var videoContainer = document.getElementById('video' + index);
-            if (videoContainer.style.display === 'none') {
-                videoContainer.style.display = 'block';
-            } else {
-                videoContainer.style.display = 'none';
-            }
-        }
+      const lectures = JSON.parse('<%- JSON.stringify(lectures) %>');
+     // const lectures = ('<%= lectures %>');
+     function showDetails(index) {
+    console.log('details of the show');
+    console.log(lectures);
+    console.log(index);
+    var lectureDetails = document.getElementById('lectureDetails');
+    var lecture = lectures[index];
+    console.log(lecture);
+
+    console.log("Video Link:", lecture.videolink); // Log the video link
+
+    lectureDetails.innerHTML = `
+        <h2>Lecture: ${lecture.lecture_name}</h2>
+        <p><strong>Description:</strong> ${lecture.description}</p>
+        <div class="video-container">
+        ${lecture.videolink.includes('youtube.com') || lecture.videolink.includes('youtu.be') ?
+        `<iframe width="560" height="315" src="${lecture.videolink.replace('watch?v=', 'embed/')}" frameborder="0" allowfullscreen></iframe>` :
+        `<video controls>
+            <source src="/uploads/${lecture.videolink}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>`}
+        </div> 
+    `;
+    }
+
     </script>
+    
 </body>
 
 </html>
+<!-- <div class="video-container">
+    ${lecture.videolink.includes('youtube.com') || lecture.videolink.includes('youtu.be') ?
+        `<iframe width="560" height="315" src="${lecture.videolink.replace('watch?v=', 'embed/')}" frameborder="0" allowfullscreen></iframe>` :
+        `<video controls>
+            <source src="/uploads/${lecture.videolink}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>`}
+</div> -->
 
 
