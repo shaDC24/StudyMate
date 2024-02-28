@@ -1092,10 +1092,25 @@ app.get('/open-chat/:studentId', async (req, res) => {
 
 
 //shatabdi end
+app.get('/student/about',async(req,res)=>{
 
-//shatabdi student er extra kaaj
-//app.get('/student/routine')
-//shatabdi end
+    try {
+       res.render('student_about');
+    } catch (error) {
+        console.error('Error opening chat:', error);
+        res.status(500).json({ error: 'Error about page.' }); // Sending a JSON response with error message
+    }
+});
+
+app.get('/teacher/about',async(req,res)=>{
+
+    try {
+       res.render('teacher_about');
+    } catch (error) {
+        console.error('Error opening chat:', error);
+        res.status(500).json({ error: 'Error about page.' }); // Sending a JSON response with error message
+    }
+});
 
 
 
