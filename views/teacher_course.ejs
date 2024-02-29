@@ -84,24 +84,12 @@
         <div>
             <h2>Your Information:</h2>
             <ul>
-                <li><strong>ID:</strong>
-                    <%= Data[0].teacher_id %>
-                </li>
-                <li><strong>Name:</strong>
-                    <%= Data[0].teacher_name %>
-                </li>
-                <li><strong>Proficiency:</strong>
-                    <%= Data[0].teacher_proficiency %>
-                </li>
-                <li><strong>Birth Date:</strong>
-                    <%= Data[0].date_of_birth.toISOString().split('T')[0] %>
-                </li>
-                <li><strong>Age:</strong>
-                    <%= Data[0].age %>
-                </li>
-                <li><strong>Last Login:</strong>
-                    <%= Data[0].last_login_time %>
-                </li>
+                <li><strong>ID:</strong> <%= Data[0].teacher_id %></li>
+                <li><strong>Name:</strong> <%= Data[0].teacher_name %></li>
+                <li><strong>Proficiency:</strong> <%= Data[0].teacher_proficiency %></li>
+                <li><strong>Birth Date:</strong> <%= Data[0].date_of_birth.toISOString().split('T')[0] %></li>
+                <li><strong>Age:</strong> <%= Data[0].age %></li>
+                <li><strong>Last Login:</strong> <%= Data[0].last_login_time %></li>
             </ul>
             <h2>Your Courses:</h2>
             <div class="accordion" id="accordionCourses">
@@ -118,16 +106,22 @@
                             data-bs-parent="#accordionCourses">
                             <div class="accordion-body">
                                 <%= courses[i].course_description %>
+                                <!-- Upload Lecture button -->
                                 <a href="/initiate/lecture" class="btn btn-primary">Upload Lecture</a>
-                                <a href="/add-exam/<%=courses[i].id%>" class="btn btn-secondary">Add Exam</a> <!-- Add Exam button -->
+                                <!-- Add Exam button -->
+                                <a href="/add-exam/<%=courses[i].id%>" class="btn btn-secondary">Add Exam</a>
+                                <!-- Delete button -->
+                                <a href="/teacher/delete-course/<%=courses[i].id%>" class="btn btn-danger">Delete Course</a>
                             </div>
                         </div>
                     </div>
-                    <% } %>
+                <% } %>
             </div>
+            <!-- Initiate Course button -->
             <a href="/course/initiation" class="btn btn-primary">Initiate Course</a>
         </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
         integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p"
         crossorigin="anonymous"></script>
@@ -135,3 +129,4 @@
 </body>
 
 </html>
+

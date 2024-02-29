@@ -649,6 +649,22 @@ app.get('/teacher/courses', async (req, res) => {
     }
 });
 
+app.get('/teacher/delete-course/:course_id', async (req, res) => {
+    const courseId = req.params.course_id;
+    
+    try {
+        const enrolledstudents=await db.manyOrNone()
+        // Perform deletion of the course from the database
+        // Example: await Course.findByIdAndDelete(courseId);
+        // Redirect or render a page after successful deletion
+        console.log(courseId);
+        res.render('teacher_course_delete');
+    } catch (error) {
+        console.error('Error deleting course:', error);
+        res.status(500).send('Error deleting course');
+    }
+});
+
 app.get('/add-exam/:courseId', async (req, res) => {
     const courseId = req.params.courseId;
     console.log(courseId);
@@ -1119,6 +1135,19 @@ app.get('/open-chat/:studentId', async (req, res) => {
 
 
 //shatabdi end
+app.delete('/teacher/delete-lecture/:lecture_id', async (req, res) => {
+    const lectureId = req.params.lecture_id;
+    
+    try {
+        // Delete the lecture from the database
+        await db.none('DELETE FROM lecture WHERE lecture_id = $1', lectureId);
+        res.status(200).send('Lecture deleted successfully');
+    } catch (error) {
+        console.error('Error deleting lecture:', error);
+        res.status(500).send('Error deleting lecture');
+    }
+});
+
 
 app.get('/teacher/update-lecture/:lecture_id', async (req, res) => {
     const lectureId = parseInt(req.params.lecture_id);
