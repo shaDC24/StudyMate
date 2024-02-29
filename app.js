@@ -519,10 +519,10 @@ app.get('/show/lecture', async (req, res) => {
     try {
         console.log(courseId);
         // Fetch lectures associated with the specified course from the database
-        const lectures = await db.any('SELECT * FROM lecture WHERE course_id = $1 and teacher_id=$2', [courseId,id]);
+        const lectures = await db.any('SELECT * FROM lecture WHERE course_id = $1', [courseId]);
 
         // Fetch course details for display
-        const course = await db.one('SELECT * FROM courses WHERE id = $1and teacher_id=$2', [courseId,id]);
+        const course = await db.one('SELECT * FROM courses WHERE id = $1', [courseId]);
 
         // Render the 'show_lectures' view and pass the retrieved lectures and course data
         res.render('show_lectures', { lectures, course });
@@ -594,8 +594,12 @@ app.get('/student/enroll-courses', async (req, res) => {
 
 app.get('/student/course-lists', async (req, res) => {
     const enrolledCourses = await db.any('select * from student s join enrollments e on s.student_id=e.student_id join courses c on c.id=e.course_id join teacher t on  t.teacher_id=c.teacher_id where s.student_id=$1;', Number(id));
+    const rating = await db.any('select r.course_id,sum(rating),count(*) from student s join enrollments e on s.student_id=e.student_id join courses c on c.id=e.course_id join rate r on r.course_id = c.id where s.student_id=$1 group by r.course_id;',Number(id));
+    //const ratingg = await db.any('select * from student s join enrollments e on s.student_id=e.student_id join courses c on c.id=e.course_id join rate r on r.course_id = c.id where s.student_id=$1;',Number(id));
     console.log(enrolledCourses);
-    res.render('course_lists', { userType: 'Student', courses: enrolledCourses });
+    console.log(rating);
+    //console.log(ratingg);
+    res.render('course_lists', { userType: 'Student', courses: enrolledCourses,rating:rating });
 });
 
 app.get('/teacher/dashboard', (req, res) => {
@@ -888,6 +892,26 @@ app.get('/exam-wise-leaderboard',async(req,res)=>{
         res.status(500).send('Internal Server Error');
     }
 });
+
+app.post('/submit-rating', async (req, res) => {
+    const { courseId, rating } = req.body; // Assuming courseId and rating are sent in the request body
+    // Perform actions with courseId and rating, such as saving to a database
+    console.log(`Received rating for course ${courseId}: ${rating}`);
+    try {
+        // Assuming db is your database connection pool
+        const { rows } = await db.query('CALL insert_or_update_rate($1, $2, $3)', [Number(id), courseId, rating]);
+
+        // Log the result if needed
+        console.log('Stored procedure executed successfully:', rows);
+
+        // Send a response
+        res.status(200).json({ message: 'Rating submitted successfully!' });
+    } catch (error) {
+        console.error('Error occurred while executing stored procedure:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 
 app.post('/send-request', async (req, res) => {
     try {

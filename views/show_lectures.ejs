@@ -79,7 +79,7 @@
 
         <ul>
             <% for (let i = 0; i < lectures.length; i++) { %>
-                <li onclick="showDetails(<%= i %>)">
+                <li onclick="showDetails(<%=i%>)">
                     <strong>Lecture Name:</strong> <%= lectures[i].lecture_name %><br>
                     <strong>Description:</strong> <%= lectures[i].description %><br>
                     <%= lectures[i].videolink %><br>
@@ -88,7 +88,7 @@
                             <iframe width="560" height="315" src="https://www.youtube.com/embed/VIDEO_ID?privacy=1" frameborder="0" allowfullscreen></iframe>
                         <% } else { %>
                             <video controls>
-                                <source src="/uploads/<%= lectures[i].videolink %>" type="video/mp4">
+                                <source src="<%= lectures[i].videolink %>" type="video/mp4">
                                 Your browser does not support the video tag.
                             </video>
                         <% } %>
