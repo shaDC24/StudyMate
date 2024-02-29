@@ -5,11 +5,18 @@ const multer = require('multer');
 const db = require('./db'); // Import your database connection
 const bcrypt = require('bcrypt');
 const fs = require('fs');
+const { name } = require('ejs');
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true })); // Parse form data
+app.use(bodyParser.json());
+
 app.use(express.json());
-//app.use(bodyParser.json());
+
+
+
+
+
 let id = null;
 let C_id = null;
 
@@ -502,13 +509,13 @@ app.get('/student/show/lecture', async (req, res) => {
     const courseId = req.query.course_id;
 
     try {
-        console.log('course id '+courseId);
-      
+        console.log('course id ' + courseId);
+
         //const lecturecount = await db.any('SELECT count(*) as c FROM lecture WHERE course_id = $1', [courseId]);
         const lectures = await db.any('SELECT * FROM lecture WHERE course_id = $1', [courseId]);
         //console.log("lecture count "+lecturecount.c);
         const course = await db.one('SELECT * FROM courses WHERE id = $1', [courseId]);
-       
+
         res.render('student_show_lecture', { lectures, course });
     } catch (error) {
         console.error(error);
@@ -520,8 +527,8 @@ app.get('/show/lecture', async (req, res) => {
     const courseId = req.query.course_id;
 
     try {
-        console.log('course id '+courseId);
-      
+        console.log('course id ' + courseId);
+
         //const lecturecount = await db.any('SELECT count(*) as c FROM lecture WHERE course_id = $1', [courseId]);
         const lectures = await db.any('SELECT * FROM lecture WHERE course_id = $1', [courseId]);
         //console.log("lecture coujnt "+lecturecount.c);
@@ -529,7 +536,7 @@ app.get('/show/lecture', async (req, res) => {
         //const lc = lecturecount.c;
         console.log(lectures);
         console.log(course);
-        res.render('show_lectures', { lectures, course});
+        res.render('show_lectures', { lectures, course });
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
@@ -539,7 +546,7 @@ app.get('/show/lecture', async (req, res) => {
 
 const getExams = async () => {
     try {
-      
+
         const client = await pool.connect();
         const result = await client.query('SELECT * FROM exam_section');
         client.release();
@@ -598,7 +605,7 @@ app.get('/student/enroll-courses', async (req, res) => {
         console.log(enrolledCourses);
 
 
-        res.render('enroll_courses', { userType: 'Student', courses,enrolledCourses });
+        res.render('enroll_courses', { userType: 'Student', courses, enrolledCourses });
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
@@ -609,19 +616,19 @@ app.get('/student/enroll-courses', async (req, res) => {
 app.get('/student/course-lists', async (req, res) => {
     // const studentId = req.query.studentId;
     const enrolledCourses = await db.any('select * from student s join enrollments e on s.student_id=e.student_id join courses c on c.id=e.course_id join teacher t on  t.teacher_id=c.teacher_id where s.student_id=$1', Number(id));
-    const rating = await db.any('select r.course_id,sum(rating),count(*) from student s join enrollments e on s.student_id=e.student_id join courses c on c.id=e.course_id join rate r on r.course_id = c.id where s.student_id=$1 group by r.course_id;',Number(id));
+    const rating = await db.any('select r.course_id,sum(rating),count(*) from student s join enrollments e on s.student_id=e.student_id join courses c on c.id=e.course_id join rate r on r.course_id = c.id where s.student_id=$1 group by r.course_id;', Number(id));
     console.log(enrolledCourses);
 
-    res.render('course_lists', { userType: 'Student', courses: enrolledCourses, studentId: Number(id),rating:rating });
+    res.render('course_lists', { userType: 'Student', courses: enrolledCourses, studentId: Number(id), rating: rating });
 
 });
-app.get('/student/courselistsagain',async(req,res)=>{
-    
+app.get('/student/courselistsagain', async (req, res) => {
+
     const enrolledCourses = await db.any('select * from student s join enrollments e on s.student_id=e.student_id join courses c on c.id=e.course_id join teacher t on  t.teacher_id=c.teacher_id where s.student_id=$1;', Number(id));
-    const rating = await db.any('select r.course_id,sum(rating),count(*) from student s join enrollments e on s.student_id=e.student_id join courses c on c.id=e.course_id join rate r on r.course_id = c.id where s.student_id=$1 group by r.course_id;',Number(id));
+    const rating = await db.any('select r.course_id,sum(rating),count(*) from student s join enrollments e on s.student_id=e.student_id join courses c on c.id=e.course_id join rate r on r.course_id = c.id where s.student_id=$1 group by r.course_id;', Number(id));
     //const ratingg = await db.any('select * from student s join enrollments e on s.student_id=e.student_id join courses c on c.id=e.course_id join rate r on r.course_id = c.id where s.student_id=$1;',Number(id));
     console.log(enrolledCourses);
-    res.render('course_lists', { userType: 'Student', courses: enrolledCourses,studentId: Number(id),rating:rating });
+    res.render('course_lists', { userType: 'Student', courses: enrolledCourses, studentId: Number(id), rating: rating });
 });
 
 app.get('/teacher/dashboard', (req, res) => {
@@ -1112,20 +1119,100 @@ app.get('/open-chat/:studentId', async (req, res) => {
 
 
 //shatabdi end
-app.get('/student/about',async(req,res)=>{
+
+app.get('/teacher/update-lecture/:lecture_id', async (req, res) => {
+    const lectureId = parseInt(req.params.lecture_id);
+    console.log(lectureId);
+    const lecture = await db.oneOrNone('select * from lecture where lecture_id = $1', lectureId);
+    if (!lecture) {
+        return res.status(404).send('Lecture not found');
+    }
+    console.log(lecture);
+    res.render('teacher_update_lecture', {
+        lecture: lecture,
+        newVideoLink: null,
+        newPdfLink: null
+    });
+});
+
+app.post('/teacher/update-lecture/:lecture_id', upload.fields([{ name: 'video_file', maxCount: 1 }, { name: 'pdf_file', maxCount: 1 }]), async (req, res) => {
+    const lectureId = parseInt(req.params.lecture_id);
+    console.log("post  " + lectureId);
+    //console.log(C_id);
+    const lectureName = req.body.lecture_name;
+    const description = req.body.description;
+    const prevLec = await db.oneOrNone('SELECT * FROM lecture WHERE lecture_id = $1', lectureId);
+    console.log(prevLec);
+    try {
+        //console.log("req  " + req.body);
+        console.log(lectureName + "  " + description + '  ' + req.body.video_link + '  ' + req.body.pdf_link);
+        const result = await db.proc('update_lecture', [lectureId, lectureName, description, req.body.video_link, req.body.pdf_link, 'OUT p_status_message']);
+        console.log(result);
+        if (result.p_status_message === 'Lecture updated successfully') {
+
+            if (req.files && req.files['video_file'] && req.files['video_file'].length > 0) {
+                console.log('in if0');
+                const videoFile = req.files['video_file'][0];
+                const videoFileName = `video_${lectureId}_${prevLec.course_id}_${prevLec.teacher_id}.mp4`;
+                const videoFilePath = path.join(__dirname, 'uploads', videoFileName);
+
+                if (prevLec.videolink) {
+                    const prevVideoFilePath = path.join(__dirname, 'uploads', prevLec.videolink);
+                    deleteFile(prevVideoFilePath);
+                }
+                saveFile(videoFile, videoFilePath);
+                req.body.video_link = videoFileName;
+            }
+
+            if (req.files && req.files['pdf_file'] && req.files['pdf_file'].length > 0) {
+                const pdfFile = req.files['pdf_file'][0];
+                const pdfFileName = `pdf_${lectureId}_${prevLec.course_id}_${prevLec.teacher_id}.pdf`;
+                const pdfFilePath = path.join(__dirname, 'uploads', pdfFileName);
+
+                if (prevLec.pdflink) {
+                    const prevPdfFilePath = path.join(__dirname, 'uploads', prevLec.pdflink);
+                    deleteFile(prevPdfFilePath);
+                }
+                saveFile(pdfFile, pdfFilePath);
+                req.body.pdf_link = pdfFileName;
+            }
+           C_id=prevLec.course_id;
+            return res.render('lecture_updated', { message: result.p_status_message, lectureId,C_id });
+        } else {
+            return res.render('lecture_not_updated', { message: result.p_status_message, lectureId });
+        }
+    } catch (error) {
+        console.error('Error updating lecture:', error);
+        return res.status(500).send('Error updating lecture');
+    }
+});
+
+
+function saveFile(file, filePath) {
+    fs.writeFileSync(filePath, file.buffer);
+}
+
+function deleteFile(filePath) {
+    if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+    }
+}
+
+
+app.get('/student/about', async (req, res) => {
 
     try {
-       res.render('student_about');
+        res.render('student_about');
     } catch (error) {
         console.error('Error opening chat:', error);
         res.status(500).json({ error: 'Error about page.' }); // Sending a JSON response with error message
     }
 });
 
-app.get('/teacher/about',async(req,res)=>{
+app.get('/teacher/about', async (req, res) => {
 
     try {
-       res.render('teacher_about');
+        res.render('teacher_about');
     } catch (error) {
         console.error('Error opening chat:', error);
         res.status(500).json({ error: 'Error about page.' }); // Sending a JSON response with error message

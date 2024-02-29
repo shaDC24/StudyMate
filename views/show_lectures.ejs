@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+
     <title>Show Lectures</title>
     <style>
         body {
@@ -259,19 +261,21 @@
 
             lectureDetails.innerHTML += `
                 <div class="action-buttons">
-                    <button class="update-button" onclick="updateLecture(index, lecture)">Update</button>
-                    <button class="delete-button" onclick="deleteLecture(index, lecture)">Delete</button>
+                    <button class="update-button" onclick="updateLecture(${index})">Update</button>
+
+                    <button class="delete-button" onclick="deleteLecture(${index})">Delete</button>
                 </div>`;
         }
 
 
-        function updateLecture(index, lecture) {
-                // Construct the URL for the update page, you can pass necessary data via query parameters if needed
-                const updatePageUrl = `/teacher/update-lecture?lecture_id=${lecture.id}`;
-
-                // Redirect the user to the update page
+        function updateLecture(index) {
+                console.log('update');
+                console.log(lectures[index].lecture_id);
+                const lectureId = lectures[index].lecture_id;
+                const updatePageUrl = `/teacher/update-lecture/${lectureId}`;
                 window.location.href = updatePageUrl;
             }
+
 
     </script>
 

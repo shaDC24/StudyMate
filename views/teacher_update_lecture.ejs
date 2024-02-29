@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Lecture</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 10px;
+        }
+
+        input[type="text"],
+        input[type="url"] {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 15px;
+        }
+
+        textarea {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 15px;
+        }
+
+        input[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Update Lecture</h1>
+        <form action="/teacher/update-lecture/<%= lecture.lecture_id %>" method="POST" enctype="multipart/form-data">
+
+            <input type="hidden" name="lecture_id" value="<%= lecture.id %>">
+            <label for="lecture_name">Lecture Name:</label>
+            <input type="text" id="lecture_name" name="lecture_name" value="<%= lecture.lecture_name %>">
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" rows="4"><%= lecture.description %></textarea>
+            <input type="hidden" id="video_link" name="video_link" value="<%= lecture.videolink %>"> 
+           
+            <!-- Display previous video link -->
+            <% if (lecture.videolink) { %>
+                <p>Previous Video: <a href="/uploads/<%= lecture.videolink %>"><%= lecture.videolink %></a></p>
+            <% } else { %>
+                <p>No previous video uploaded.</p>
+            <% } %>
+            <!-- File input for new video -->
+            <label for="video_file">Upload New Video:</label>
+            <input type="file" id="video_file" name="video_file" accept="video/*">
+            
+
+            <input type="hidden" id="pdf_link" name="pdf_link" value="<%= lecture.pdflink %>"> 
+            <!-- Display previous PDF link -->
+            <% if (lecture.pdflink) { %>
+                <p>Previous PDF: <a href="/uploads/<%= lecture.pdflink %>"><%= lecture.pdflink %></a></p>
+            <% } else { %>
+                <p>No previous PDF uploaded.</p>
+            <% } %>
+            <!-- File input for new PDF -->
+       
+
+        <!-- PDF Upload -->
+        <label for="pdf_file">Upload New PDF:</label>
+        <input type="file" id="pdf_file" name="pdf_file" accept=".pdf">
+            
+            <input type="submit" value="Update Lecture">
+        </form>
+    </div>
+    <script>
+        document.getElementById("video_file").addEventListener("change", function(event) {
+            const videoFile = event.target.files[0];
+            if (videoFile) {
+                updateVideoLink(videoFile.name);
+            }
+        });
+    
+        document.getElementById("pdf_file").addEventListener("change", function(event) {
+            const pdfFile = event.target.files[0];
+            if (pdfFile) {
+                updatePdfLink(pdfFile.name);
+            }
+        });
+    
+        // Function to update video link input field value
+        function updateVideoLink(newLink) {
+            console.log(newLink);
+            document.getElementById("video_link").value = newLink;
+        }
+    
+        // Function to update PDF link input field value
+        function updatePdfLink(newLink) {
+            console.log(newLink);
+            document.getElementById("pdf_link").value = newLink;
+        }
+    </script>
+    
+
+</body>
+
+</html>
+
+
+    
+
+
+
