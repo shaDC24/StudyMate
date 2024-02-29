@@ -1135,11 +1135,22 @@ app.get('/open-chat/:studentId', async (req, res) => {
 
 
 //shatabdi end
+app.post('/complete-lecture', async(req, res) => {
+    const { lectureId } = req.body;
+    const course_id=await db.one('select course_id as cid from lecture where lecture_id=$1',lectureId);
+    console.log(course_id.cid);
+    await db.one('insert into watched(student_id,lecture_id,course_id) values($1,$2,$3)',[id,lectureId.course_id.cid]);
+    // Perform database insertion here using lectureId
+    // Example: INSERT INTO completed_lectures (lecture_id) VALUES ($1)
+    res.sendStatus(200); // Send success response
+});
+
 app.delete('/teacher/delete-lecture/:lecture_id', async (req, res) => {
     const lectureId = req.params.lecture_id;
     
     try {
         // Delete the lecture from the database
+        await db.none('DELETE FROM watched WHERE lecture_id = $1', lectureId);
         await db.none('DELETE FROM lecture WHERE lecture_id = $1', lectureId);
         res.status(200).send('Lecture deleted successfully');
     } catch (error) {

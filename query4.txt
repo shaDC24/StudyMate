@@ -1,4 +1,4 @@
-npm install formidable
+
 
 CREATE OR REPLACE PROCEDURE update_lecture(
     IN p_lecture_id INT,
@@ -54,3 +54,121 @@ BEGIN
     END;
 END;
 $$;
+
+
+alter table courses
+drop column enrolled_id;
+
+
+ALTER TABLE watched
+ADD COLUMN course_id INT;
+
+ALTER TABLE watched
+ADD CONSTRAINT fk_watched_course_id
+FOREIGN KEY (course_id)
+REFERENCES courses(id);
+
+DO $$
+DECLARE
+    constraint_rec RECORD;
+    drop_sql TEXT;
+    create_sql TEXT;
+    has_constraints BOOLEAN := FALSE;
+BEGIN
+    -- Check if there are existing foreign key constraints without ON DELETE CASCADE
+    FOR constraint_rec IN (
+        SELECT constraint_name, table_schema, table_name
+        FROM information_schema.table_constraints
+        WHERE constraint_type = 'FOREIGN KEY'
+        AND constraint_schema = 'public'  -- Adjust schema name if necessary
+        AND constraint_name NOT IN (
+            SELECT constraint_name
+            FROM information_schema.referential_constraints
+            WHERE delete_rule = 'CASCADE'
+            AND constraint_schema = 'public'  -- Adjust schema name if necessary
+        )
+    ) LOOP
+        has_constraints := TRUE;
+        
+        drop_sql := 'ALTER TABLE ' || constraint_rec.table_schema || '.' || constraint_rec.table_name ||
+                    ' DROP CONSTRAINT ' || constraint_rec.constraint_name || ' CASCADE;';
+        
+        EXECUTE drop_sql;
+        
+        create_sql := 'ALTER TABLE ' || constraint_rec.table_schema || '.' || constraint_rec.table_name ||
+                      ' ADD CONSTRAINT ' || constraint_rec.constraint_name || 
+                      ' FOREIGN KEY ' || pg_get_constraintdef(pg_constraint.oid, true) ||
+                      ' ON DELETE CASCADE;';
+        
+        EXECUTE create_sql;
+        
+        RAISE NOTICE 'Constraint % on table % modified.', constraint_rec.constraint_name, constraint_rec.table_name;
+    END LOOP;
+    
+    -- Create the new table with foreign key constraints
+    IF has_constraints THEN
+        -- Add your table creation SQL statement here
+        RAISE NOTICE 'New table created with ON DELETE CASCADE for existing foreign key constraints.';
+    ELSE
+        -- Add your table creation SQL statement here without modification
+        RAISE NOTICE 'New table created without any changes to foreign key constraints.';
+    END IF;
+END $$;
+
+CREATE OR REPLACE FUNCTION ddl_event_trigger_function() RETURNS event_trigger AS $$
+DECLARE
+    obj record;
+BEGIN
+    FOR obj IN SELECT * FROM pg_event_trigger_ddl_commands() LOOP
+        RAISE NOTICE 'DDL Event: %', obj.command_tag;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE EVENT TRIGGER ddl_event_trigger
+ON ddl_command_end
+EXECUTE PROCEDURE ddl_event_trigger_function();
+
+
+
+
+CREATE OR REPLACE FUNCTION cascade_delete_dependent_rows()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Delete rows from enrollments table
+    DELETE FROM enrollments WHERE course_id = OLD.id;
+	DELETE FROM watched WHERE course_id=OLD.id;
+    DELETE FROM lecture WHERE course_id = OLD.id;
+	DELETE from topper where exam_id in(
+	SELECT id FROM exam_section
+	WHERE course_id = OLD.id
+	);
+	DELETE FROM result where exam_id in(
+	SELECT id FROM exam_section
+	WHERE course_id = OLD.id
+	);
+	DELETE FROM choice WHERE question_id in
+	(SELECT question_id FROM question
+	where exam_id in (
+		SELECT id FROM exam_section
+	    WHERE course_id = OLD.id
+	));
+	DELETE FROM question 
+	WHERE exam_id in( SELECT id FROM exam_section
+					WHERE course_id = OLD.id);
+					
+    DELETE FROM exam_section WHERE course_id = OLD.id;
+    DELETE FROM rate WHERE course_id = OLD.id;
+	
+	
+
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create trigger for cascading deletes on the courses table
+CREATE TRIGGER cascade_delete_trigger
+BEFORE DELETE ON courses
+FOR EACH ROW
+EXECUTE FUNCTION cascade_delete_dependent_rows();

@@ -61,19 +61,23 @@
             border-radius: 8px;
         }
 
-        button {
+        .complete-button {
             display: block;
             margin: 20px auto;
             padding: 10px 20px;
-            background-color: #4CAF50;
+            background-color: #FFD700; /* Yellow color */
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
         }
 
+        .complete-button.complete {
+            background-color: #32CD32; /* Another color for completed */
+        }
+
         button:hover {
-            background-color: #45a049;
+            background-color: #DAA520; /* Darker yellow on hover */
         }
     </style>
 </head>
@@ -85,6 +89,7 @@
             <% for (let i = 0; i < lectures.length; i++) { %>
                 <li onclick="showDetails( `<%=i%>` )">
                     <%= lectures[i].lecture_name %>
+                    
                 </li>
             <% } %>
         </ul>
@@ -92,50 +97,73 @@
             <button>Back to Courses</button>
         </a>
     </div>
-    
- 
-    
 
     <div class="main-content">
-        
         <h1>Lecture for <%= course.course_title %></h1>
         <div id="lectureDetails">
             <!-- Lecture details will be displayed here -->
         </div>
-
-       
     </div>
 
     <script>
-      const lectures = JSON.parse('<%- JSON.stringify(lectures) %>');
-     // const lectures = ('<%= lectures %>');
-     function showDetails(index) {
-    console.log('details of the show');
-    console.log(lectures);
-    console.log(index);
-    var lectureDetails = document.getElementById('lectureDetails');
-    var lecture = lectures[index];
-    console.log(lecture);
+        const lectures = JSON.parse('<%- JSON.stringify(lectures) %>');
 
-    console.log("Video Link:", lecture.videolink); // Log the video link
+        function showDetails(index) {
+            console.log('details of the show');
+            console.log(lectures);
+            console.log(index);
+            var lectureDetails = document.getElementById('lectureDetails');
+            var lecture = lectures[index];
+            console.log(lecture);
 
-    lectureDetails.innerHTML = `
-        <h2>Lecture: ${lecture.lecture_name}</h2>
-        <p><strong>Description:</strong> ${lecture.description}</p>
-        <div class="video-container">
-        ${lecture.videolink.includes('youtube.com') || lecture.videolink.includes('youtu.be') ?
-        `<iframe width="560" height="315" src="${lecture.videolink.replace('watch?v=', 'embed/')}" frameborder="0" allowfullscreen></iframe>` :
-        `<video controls>
-            <source src="${lecture.videolink}" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>`}
-        </div> 
-    `;
+            console.log("Video Link:", lecture.videolink); // Log the video link
+
+            lectureDetails.innerHTML = `
+                <h2>Lecture: ${lecture.lecture_name}</h2>
+                <p><strong>Description:</strong> ${lecture.description}</p>
+                <div class="video-container">
+                ${lecture.videolink.includes('youtube.com') || lecture.videolink.includes('youtu.be') ?
+                `<iframe width="560" height="315" src="${lecture.videolink.replace('watch?v=', 'embed/')}" frameborder="0" allowfullscreen></iframe>` :
+                `<video controls>
+                    <source src="/uploads/${lecture.videolink}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <button class="complete-button" onclick="completeLecture(event, ${lecture.lecture_id})">Complete</button>`}
+                </div> 
+            `;
+        }
+
+    function completeLecture(event, lectureId) {
+    event.stopPropagation(); // Prevent the li onclick event from firing
+    const button = event.target;
+    if (!button.classList.contains('complete')) {
+        button.classList.add('complete');
+        button.textContent = 'Repeat Now';
+        // Send AJAX request to insert into the database
+        fetch('/complete-lecture', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ lectureId })
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log('Lecture completed and inserted into the database.');
+            } else {
+                console.error('Failed to complete lecture and insert into the database.');
+            }
+        })
+        .catch(error => {
+            console.error('Error completing lecture and inserting into the database:', error);
+        });
     }
+}
 
     </script>
-    
+
 </body>
 
 </html>
+
 
