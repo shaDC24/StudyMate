@@ -4,101 +4,261 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal profile</title>
+    <title>Teacher Profile</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        .container {
+            padding-top: 50px;
+        }
+
+        h1 {
+            color: #1a237e;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        h4 {
+            color: #1a237e;
+            font-weight: bold;
+        }
+
+        h5 {
+            color: #1a237e;
+            font-weight: bold;
+        }
+
+        p {
+            color: #555;
+        }
+
+        .nav-link {
+            color: #1a237e !important;
+            font-weight: bold;
+        }
+
+        .nav-link.active {
+            background-color: #1a237e;
+            color: #fff !important;
+        }
+
+        .nav-pills .nav-link {
+            border-radius: 0;
+        }
+
+        .col-md-4 {
+            position: sticky;
+            top: 100px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            background-color: #1a237e;
+            color: #fff;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .card-body {
+            background-color: #fff;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .btn-primary {
+            background-color: #1a237e;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #283593;
+        }
+
+        .btn-back {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+        }
+    </style>
 </head>
 
 <body>
-    <h1 style="color: darkblue;">You have searched for <%= inputs[0].teacher_name %></h1>
-    <br><br>
-    <div class="row">
-        <div class="col-4">
-            <nav id="navbar-example3" class="h-100 flex-column align-items-stretch pe-4 border-end">
-                <nav class="nav nav-pills flex-column">
-                    <a class="nav-link" href="#TeacherName">Teacher Name</a>
-                    <nav class="nav nav-pills flex-column">
-                        <a class="nav-link ms-3 my-1" href="#Proficiency">Proficiency</a>
-                        <a class="nav-link ms-3 my-1" href="#TotalCourses">Total Courses</a>
-                    </nav>
+    <div class="container">
+        <h1>Teacher Profile: <%= inputs[0] ? inputs[0].teacher_name : 'Not Found' %></h1>
+        <br><br>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                    <a class="nav-link active" id="v-pills-teacher-tab" data-bs-toggle="pill" href="#TeacherName"
+                        role="tab" aria-controls="TeacherName" aria-selected="true">Teacher Name</a>
+                    <a class="nav-link" id="v-pills-proficiency-tab" data-bs-toggle="pill" href="#Proficiency"
+                        role="tab" aria-controls="Proficiency" aria-selected="false">Proficiency</a>
+                    <a class="nav-link" id="v-pills-courses-tab" data-bs-toggle="pill" href="#TotalCourses" role="tab"
+                        aria-controls="TotalCourses" aria-selected="false">Total Courses</a>
                     <% for (let i=0; i < inputs.length; i++) { %>
-                        <li>
-                            <a class="nav-link" href="#course<%= i %>">
-                                <%= inputs[i].course_title %>
-                            </a>
-                        </li>
+                        <a class="nav-link" id="v-pills-course<%= i %>-tab" data-bs-toggle="pill" href="#course<%= i %>"
+                            role="tab" aria-controls="course<%= i %>" aria-selected="false"><%= inputs[i].course_title %>
+                        </a>
                     <% } %>
-                </nav>
-            </nav>
-        </div>
-
-        <div class="col-8">
-            <div data-bs-spy="scroll" data-bs-target="#navbar-example3" data-bs-smooth-scroll="true"
-                class="scrollspy-example-2" tabindex="0">
-                <div id="TeacherName">
-                    <h4>Teacher Name</h4>
-                    <p>The name of the teacher is <%= inputs[0].teacher_name %><br>
-                        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Voluptatibus exercitationem
-                        veniam enim beatae, asperiores illum quis architecto quod atque animi similique,
-                        veritatis distinctio quidem, corporis culpa dolorum eaque laboriosam quae.
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione
-                        reiciendis maxime repellat molestiae quam quod dicta explicabo unde veritatis accusantium
-                        quidem adipisci earum impedit libero dignissimos ea sint, ipsam nemo!
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Laboriosam
-                        dicta eius labore aspernatur rerum tempora excepturi porro ratione dolorem minus odio,
-                        delectus cupiditate non iusto ad, numquam omnis quis repellendus.
-                    </p>
                 </div>
-                <div id="Proficiency">
-                    <h5>Proficiency</h5>
-                    <p>He has proficient in <%= inputs[0].teacher_proficiency %><br>
-                        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Voluptatibus exercitationem
-                        veniam enim beatae, asperiores illum quis architecto quod atque animi similique,
-                        veritatis distinctio quidem, corporis culpa dolorum eaque laboriosam quae.
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione
-                        reiciendis maxime repellat molestiae quam quod dicta explicabo unde veritatis accusantium
-                        quidem adipisci earum impedit libero dignissimos ea sint, ipsam nemo!
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Laboriosam
-                        dicta eius labore aspernatur rerum tempora excepturi porro ratione dolorem minus odio,
-                        delectus cupiditate non iusto ad, numquam omnis quis repellendus.
-                    </p>
-                </div>
-                <div id="TotalCourses">
-                    <h5>Total Courses</h5>
-                    <p>Courses Initiated: <%=inputs.length%><br>
-                        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Voluptatibus exercitationem
-                        veniam enim beatae, asperiores illum quis architecto quod atque animi similique,
-                        veritatis distinctio quidem, corporis culpa dolorum eaque laboriosam quae.
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione
-                        reiciendis maxime repellat molestiae quam quod dicta explicabo unde veritatis accusantium
-                        quidem adipisci earum impedit libero dignissimos ea sint, ipsam nemo!
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Laboriosam
-                        dicta eius labore aspernatur rerum tempora excepturi porro ratione dolorem minus odio,
-                        delectus cupiditate non iusto ad, numquam omnis quis repellendus.
-                    </p>
-                </div>
-                <% for (let i=0; i < inputs.length; i++) { %>
-                    <div id="course<%= i %>">
-                        <h4><%= inputs[i].course_title %></h4>
-                        <p><%= inputs[i].course_description %><br>
-                            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Voluptatibus exercitationem
-                            veniam enim beatae, asperiores illum quis architecto quod atque animi similique,
-                            veritatis distinctio quidem, corporis culpa dolorum eaque laboriosam quae.
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione
-                            reiciendis maxime repellat molestiae quam quod dicta explicabo unde veritatis
-                            accusantium quidem adipisci earum impedit libero dignissimos ea sint, ipsam nemo!
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Laboriosam
-                            dicta eius labore aspernatur rerum tempora excepturi porro ratione dolorem minus odio,
-                            delectus cupiditate non iusto ad, numquam omnis quis repellendus.
-                        </p>
+            </div>
+            <div class="col-md-8">
+                <div class="tab-content" id="v-pills-tabContent">
+                    <div class="tab-pane fade show active" id="TeacherName" role="tabpanel"
+                        aria-labelledby="v-pills-teacher-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Teacher Name</h4>
+                            </div>
+                            <div class="card-body">
+                                <p><%= inputs[0] ? inputs[0].teacher_name : 'Not Found' %></p>
+                                <p>
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel tincidunt tortor.
+                                    Nam
+                                    suscipit nulla vitae leo ultricies tincidunt. Sed semper eros a sapien ultrices,
+                                    ut
+                                    blandit odio tincidunt. Duis lacinia, dolor id dapibus congue, dui mi tempor elit,
+                                    sed
+                                    sodales dolor lectus nec velit. Curabitur finibus velit et sapien condimentum
+                                    convallis.
+                                    Proin volutpat, velit eget vehicula condimentum, purus libero varius ipsum, nec
+                                    posuere
+                                    mauris mauris id justo. Proin non felis nec purus tincidunt auctor nec a nulla.
+                                    Vivamus
+                                    auctor lectus sit amet tellus convallis dictum. Sed in tellus nec dui facilisis
+                                    semper.
+                                    Donec fermentum nisi eget lacus consectetur, in vehicula eros tempor. Ut id
+                                    tellus
+                                    volutpat, ultricies odio a, eleifend justo. Nulla sit amet mi nec odio aliquet
+                                    fringilla. Nullam lacinia gravida libero, nec vehicula sapien tincidunt non.
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                <% } %>
+                    <div class="tab-pane fade" id="Proficiency" role="tabpanel"
+                        aria-labelledby="v-pills-proficiency-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Proficiency</h4>
+                            </div>
+                            <div class="card-body">
+                                <p><%= inputs[0] ? inputs[0].teacher_proficiency : 'Not Found' %></p>
+                                <p>
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel tincidunt tortor.
+                                    Nam
+                                    suscipit nulla vitae leo ultricies tincidunt. Sed semper eros a sapien ultrices,
+                                    ut
+                                    blandit odio tincidunt. Duis lacinia, dolor id dapibus congue, dui mi tempor elit,
+                                    sed
+                                    sodales dolor lectus nec velit. Curabitur finibus velit et sapien condimentum
+                                    convallis.
+                                    Proin volutpat, velit eget vehicula condimentum, purus libero varius ipsum, nec
+                                    posuere
+                                    mauris mauris id justo. Proin non felis nec purus tincidunt auctor nec a nulla.
+                                    Vivamus
+                                    auctor lectus sit amet tellus convallis dictum. Sed in tellus nec dui facilisis
+                                    semper.
+                                    Donec fermentum nisi eget lacus consectetur, in vehicula eros tempor. Ut id
+                                    tellus
+                                    volutpat, ultricies odio a, eleifend justo. Nulla sit amet mi nec odio aliquet
+                                    fringilla. Nullam lacinia gravida libero, nec vehicula sapien tincidunt non.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="TotalCourses" role="tabpanel"
+                        aria-labelledby="v-pills-courses-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Total Courses</h4>
+                            </div>
+                            <div class="card-body">
+                                <p>Courses Initiated: <%= inputs.length %></p>
+                                <p>
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel tincidunt tortor.
+                                    Nam
+                                    suscipit nulla vitae leo ultricies tincidunt. Sed semper eros a sapien ultrices,
+                                    ut
+                                    blandit odio tincidunt. Duis lacinia, dolor id dapibus congue, dui mi tempor elit,
+                                    sed
+                                    sodales dolor lectus nec velit. Curabitur finibus velit et sapien condimentum
+                                    convallis.
+                                    Proin volutpat, velit eget vehicula condimentum, purus libero varius ipsum, nec
+                                    posuere
+                                    mauris mauris id justo. Proin non felis nec purus tincidunt auctor nec a nulla.
+                                    Vivamus
+                                    auctor lectus sit amet tellus convallis dictum. Sed in tellus nec dui facilisis
+                                    semper.
+                                    Donec fermentum nisi eget lacus consectetur, in vehicula eros tempor. Ut id
+                                    tellus
+                                    volutpat, ultricies odio a, eleifend justo. Nulla sit amet mi nec odio aliquet
+                                    fringilla. Nullam lacinia gravida libero, nec vehicula sapien tincidunt non.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <% for (let i=0; i < inputs.length; i++) { %>
+                        <div class="tab-pane fade" id="course<%= i %>" role="tabpanel"
+                            aria-labelledby="v-pills-course<%= i %>-tab">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4><%= inputs[i].course_title %></h4>
+                                </div>
+                                <div class="card-body">
+                                    <p><%= inputs[i].course_description %></p>
+                                    <p>
+                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel tincidunt
+                                        tortor. Nam
+                                        suscipit nulla vitae leo ultricies tincidunt. Sed semper eros a sapien
+                                        ultrices, ut
+                                        blandit odio tincidunt. Duis lacinia, dolor id dapibus congue, dui mi tempor
+                                        elit, sed
+                                        sodales dolor lectus nec velit. Curabitur finibus velit et sapien condimentum
+                                        convallis.
+                                        Proin volutpat, velit eget vehicula condimentum, purus libero varius ipsum,
+                                        nec posuere
+                                        mauris mauris id justo. Proin non felis nec purus tincidunt auctor nec a
+                                        nulla.
+                                        Vivamus auctor lectus sit amet tellus convallis dictum. Sed in tellus nec dui
+                                        facilisis semper.
+                                        Donec fermentum nisi eget lacus consectetur, in vehicula eros tempor. Ut id
+                                        tellus
+                                        volutpat, ultricies odio a, eleifend justo. Nulla sit amet mi nec odio
+                                        aliquet
+                                        fringilla. Nullam lacinia gravida libero, nec vehicula sapien tincidunt non.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
             </div>
         </div>
     </div>
+    <button class="btn btn-primary btn-back">Back</button>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
         integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p"
         crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
         integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF"
         crossorigin="anonymous"></script>
-    <button class="btn btn-primary mt-3" onclick="window.location.href='/student/dashboard'">Back</button>
+</body>
+
+</html>
