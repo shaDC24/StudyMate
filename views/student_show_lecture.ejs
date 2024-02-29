@@ -126,7 +126,7 @@
         ${lecture.videolink.includes('youtube.com') || lecture.videolink.includes('youtu.be') ?
         `<iframe width="560" height="315" src="${lecture.videolink.replace('watch?v=', 'embed/')}" frameborder="0" allowfullscreen></iframe>` :
         `<video controls>
-            <source src="/uploads/${lecture.videolink}" type="video/mp4">
+            <source src="${lecture.videolink}" type="video/mp4">
             Your browser does not support the video tag.
         </video>`}
         </div> 
