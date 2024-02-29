@@ -1,0 +1,41 @@
+ALTER TABLE courses DROP COLUMN rate_id;
+
+CREATE TABLE rate (
+    rate_id SERIAL PRIMARY KEY,
+    student_id INT REFERENCES student(student_id),
+    course_id INT REFERENCES course(id),
+    rating INT CHECK (rating >= 0 AND rating <= 5)
+);
+
+
+
+
+CREATE OR REPLACE PROCEDURE insert_or_update_rate (
+    p_student_id INT,
+    p_course_id INT,
+    p_rating INT
+)
+AS $$
+DECLARE
+    v_row_count INT;
+BEGIN
+    -- Check if a record already exists for the given student_id and course_id
+    SELECT COUNT(*)
+    INTO v_row_count
+    FROM rate
+    WHERE student_id = p_student_id
+    AND course_id = p_course_id;
+
+    IF v_row_count > 0 THEN
+        -- Update the existing record
+        UPDATE rate
+        SET rating = p_rating
+        WHERE student_id = p_student_id
+        AND course_id = p_course_id;
+    ELSE
+        -- Insert a new record
+        INSERT INTO rate (student_id, course_id, rating)
+        VALUES (p_student_id, p_course_id, p_rating);
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
