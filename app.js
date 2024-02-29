@@ -609,9 +609,10 @@ app.get('/student/enroll-courses', async (req, res) => {
 app.get('/student/course-lists', async (req, res) => {
     // const studentId = req.query.studentId;
     const enrolledCourses = await db.any('select * from student s join enrollments e on s.student_id=e.student_id join courses c on c.id=e.course_id join teacher t on  t.teacher_id=c.teacher_id where s.student_id=$1', Number(id));
+    const rating = await db.any('select r.course_id,sum(rating),count(*) from student s join enrollments e on s.student_id=e.student_id join courses c on c.id=e.course_id join rate r on r.course_id = c.id where s.student_id=$1 group by r.course_id;',Number(id));
     console.log(enrolledCourses);
 
-    res.render('course_lists', { userType: 'Student', courses: enrolledCourses, studentId: Number(id) });
+    res.render('course_lists', { userType: 'Student', courses: enrolledCourses, studentId: Number(id),rating:rating });
 
 });
 app.get('/student/courselistsagain',async(req,res)=>{
