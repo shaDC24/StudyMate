@@ -653,17 +653,40 @@ app.get('/teacher/delete-course/:course_id', async (req, res) => {
     const courseId = req.params.course_id;
     
     try {
-        const enrolledstudents=await db.manyOrNone()
-        // Perform deletion of the course from the database
-        // Example: await Course.findByIdAndDelete(courseId);
-        // Redirect or render a page after successful deletion
+        const lecture=await db.manyOrNone('select *from lecture where course_id=$1',courseId);
+        const enrolledstudents=await db.manyOrNone(`select *from student where student_id in (
+                    select student_id from enrollments where course_id=$1
+        ) `,courseId);
+        const rating =await db.one('select round(avg(rating),2) as avg from rate where course_id = $1',courseId);
+       
         console.log(courseId);
-        res.render('teacher_course_delete');
+        res.render('teacher_course_delete',{enrolledstudents,lecture,rating,courseId});
     } catch (error) {
         console.error('Error deleting course:', error);
         res.status(500).send('Error deleting course');
     }
 });
+app.get('/teacher/delete/course/:course_id', async (req, res) => {
+    const courseId = req.params.course_id; // Retrieve the course ID from the URL parameters
+    
+    try {
+        // Add your code to delete the course here
+        // For example:
+        console.log(courseId);
+        await db.none('DELETE FROM courses WHERE id = $1', courseId);
+        
+        // After deleting the course, you can redirect the user to a confirmation page or any other appropriate action
+        res.redirect('/confirmation'); // Replace '/confirmation' with the desired route
+    } catch (error) {
+        console.error('Error deleting course:', error);
+        res.status(500).send('Error deleting course');
+    }
+});
+app.get('/confirmation', (req, res) => {
+    res.render('confirmation'); // Assuming you have a view file named 'confirmation.ejs'
+});
+
+
 
 app.get('/add-exam/:courseId', async (req, res) => {
     const courseId = req.params.courseId;
