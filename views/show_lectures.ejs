@@ -263,6 +263,16 @@
                     <button class="delete-button" onclick="deleteLecture(index, lecture)">Delete</button>
                 </div>`;
         }
+
+
+        function updateLecture(index, lecture) {
+                // Construct the URL for the update page, you can pass necessary data via query parameters if needed
+                const updatePageUrl = `/teacher/update-lecture?lecture_id=${lecture.id}`;
+
+                // Redirect the user to the update page
+                window.location.href = updatePageUrl;
+            }
+
     </script>
 
 </body>

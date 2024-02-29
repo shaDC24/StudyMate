@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Lecture</title>
+    <!-- Include any necessary CSS files -->
+</head>
+
+<body>
+    <h1>Update Lecture</h1>
+
+    <form action="/teacher/update-lecture/<%= lecture.id %>" method="POST" enctype="multipart/form-data">
+        <div>
+            <label for="lectureName">Lecture Name:</label>
+            <input type="text" id="lectureName" name="lectureName" value="<%= lecture.lecture_name %>" required>
+        </div>
+        <div>
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" rows="4" required><%= lecture.description %></textarea>
+        </div>
+        <div>
+            <label for="videoLink">Video Link:</label>
+            <input type="text" id="videoLink" name="videoLink" value="<%= lecture.videolink %>" required>
+        </div>
+        <div>
+            <label for="pdfLink">PDF Link:</label>
+            <input type="text" id="pdfLink" name="pdfLink" value="<%= lecture.pdflink %>">
+        </div>
+        <div>
+            <!-- Add any additional fields as needed -->
+        </div>
+        <button type="submit">Update Lecture</button>
+    </form>
+
+    <!-- Include any necessary JavaScript files -->
+</body>
+
+</html>
