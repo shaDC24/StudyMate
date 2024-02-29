@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Show Lectures</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 200px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-right: 1px solid #ddd;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            background-color: #f9f9f9;
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        li:hover {
+            background-color: #eaeaea;
+        }
+
+        .video-container {
+            /* display: none; */
+            margin-top: 10px;
+        }
+
+        iframe,
+        video {
+            width: 100%;
+            height: 315px;
+            border-radius: 8px;
+        }
+
+        button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <h1> <%= course.course_title %></h1>
+        <ul>
+            <% for (let i = 0; i < lectures.length; i++) { %>
+                <li onclick="showDetails( `<%=i%>` )">
+                    <%= lectures[i].lecture_name %>
+                </li>
+            <% } %>
+        </ul>
+        <a href="/student/courselistsagain">
+            <button>Back to Courses</button>
+        </a>
+    </div>
+    
+ 
+    
+
+    <div class="main-content">
+        
+        <h1>Lecture for <%= course.course_title %></h1>
+        <div id="lectureDetails">
+            <!-- Lecture details will be displayed here -->
+        </div>
+
+       
+    </div>
+
+    <script>
+      const lectures = JSON.parse('<%- JSON.stringify(lectures) %>');
+     // const lectures = ('<%= lectures %>');
+     function showDetails(index) {
+    console.log('details of the show');
+    console.log(lectures);
+    console.log(index);
+    var lectureDetails = document.getElementById('lectureDetails');
+    var lecture = lectures[index];
+    console.log(lecture);
+
+    console.log("Video Link:", lecture.videolink); // Log the video link
+
+    lectureDetails.innerHTML = `
+        <h2>Lecture: ${lecture.lecture_name}</h2>
+        <p><strong>Description:</strong> ${lecture.description}</p>
+        <div class="video-container">
+        ${lecture.videolink.includes('youtube.com') || lecture.videolink.includes('youtu.be') ?
+        `<iframe width="560" height="315" src="${lecture.videolink.replace('watch?v=', 'embed/')}" frameborder="0" allowfullscreen></iframe>` :
+        `<video controls>
+            <source src="/uploads/${lecture.videolink}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>`}
+        </div> 
+    `;
+    }
+
+    </script>
+    
+</body>
+
+</html>
+

@@ -11,25 +11,92 @@
             background-color: #f2f2f2;
             margin: 0;
             padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .nav {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+           
+        }
+        
+        .nav li {
+            float: left;
+        }
+        .nav-tabs {
+            background-color: #6c757d;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
         }
 
+        .nav-tabs .nav-item .nav-link {
+            color: #201515;
+        }
+
+        .nav-tabs .nav-item .nav-link.active {
+            background-color: #c5ced7;
+        }
+
+        /* .nav {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+           
+        }
+
+        .nav li {
+            float: left;
+        }
+
+        .nav li a {
+            display: block;
+            color: rgb(22, 5, 5);
+            text-align: center;
+            text-decoration: none;
+        } */
+
+      
         .container {
             max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
+            width: 100%;
             background-color: #fff;
-            border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 200px;
+            padding: 20px;
+            border-right: 1px solid #ddd;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
         }
 
         h1 {
             text-align: center;
             color: #333;
+            margin-bottom: 20px;
         }
 
         ul {
             list-style: none;
             padding: 0;
+            margin: 0;
         }
 
         li {
@@ -44,76 +111,170 @@
             background-color: #eaeaea;
         }
 
-        .video-container {
-            display: none;
-            margin-top: 10px;
+        .video-container,
+        .pdf-container {
+            margin-top: 20px;
         }
 
         iframe,
         video {
             width: 100%;
-            height: 315px;
             border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        button {
-            display: block;
-            margin: 20px auto;
+        .pdf-container {
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .action-buttons button {
             padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
 
-        button:hover {
-            background-color: #45a049;
+        .update-button {
+            background-color: purple;
+            color: white;
+        }
+
+        .update-button:hover {
+            background-color: #6a1b9a;
+        }
+
+        .delete-button {
+            background-color: red;
+            color: white;
+        }
+
+        .delete-button:hover {
+            background-color: #d32f2f;
+        }
+
+        .back-button {
+            background-color: blue;
+            color: white;
+        }
+
+        .back-button:hover {
+            background-color: #1565c0;
         }
     </style>
 </head>
 
 <body>
+    <ul class="nav nav-tabs justify-content-center">
+        <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/teacher/courses">Teaching Courses</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" href="/show/lecture?course_id=<%= parseInt(course.id) %>">Show Lecture</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/teacher/about">About</a>
+        </li>
+    </ul>
     <div class="container">
-        <h1>Show Lectures for <%= course.course_title %></h1>
+        <div class="sidebar">
+            <h1>
+                <%= course.course_title %>
+            </h1>
+            <ul>
+                <% for (let i=0; i < lectures.length; i++) { %>
+                    <li onclick="showDetails('<%=i%>')">
+                        <%= lectures[i].lecture_name %>
+                    </li>
+                    <% } %>
+            </ul>
+            <a href="/teacher/lecture">
+                <button class="back-button">Back to Courses</button>
+            </a>
+        </div>
 
-        <ul>
-            <% for (let i = 0; i < lectures.length; i++) { %>
-                <li onclick="showDetails(<%=i%>)">
-                    <strong>Lecture Name:</strong> <%= lectures[i].lecture_name %><br>
-                    <strong>Description:</strong> <%= lectures[i].description %><br>
-                    <%= lectures[i].videolink %><br>
-                    <div class="video-container" id="video<%= i %>">
-                        <% if (lectures[i].videolink.includes('youtube.com') || lectures[i].videolink.includes('youtu.be')) { %>
-                            <iframe width="560" height="315" src="https://www.youtube.com/embed/VIDEO_ID?privacy=1" frameborder="0" allowfullscreen></iframe>
-                        <% } else { %>
-                            <video controls>
-                                <source src="<%= lectures[i].videolink %>" type="video/mp4">
-                                Your browser does not support the video tag.
-                            </video>
-                        <% } %>
-                    </div>
-                </li>
-            <% } %>
-        </ul>
-
-        <a href="/teacher/lecture">
-            <button>Back to Courses</button>
-        </a>
+        <div class="main-content">
+            <h1>Lecture for <%= course.course_title %>
+            </h1>
+            <div id="lectureDetails">
+                <!-- Lecture details will be displayed here -->
+            </div>
+        </div>
     </div>
 
     <script>
+        const lectures = JSON.parse('<%- JSON.stringify(lectures) %>');
+
         function showDetails(index) {
-            var videoContainer = document.getElementById('video' + index);
-            if (videoContainer.style.display === 'none') {
-                videoContainer.style.display = 'block';
+            console.log('details of the show');
+            console.log(lectures);
+            console.log(index);
+            var lectureDetails = document.getElementById('lectureDetails');
+            var lecture = lectures[index];
+            console.log(lecture);
+
+            console.log("Video Link:", lecture.videolink); // Log the video link
+
+            lectureDetails.innerHTML = `
+                <h2>Lecture: ${lecture.lecture_name}</h2>
+                <p><strong>Description:</strong> ${lecture.description}</p>
+                <div class="video-container">
+                    <strong>Lecture Video :</strong>
+                    ${lecture.videolink.includes('youtube.com') || lecture.videolink.includes('youtu.be') ?
+                    `<iframe width="100%" height="315" src="${lecture.videolink.replace('watch?v=', 'embed/')}" frameborder="0" allowfullscreen></iframe>` :
+                    `<video controls>
+                        <source src="/uploads/${lecture.videolink}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>`}
+                </div> 
+            `;
+
+            if (lecture.pdflink) {
+                lectureDetails.innerHTML += `
+                    <div class="pdf-container">
+                        <strong>Lecture Files :</strong>
+                        <iframe src="/uploads/${lecture.pdflink}" width="100%" height="500px" frameborder="0"></iframe>
+                    </div>
+                `;
             } else {
-                videoContainer.style.display = 'none';
+                lectureDetails.innerHTML += `
+                    <div class="pdf-container">
+                        <strong>Lecture Files :</strong>
+                        No Pdf File Available 
+                    </div>
+                `;
             }
+
+            lectureDetails.innerHTML += `
+                <div class="action-buttons">
+                    <button class="update-button" onclick="updateLecture(index, lecture)">Update</button>
+                    <button class="delete-button" onclick="deleteLecture(index, lecture)">Delete</button>
+                </div>`;
         }
     </script>
+
 </body>
 
 </html>
 
 
+<!-- <div class="video-container">
+    ${lecture.videolink.includes('youtube.com') || lecture.videolink.includes('youtu.be') ?
+        `<iframe width="560" height="315" src="${lecture.videolink.replace('watch?v=', 'embed/')}" frameborder="0" allowfullscreen></iframe>` :
+        `<video controls>
+            <source src="/uploads/${lecture.videolink}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>`}
+</div> -->

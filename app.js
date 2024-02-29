@@ -382,20 +382,7 @@ app.get('/api/search/course', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
-app.post('/student/enroll-courses', async (req, res) => {
-    const courseId = req.body.courseId;
-    // Do something with the courseId, such as storing it in a database or processing it 
-    try {
-        const enrollment = await db.one('INSERT INTO enrollments( student_id,course_id) VALUES($1,$2) returning *', [Number(id), Number(courseId)]);
-        console.log(`Enrolling in course with ID: ${courseId}`);
-        res.send('Course enrolled successfully');
-        console.log(enrollment);
-    }
-    catch (error) {
-        console.error(error);
-        res.status(500).send('Internal Server Error');
-    }
-});
+
 app.get('/teacher-search-results', async (req, res) => {
     try {
         console.log('teacher-search-results');
@@ -511,40 +498,51 @@ app.get('/api/choice/:questionId', async (req, res) => {
     }
 });
 
-
-
-app.get('/show/lecture', async (req, res) => {
+app.get('/student/show/lecture', async (req, res) => {
     const courseId = req.query.course_id;
 
     try {
-        console.log(courseId);
-        // Fetch lectures associated with the specified course from the database
+        console.log('course id '+courseId);
+      
+        //const lecturecount = await db.any('SELECT count(*) as c FROM lecture WHERE course_id = $1', [courseId]);
         const lectures = await db.any('SELECT * FROM lecture WHERE course_id = $1', [courseId]);
-
-        // Fetch course details for display
+        //console.log("lecture count "+lecturecount.c);
         const course = await db.one('SELECT * FROM courses WHERE id = $1', [courseId]);
-
-        // Render the 'show_lectures' view and pass the retrieved lectures and course data
-        res.render('show_lectures', { lectures, course });
+       
+        res.render('student_show_lecture', { lectures, course });
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
     }
 });
 
-// Define a function to fetch the exam data from the database
+app.get('/show/lecture', async (req, res) => {
+    const courseId = req.query.course_id;
+
+    try {
+        console.log('course id '+courseId);
+      
+        //const lecturecount = await db.any('SELECT count(*) as c FROM lecture WHERE course_id = $1', [courseId]);
+        const lectures = await db.any('SELECT * FROM lecture WHERE course_id = $1', [courseId]);
+        //console.log("lecture coujnt "+lecturecount.c);
+        const course = await db.one('SELECT * FROM courses WHERE id = $1', [courseId]);
+        //const lc = lecturecount.c;
+        console.log(lectures);
+        console.log(course);
+        res.render('show_lectures', { lectures, course});
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+
 const getExams = async () => {
     try {
-        // Connect to the database
+      
         const client = await pool.connect();
-
-        // Execute a query to fetch the exams from the exam_section table
         const result = await client.query('SELECT * FROM exam_section');
-
-        // Release the client back to the pool
         client.release();
-
-        // Return the rows fetched from the database
         return result.rows;
     } catch (err) {
         console.error('Error fetching exams:', err);
@@ -576,15 +574,31 @@ app.get('/exam-section/exams', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
+app.post('/student/enroll-courses', async (req, res) => {
+    const courseId = req.body.courseId;
+    // Do something with the courseId, such as storing it in a database or processing it 
+    try {
+        const enrollment = await db.one('INSERT INTO enrollments( student_id,course_id) VALUES($1,$2) returning *', [Number(id), Number(courseId)]);
+        console.log(`Enrolling in course with ID: ${courseId}`);
+        res.send('Course enrolled successfully');
+        console.log(enrollment);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
 
 app.get('/student/enroll-courses', async (req, res) => {
     try {
         // Fetch course information from the database
         const courses = await db.any('SELECT *FROM courses');
         // res.json(courses);
+        const enrolledCourses = await db.any('select * from student s join enrollments e on s.student_id=e.student_id join courses c on c.id=e.course_id join teacher t on  t.teacher_id=c.teacher_id where s.student_id=$1', Number(id));
+        console.log(enrolledCourses);
 
 
-        res.render('enroll_courses', { userType: 'Student', courses });
+        res.render('enroll_courses', { userType: 'Student', courses,enrolledCourses });
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
@@ -593,13 +607,20 @@ app.get('/student/enroll-courses', async (req, res) => {
 
 
 app.get('/student/course-lists', async (req, res) => {
+    // const studentId = req.query.studentId;
+    const enrolledCourses = await db.any('select * from student s join enrollments e on s.student_id=e.student_id join courses c on c.id=e.course_id join teacher t on  t.teacher_id=c.teacher_id where s.student_id=$1', Number(id));
+    console.log(enrolledCourses);
+
+    res.render('course_lists', { userType: 'Student', courses: enrolledCourses, studentId: Number(id) });
+
+});
+app.get('/student/courselistsagain',async(req,res)=>{
+    
     const enrolledCourses = await db.any('select * from student s join enrollments e on s.student_id=e.student_id join courses c on c.id=e.course_id join teacher t on  t.teacher_id=c.teacher_id where s.student_id=$1;', Number(id));
     const rating = await db.any('select r.course_id,sum(rating),count(*) from student s join enrollments e on s.student_id=e.student_id join courses c on c.id=e.course_id join rate r on r.course_id = c.id where s.student_id=$1 group by r.course_id;',Number(id));
     //const ratingg = await db.any('select * from student s join enrollments e on s.student_id=e.student_id join courses c on c.id=e.course_id join rate r on r.course_id = c.id where s.student_id=$1;',Number(id));
     console.log(enrolledCourses);
-    console.log(rating);
-    //console.log(ratingg);
-    res.render('course_lists', { userType: 'Student', courses: enrolledCourses,rating:rating });
+    res.render('course_lists', { userType: 'Student', courses: enrolledCourses,studentId: Number(id),rating:rating });
 });
 
 app.get('/teacher/dashboard', (req, res) => {
@@ -882,12 +903,12 @@ app.get('/leaderboard/:exam_id', async (req, res) => {
     }
 });
 
-app.get('/exam-wise-leaderboard',async(req,res)=>{
-    try{
+app.get('/exam-wise-leaderboard', async (req, res) => {
+    try {
         const exams = await db.query(`select * from exam_section`);
-        res.render(`listExams`,{exams});
+        res.render(`listExams`, { exams });
     }
-    catch(error){
+    catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
     }
@@ -1090,8 +1111,25 @@ app.get('/open-chat/:studentId', async (req, res) => {
 
 
 //shatabdi end
+app.get('/student/about',async(req,res)=>{
 
+    try {
+       res.render('student_about');
+    } catch (error) {
+        console.error('Error opening chat:', error);
+        res.status(500).json({ error: 'Error about page.' }); // Sending a JSON response with error message
+    }
+});
 
+app.get('/teacher/about',async(req,res)=>{
+
+    try {
+       res.render('teacher_about');
+    } catch (error) {
+        console.error('Error opening chat:', error);
+        res.status(500).json({ error: 'Error about page.' }); // Sending a JSON response with error message
+    }
+});
 
 
 
