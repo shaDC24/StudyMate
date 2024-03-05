@@ -9,24 +9,37 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
+            background-color: #fef6fb;
         }
         h1 {
             text-align: center;
+            color: #333;
+            text-shadow: 2px 2px 2px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
         }
         #currentDateTime {
             text-align: center;
+            margin-bottom: 20px;
         }
         #routineForm {
             margin-top: 20px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
         label {
             font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
         }
-        input[type="text"] {
+        input[type="time"] {
             width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
+            padding: 10px;
+            margin-bottom: 15px;
             box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
         input[type="submit"] {
             background-color: #4CAF50;
@@ -40,6 +53,22 @@
         input[type="submit"]:hover {
             background-color: #45a049;
         }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 12px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
     </style>
 </head>
 <body>
@@ -47,17 +76,25 @@
     <div id="currentDateTime">
         <p>Date: <span id="currentDate"></span></p>
         <p>Day: <span id="currentDay"></span></p>
-        <p>Time Slot: <span id="currentTime"></span></p>
+        <p>Current Time <span id="currentTime"></span></p>
     </div>
     <form id="routineForm">
-        <label for="subject">Subject:</label>
-        <input type="text" id="subject" name="subject" required>
-        <label for="time">Time:</label>
-        <input type="text" id="time" name="time" required>
-        <label for="description">Description:</label>
-        <input type="text" id="description" name="description" required>
+        <label for="startTime">Start Time:</label>
+        <input type="time" id="startTime" name="startTime" required>
+        <label for="endTime">End Time:</label>
+        <input type="time" id="endTime" name="endTime" required>
+        <label for="taskName">Task Name:</label>
+        <input type="text" id="taskName" name="taskName" required>
         <input type="submit" value="Add to Routine">
     </form>
+
+    <table id="routineTable">
+        <tr>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Task Name</th>
+        </tr>
+    </table>
 
     <script>
         function updateDateTime() {
@@ -67,27 +104,37 @@
             document.getElementById('currentDay').textContent = now.toLocaleDateString('en-US', { weekday: 'long' });
             document.getElementById('currentTime').textContent = now.toLocaleTimeString('en-US');
         }
-
+    
         document.getElementById('routineForm').addEventListener('submit', function(event) {
             event.preventDefault(); // Prevent form submission
-            const subject = document.getElementById('subject').value;
-            const time = document.getElementById('time').value;
-            const description = document.getElementById('description').value;
-
-            // You can perform any actions here, like saving the routine to a database or displaying it on the page
-            console.log("Subject:", subject);
-            console.log("Time:", time);
-            console.log("Description:", description);
-
+            const startTimeInput = document.getElementById('startTime');
+            const endTimeInput = document.getElementById('endTime');
+            const taskName = document.getElementById('taskName').value;
+    
+            const startTime = startTimeInput.value;
+            const endTime = endTimeInput.value;
+    
+            // Add the task to the routine table
+            const routineTable = document.getElementById('routineTable');
+            const newRow = routineTable.insertRow(-1);
+            const startTimeCell = newRow.insertCell(0);
+            const endTimeCell = newRow.insertCell(1);
+            const taskNameCell = newRow.insertCell(2);
+    
+            startTimeCell.textContent = startTime;
+            endTimeCell.textContent = endTime;
+            taskNameCell.textContent = taskName;
+    
             // Clear form fields after submission
-            document.getElementById('subject').value = '';
-            document.getElementById('time').value = '';
-            document.getElementById('description').value = '';
+            document.getElementById('taskName').value = '';
         });
-
+    
         // Update date and time every second
         updateDateTime();
         setInterval(updateDateTime, 1000);
     </script>
+    
 </body>
 </html>
+
+

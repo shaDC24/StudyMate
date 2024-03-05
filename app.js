@@ -651,16 +651,16 @@ app.get('/teacher/courses', async (req, res) => {
 
 app.get('/teacher/delete-course/:course_id', async (req, res) => {
     const courseId = req.params.course_id;
-    
+
     try {
-        const lecture=await db.manyOrNone('select *from lecture where course_id=$1',courseId);
-        const enrolledstudents=await db.manyOrNone(`select *from student where student_id in (
+        const lecture = await db.manyOrNone('select *from lecture where course_id=$1', courseId);
+        const enrolledstudents = await db.manyOrNone(`select *from student where student_id in (
                     select student_id from enrollments where course_id=$1
-        ) `,courseId);
-        const rating =await db.one('select round(avg(rating),2) as avg from rate where course_id = $1',courseId);
-       
+        ) `, courseId);
+        const rating = await db.one('select round(avg(rating),2) as avg from rate where course_id = $1', courseId);
+
         console.log(courseId);
-        res.render('teacher_course_delete',{enrolledstudents,lecture,rating,courseId});
+        res.render('teacher_course_delete', { enrolledstudents, lecture, rating, courseId });
     } catch (error) {
         console.error('Error deleting course:', error);
         res.status(500).send('Error deleting course');
@@ -668,13 +668,13 @@ app.get('/teacher/delete-course/:course_id', async (req, res) => {
 });
 app.get('/teacher/delete/course/:course_id', async (req, res) => {
     const courseId = req.params.course_id; // Retrieve the course ID from the URL parameters
-    
+
     try {
         // Add your code to delete the course here
         // For example:
         console.log(courseId);
         await db.none('DELETE FROM courses WHERE id = $1', courseId);
-        
+
         // After deleting the course, you can redirect the user to a confirmation page or any other appropriate action
         res.redirect('/confirmation'); // Replace '/confirmation' with the desired route
     } catch (error) {
@@ -1158,11 +1158,11 @@ app.get('/open-chat/:studentId', async (req, res) => {
 
 
 //shatabdi end
-app.post('/complete-lecture', async(req, res) => {
+app.post('/complete-lecture', async (req, res) => {
     const { lectureId } = req.body;
-    const course_id=await db.one('select course_id as cid from lecture where lecture_id=$1',lectureId);
+    const course_id = await db.one('select course_id as cid from lecture where lecture_id=$1', lectureId);
     console.log(course_id.cid);
-    await db.one('insert into watched(student_id,lecture_id,course_id) values($1,$2,$3)',[id,lectureId.course_id.cid]);
+    await db.one('insert into watched(student_id,lecture_id,course_id) values($1,$2,$3)', [id, lectureId.course_id.cid]);
     // Perform database insertion here using lectureId
     // Example: INSERT INTO completed_lectures (lecture_id) VALUES ($1)
     res.sendStatus(200); // Send success response
@@ -1170,7 +1170,7 @@ app.post('/complete-lecture', async(req, res) => {
 
 app.delete('/teacher/delete-lecture/:lecture_id', async (req, res) => {
     const lectureId = req.params.lecture_id;
-    
+
     try {
         // Delete the lecture from the database
         await db.none('DELETE FROM watched WHERE lecture_id = $1', lectureId);
@@ -1239,8 +1239,8 @@ app.post('/teacher/update-lecture/:lecture_id', upload.fields([{ name: 'video_fi
                 saveFile(pdfFile, pdfFilePath);
                 req.body.pdf_link = pdfFileName;
             }
-           C_id=prevLec.course_id;
-            return res.render('lecture_updated', { message: result.p_status_message, lectureId,C_id });
+            C_id = prevLec.course_id;
+            return res.render('lecture_updated', { message: result.p_status_message, lectureId, C_id });
         } else {
             return res.render('lecture_not_updated', { message: result.p_status_message, lectureId });
         }
@@ -1260,7 +1260,15 @@ function deleteFile(filePath) {
         fs.unlinkSync(filePath);
     }
 }
-
+app.get('/student/routine', async (req, res) => {
+    try {
+        res.render('student_routine');
+    }
+    catch (error) {
+        console.error('Error opening chat:', error);
+        res.status(500).json({ error: 'Error about page.' });
+    }
+});
 
 app.get('/student/about', async (req, res) => {
 
