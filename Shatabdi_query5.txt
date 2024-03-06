@@ -1,0 +1,32 @@
+ALTER TABLE routine
+ADD COLUMN student_id INT REFERENCES student(student_id) ON DELETE CASCADE;
+
+
+ALTER TABLE routine
+ADD CONSTRAINT unique_routine_combination UNIQUE (start_time, end_time, student_id),
+ADD FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE;
+
+
+CREATE OR REPLACE FUNCTION check_routine_constraint()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM routine
+        WHERE start_time = NEW.start_time
+          AND end_time = NEW.end_time
+          AND student_id = NEW.student_id
+    ) THEN
+        RAISE EXCEPTION 'Routine with the same start time, end time, and student ID already exists';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER before_insert_routine
+BEFORE INSERT ON routine
+FOR EACH ROW
+EXECUTE FUNCTION check_routine_constraint();
+
+

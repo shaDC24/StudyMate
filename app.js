@@ -1260,15 +1260,67 @@ function deleteFile(filePath) {
         fs.unlinkSync(filePath);
     }
 }
+
 app.get('/student/routine', async (req, res) => {
     try {
-        res.render('student_routine');
-    }
-    catch (error) {
-        console.error('Error opening chat:', error);
-        res.status(500).json({ error: 'Error about page.' });
+        console.log("......get......");
+        // Retrieve tasks from your database or any other data source
+        const tasks = await db.manyOrNone('select *from routine where student_id = $1',id);
+        console.log(tasks);
+
+        // Render the student_routine EJS template with tasks
+        res.render('student_routine', { tasks: tasks });
+    } catch (error) {
+        console.error('Error opening page:', error);
+        res.status(500).json({ error: 'Error opening page.' });
     }
 });
+
+
+app.post('/student/routine', async (req, res) => {
+    try {
+        console.log("......post......");
+        // const existingtasks = await db.manyOrNone('SELECT * FROM routine WHERE student_id = $1', id);
+        // console.log(existingtasks);
+        const { tasks } = req.body;
+        
+        // Process each task
+        for (const task of tasks) {
+            const startTime = task.startTime.trim();
+            const endTime = task.endTime.trim();
+            const taskName = task.taskName.trim();
+            
+            console.log("inserting...");
+            
+            try {
+                // Insert task into database
+                const newtask = await db.one('INSERT INTO routine (start_time, end_time, task_name, student_id) VALUES ($1, $2, $3, $4) RETURNING *', [startTime, endTime, taskName, Number(id)]);
+                
+                console.log('New Task Added:');
+                console.log('Start Time:', startTime);
+                console.log('End Time:', endTime);
+                console.log('Task Name:', taskName);
+            } catch (error) {
+                // If exception is raised, log the error
+                console.error('Error adding task:', error);
+                // Check if error message indicates a duplicate routine
+                if (error.message.includes('Routine with the same start time, end time, and student ID already exists')) {
+                    console.log('Duplicate routine found, skipping insertion for this task.');
+                } else {
+                    // Re-throw other errors
+                    throw error;
+                }
+            }
+        }
+
+        res.status(200).send('Tasks added successfully.');
+    } catch (error) {
+        console.error('Error adding tasks:', error);
+        res.status(500).json({ error: 'Error adding tasks.' });
+    }
+});
+
+
 
 app.get('/student/about', async (req, res) => {
 
