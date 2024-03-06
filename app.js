@@ -1261,14 +1261,50 @@ function deleteFile(filePath) {
     }
 }
 
+app.get('/student/mythingstodo', async (req, res) => {
+    try {
+        console.log("my things to do");
+        res.render('mythingstodo');
+    } catch (error) {
+        console.error('Error opening page:', error);
+        res.status(500).json({ error: 'Error opening page.' });
+    }
+});
+
+app.get('/student/current_routine', async (req, res) => {
+    try {
+        console.log("current routine");
+        res.render('student_current_routine');
+    } catch (error) {
+        console.error('Error opening page:', error);
+        res.status(500).json({ error: 'Error opening page.' });
+    }
+});
+
+app.get('/student/manage_todo_list',async (req, res) => {
+    try {
+        console.log(" to do list");
+        res.render('todo_list');
+    } catch (error) {
+        console.error('Error opening page:', error);
+        res.status(500).json({ error: 'Error opening page.' });
+    }
+});
+
+app.get('/student/track_study_hour',async (req, res) => {
+    try {
+        console.log("track_study_hour");
+        res.render('track_study_hour');
+    } catch (error) {
+        console.error('Error opening page:', error);
+        res.status(500).json({ error: 'Error opening page.' });
+    }
+});
 app.get('/student/routine', async (req, res) => {
     try {
         console.log("......get......");
-        // Retrieve tasks from your database or any other data source
         const tasks = await db.manyOrNone('select *from routine where student_id = $1',id);
         console.log(tasks);
-
-        // Render the student_routine EJS template with tasks
         res.render('student_routine', { tasks: tasks });
     } catch (error) {
         console.error('Error opening page:', error);
