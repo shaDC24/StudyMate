@@ -1338,7 +1338,7 @@ app.delete('/student/delete/:taskId', async (req, res) => {
 
 app.get('/student/manage_todo_list', async (req, res) => {
     try {
-        console.log(" to do list");
+        console.log("to do list");
         res.render('todo_list');
     } catch (error) {
         console.error('Error opening page:', error);
@@ -1373,11 +1373,9 @@ app.get('/student/routine', async (req, res) => {
 app.post('/student/routine', async (req, res) => {
     try {
         console.log("......post......");
-
         const { tasks } = req.body;
         const insertedTasks = [];
         let duplicateRoutineMessage = '';
-
         for (const task of tasks) {
             const startTime = task.startTime.trim();
             const endTime = task.endTime.trim();
@@ -1387,7 +1385,6 @@ app.post('/student/routine', async (req, res) => {
                 continue;
 
             console.log("inserting...");
-
             try {
                 const newTask = await db.one('INSERT INTO routine (start_time, end_time, task_name, student_id) VALUES ($1, $2, $3, $4) RETURNING *', [startTime, endTime, taskName, Number(id)]);
                 insertedTasks.push(newTask);
@@ -1410,9 +1407,7 @@ app.post('/student/routine', async (req, res) => {
                     throw error;
                 }
             }
-        }
-
-        // Fetch updated tasks after the loop completes
+        }// Fetch updated tasks after the loop completes
         const nowTasks = await db.manyOrNone('SELECT * FROM routine WHERE student_id = $1', Number(id));
 
         // Render the page with the updated tasks and duplicate message
