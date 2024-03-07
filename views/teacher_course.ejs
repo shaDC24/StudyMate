@@ -107,7 +107,7 @@
                             <div class="accordion-body">
                                 <%= courses[i].course_description %>
                                 <!-- Upload Lecture button -->
-                                <a href="/initiate/lecture" class="btn btn-primary">Upload Lecture</a>
+                                <a href="/initiate/lecture?course_id=<%= courses[i].id %>" class="btn btn-primary">Upload Lecture</a>
                                 <!-- Add Exam button -->
                                 <a href="/add-exam/<%=courses[i].id%>" class="btn btn-secondary">Add Exam</a>
                                 <!-- Delete button -->
