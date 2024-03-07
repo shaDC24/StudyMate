@@ -13,23 +13,62 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #e5ecf4;
+            overflow-x: hidden;
+            /* To prevent horizontal scrolling */
+        }
+
+        .background {
+            background-image: url('public/background.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
+            filter: blur(5px);
+
+            -webkit-filter: blur(5px);
+
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .foreground {
+            position: relative;
+            z-index: 1;
         }
 
         .navbar {
-            background-color: #343a40 !important;
+            background-color: rgba(0, 0, 0, 0.8);
+
         }
 
-        .navbar-brand {
-            color: #fff;
-            font-weight: bold;
+        .navbar-brand,
+        .navbar-nav .nav-link {
+            color: #ffffff;
+
         }
 
-        .nav-link {
-            color: #fff;
+        .navbar-nav .nav-link:hover {
+            color: #aaaaaa;
+
+        }
+
+        .jumbotron {
+            background-color: rgba(0, 0, 0, 0.5);
+            color: #ffffff;
+            padding: 100px 20px;
+            margin-bottom: 40px;
+        }
+
+        .jumbotron h1,
+        .jumbotron h2 {
+            margin-bottom: 30px;
+        }
+
+        .jumbotron p {
+            margin-bottom: 50px;
         }
 
         .container {
@@ -39,26 +78,16 @@
             text-align: center;
         }
 
-        .jumbotron {
-            background-image: url('public/background.jpg');
-            color: #ffffff;
-            padding: 100px 20px;
+        .video-container {
+            display: flex;
+            justify-content: center;
             margin-bottom: 40px;
         }
 
-        .btn-primary {
-            background-color: #28a745;
-            border: none;
-            border-radius: 5px;
-            padding: 10px 30px;
-            font-size: 1.1em;
-            color: #ffffff;
-            transition: background-color 0.3s ease;
-            text-decoration: none;
-        }
-
-        .btn-primary:hover {
-            background-color: #218838;
+        video {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
         }
 
         .card-container {
@@ -97,21 +126,82 @@
             color: #6c757d;
         }
 
-        .video-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 40px;
+
+        .carousel-item img {
+            max-width: 1000px;
+            /* Adjust the max-width as needed */
+            height: 500px;
+            border-radius: 10px;
+            margin: auto;
+            /* Center the image */
         }
 
-        video {
-            max-width: 100%;
+        .student_card_container {
+            overflow-x: auto;
+            /* Enable horizontal scrolling */
+            white-space: nowrap;
+            /* Prevent line breaks */
+            padding-bottom: 20px;
+            /* Add some bottom padding for better spacing */
+        }
+
+        .student-grid-wrapper {
+            display: flex;
+            /* Display rows side by side */
+            overflow-x: auto;
+            /* Enable horizontal scrolling */
+            padding-bottom: 20px;
+            /* Add some bottom padding for better spacing */
+        }
+
+        .student-grid-container {
+            display: flex;
+            /* Display cards inline */
+            gap: 20px;
+            /* Adjust the gap between cards */
+        }
+
+
+
+
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            border: none;
+            border-radius: 15px;
+            transition: transform 0.3s;
+            display: inline-block;
+            /* Display cards inline */
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .circle-img {
+            width: 150px;
+            height: 150px;
+            overflow: hidden;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+        }
+
+        .circle-img img {
+            width: 100%;
             height: auto;
-            border-radius: 10px;
+        }
+
+        .card-title {
+            color: #343a40;
+            font-weight: bold;
+            margin-bottom: 0;
         }
     </style>
 </head>
 
 <body>
+
+    <div class="background"></div>
 
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
@@ -124,7 +214,9 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
+
                         <a class="nav-link" href="#" id="login-link">Log in</a>
+
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/registration">Registration</a>
@@ -133,6 +225,112 @@
             </div>
         </div>
     </nav>
+    <div class="container">
+        <div class="jumbotron">
+            <h1>Welcome to <span id="dynamic-text"></span></h1>
+            <h2><span id="dynamic-text2"></span></h2>
+            <p>Your ultimate destination for learning and success</p>
+        </div>
+    </div>
+
+    <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="public/homepage.jpeg" class="d-block w-100" alt="...">
+            </div>
+            <div class="carousel-item">
+                <img src="public/homepage2.jpeg" class="d-block w-100" alt="...">
+            </div>
+            <div class="carousel-item">
+                <img src="public/homepage3.jpeg" class="d-block w-100" alt="...">
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+
+    <br><br><br>
+
+    <div class="video-container">
+        <video width="640" height="360" controls>
+            <source src="uploads/homepage.mkv" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <div class="container card-container">
+        <div class="card">
+            <img src="public/teacher.jpg" class="card-img-top" alt="Teacher">
+            <div class="card-body">
+                <h5 class="card-title">TEACHERS</h5>
+                <p class="card-text">There are almost <%=tc%>+ teachers
+                        involved here. They are experienced and the most relevant teachers;</p><a href="#"
+                    class="btn btn-primary">Go somewhere</a>
+            </div>
+        </div>
+        <div class="card">
+            <img src="public/course.jpg" class="card-img-top" alt="Course">
+            <div class="card-body">
+                <h5 class="card-title">COURSES</h5>
+                <p class="card-text">There are almost <%=cc%> courses
+                        that are very helpful with their content.</p><a href="#" class="btn btn-primary">Go
+                    somewhere</a>
+            </div>
+        </div>
+        <div class="card">
+            <img src="public/lecture.jpg" class="card-img-top" alt="Lecture">
+            <div class="card-body">
+                <h5 class="card-title">LECTURES</h5>
+                <p class="card-text">Almost <%=lc%> quick example text to build on mental strength and make up the bulk
+                        of the brain's content.</p>
+                <a href="#" class="btn btn-primary">Go somewhere</a>
+            </div>
+        </div>
+        <div class="card">
+            <img src="public/exam.jpg" class="card-img-top" alt="Explore">
+            <div class="card-body">
+                <h5 class="card-title">EXAM</h5>
+                <p class="card-text">Almost <%=qc%> quick example exam to build on preparation and make up the bulk
+                        of the book's content.</p>
+                <a href="#" class="btn btn-primary">Go somewhere</a>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <div class="student_card_container">
+        <h1>Our Students</h1>
+        <div class="student-grid-wrapper">
+            <% for (let i = 0; i < 4; i++) { %>
+                <div class="student-grid-container">
+                    <!-- Repeat this card for each student in the current row -->
+                    <% for (let j = i * Math.ceil(students.length / 4); j < Math.min((i + 1) * Math.ceil(students.length / 4), students.length); j++) { %>
+                        <div class="card text-center">
+                            <div class="circle-img">
+                                <img src="public/<%= students[j].profilepiclink %>.jpeg" class="card-img-top rounded-circle"
+                                    alt="<%= students[j].first_name %> <%= students[j].last_name %>">
+                            </div>
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <%= students[j].first_name %> <%= students[j].last_name %>
+                                </h6>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+                <br><br><br> <!-- Optional: Add spacing between rows -->
+            <% } %>
+        </div>
+    </div>
+    
+    
+
 
     <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -151,71 +349,17 @@
             </div>
         </div>
     </div>
-
-    <div class="container">
-        <div class="jumbotron">
-            <h1>Welcome to <span id="dynamic-text"></span></h1>
-            <br><br>
-            <h2><span id="dynamic-text2"></span></h2>
-            <br><br><br>
-            <p>Your ultimate destination for learning and success</p>
-            <br><br>
-        </div>
-    </div>
-
-    <div class="video-container">
-        <video width="640" height="360" controls>
-            <source src="uploads/homepage.mkv" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-    </div>
-
-    <div class="container card-container">
-        <div class="card">
-            <img src="public/teacher.jpg" class="card-img-top" alt="Teacher">
-            <div class="card-body">
-                <h5 class="card-title">TEACHERS</h5>
-                <p class="card-text">Explore our experienced and relevant teachers.</p>
-            </div>
-        </div>
-        <div class="card">
-            <img src="public/course.jpg" class="card-img-top" alt="Course">
-            <div class="card-body">
-                <h5 class="card-title">COURSES</h5>
-                <p class="card-text">Discover our wide range of helpful courses.</p>
-            </div>
-        </div>
-        <div class="card">
-            <img src="public/lecture.jpg" class="card-img-top" alt="Lecture">
-            <div class="card-body">
-                <h5 class="card-title">LECTURES</h5>
-                <p class="card-text">Access quick example lectures to strengthen your skills.</p>
-            </div>
-        </div>
-        <div class="card">
-            <img src="public/exam.jpg" class="card-img-top" alt="Explore">
-            <div class="card-body">
-                <h5 class="card-title">EXPLORE</h5>
-                <p class="card-text">Prepare for exams with our extensive question bank.</p>
-            </div>
-        </div>
-    </div>
-
     <script>
         const text = "STUDYMATE";
         const text2 = "Learn, Connect, Succeed";
-
         // Delay between each letter (in milliseconds)
         const delay = 100;
-
         // Get the span element where the text will be displayed
         const dynamicText = document.getElementById("dynamic-text");
         const dynamicText2 = document.getElementById("dynamic-text2");
-
         // Initialize an index to keep track of the current letter being displayed
         let index = 0;
         let index2 = 0;
-
         // Function to display the text letter by letter
         function displayText() {
             // Check if all letters have been displayed
@@ -228,7 +372,6 @@
                 setTimeout(displayText, delay);
             }
         }
-
         function displayText2() {
             // Check if all letters have been displayed
             if (index2 < text2.length) {
@@ -240,19 +383,32 @@
                 setTimeout(displayText2, delay);
             }
         }
-
         // Start displaying the text
         displayText();
         setTimeout(displayText2, text.length * delay);
-
         // Add event listener to the login link
-        const loginLink = document.getElementById('login-link');
-        loginLink.addEventListener('click', function () {
-            // Show the login modal
-            const loginModal = new bootstrap.Modal(document.getElementById('loginModal'), {
-                keyboard: false
-            });
-            loginModal.show();
+        document.addEventListener('DOMContentLoaded', function () {
+            const loginLink = document.getElementById('login-link');
+            if (loginLink) {
+                loginLink.addEventListener('click', function () {
+                    const modalElement = document.getElementById('loginModal');
+                    if (modalElement) {
+                        try {
+                            const loginModal = new bootstrap.Modal(modalElement, {
+                                keyboard: false,
+                                backdrop: false // Adjust this configuration as needed
+                            });
+                            loginModal.show();
+                        } catch (error) {
+                            console.error('Error initializing modal:', error);
+                        }
+                    } else {
+                        console.error('Modal element not found.');
+                    }
+                });
+            } else {
+                console.error('Login link element not found.');
+            }
         });
 
         // Handle login Yes button click
@@ -264,6 +420,7 @@
         });
     </script>
 
+
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
         integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
         crossorigin="anonymous"></script>
@@ -273,4 +430,3 @@
 </body>
 
 </html>
-
