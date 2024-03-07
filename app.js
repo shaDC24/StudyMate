@@ -527,7 +527,8 @@ app.get("/course-search-results", async (req, res) => {
         });
       } else {
         const inputs = await db.one("select * from courses where id= $1", tid);
-        console.log(inputs);
+        console.log(inputs + "LLLLLL");
+        console.log(inputs );
         res.render("individual_course_dashboarsd", {
           userType: "Student",
           inputs: inputs,
