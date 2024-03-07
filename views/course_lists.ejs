@@ -88,10 +88,91 @@
         button:hover {
             background-color: #283593;
         }
+
+        /* Navbar styles */
+        .navbar {
+            background-color: #1a237e;
+            overflow: hidden;
+        }
+
+        .navbar a {
+            float: left;
+            display: block;
+            color: #fff;
+            text-align: center;
+            padding: 14px 20px;
+            text-decoration: none;
+            font-size: 17px;
+        }
+
+        .navbar a:hover {
+            background-color: #283593;
+        }
+
+        .dropdown {
+            float: left;
+            overflow: hidden;
+        }
+
+        .dropdown .dropbtn {
+            font-size: 17px;
+            border: none;
+            outline: none;
+            color: white;
+            padding: 14px 20px;
+            background-color: inherit;
+            font-family: inherit;
+            margin: 0;
+        }
+
+        .navbar a, .dropdown:hover .dropbtn {
+            background-color: #283593;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+        .dropdown-content a {
+            float: none;
+            color: #333;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #ddd;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
     </style>
 </head>
 
 <body>
+    <!-- Navbar -->
+    <div class="navbar">
+        <a href="/student/dashboard">Home</a>
+        <a href="/student/enroll-courses">Enroll Courses</a>
+        <a href="/student/course-lists">Course Lists</a>
+        <div class="dropdown">
+            <button class="dropbtn">More Options</button>
+            <div class="dropdown-content">
+                <a href="/student/exam-section">Exam Section</a>
+                <a href="/student/mythingstodo">My To-Do Things</a>
+            </div>
+        </div>
+        <a href="/">Logout</a>
+    </div>
+
     <div class="container">
         <h1>Course Lists</h1>
         <% if (courses.length > 0) { %>

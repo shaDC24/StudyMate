@@ -310,12 +310,16 @@ app.get("/students", async (req, res) => {
 });
 
 app.get("/student/dashboard", async (req, res) => {
-    try {
-        res.render("student_dashboard", { userType: "Student" });
-    } catch (error) {
-        console.error(error);
-        res.status(500).send("Internal Server Error");
-    }
+  try {
+    const student = await db.any(
+      "select * from student where student_id=$1",
+      id
+    );
+    res.render("student_dashboard", { userType: "Student", student: student });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
 app.get("/api/search/teacher", async (req, res) => {
@@ -1484,54 +1488,54 @@ app.get("/teacher/update-lecture/:lecture_id", async (req, res) => {
 });
 
 app.post(
-    "/teacher/update-lecture/:lecture_id",
-    upload.fields([
-        { name: "video_file", maxCount: 1 },
-        { name: "pdf_file", maxCount: 1 },
-    ]),
-    async (req, res) => {
-        const lectureId = parseInt(req.params.lecture_id);
-        console.log("post  " + lectureId);
-        //console.log(C_id);
-        const lectureName = req.body.lecture_name;
-        const description = req.body.description;
-        const prevLec = await db.oneOrNone(
-            "SELECT * FROM lecture WHERE lecture_id = $1",
-            lectureId
-        );
-        console.log(prevLec);
-        try {
-            //console.log("req  " + req.body);
-            console.log(
-                lectureName +
-                "  " +
-                description +
-                "  " +
-                req.body.video_link +
-                "  " +
-                req.body.pdf_link
-            );
-            const result = await db.proc("update_lecture", [
-                lectureId,
-                lectureName,
-                description,
-                req.body.video_link,
-                req.body.pdf_link,
-                "OUT p_status_message",
-            ]);
-            console.log(result);
-            console.log('debug');
-            if (result.p_status_message === "Lecture updated successfully") {
-                if (
-                    req.files &&
-                    req.files["video_file"] &&
-                    req.files["video_file"].length > 0
-                ) {
-                    console.log("in if0");
-                    const videoFile = req.files["video_file"][0];
-                    const videoFileName = `video_${lectureId}_${prevLec.course_id}_${prevLec.teacher_id}.mp4`;
-                    console.log(videoFileName);
-                    const videoFilePath = path.join(__dirname, "uploads", videoFileName);
+  "/teacher/update-lecture/:lecture_id",
+  upload.fields([
+    { name: "video_file", maxCount: 1 },
+    { name: "pdf_file", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    const lectureId = parseInt(req.params.lecture_id);
+    console.log("post  " + lectureId);
+    //console.log(C_id);
+    const lectureName = req.body.lecture_name;
+    const description = req.body.description;
+    const prevLec = await db.oneOrNone(
+      "SELECT * FROM lecture WHERE lecture_id = $1",
+      lectureId
+    );
+    console.log(prevLec);
+    try {
+      //console.log("req  " + req.body);
+      console.log(
+        lectureName +
+          "  " +
+          description +
+          "  " +
+          req.body.video_link +
+          "  " +
+          req.body.pdf_link
+      );
+      const result = await db.proc("update_lecture", [
+        lectureId,
+        lectureName,
+        description,
+        req.body.video_link,
+        req.body.pdf_link,
+        "OUT p_status_message",
+      ]);
+      console.log(result);
+      console.log("debug");
+      if (result.p_status_message === "Lecture updated successfully") {
+        if (
+          req.files &&
+          req.files["video_file"] &&
+          req.files["video_file"].length > 0
+        ) {
+          console.log("in if0");
+          const videoFile = req.files["video_file"][0];
+          const videoFileName = `video_${lectureId}_${prevLec.course_id}_${prevLec.teacher_id}.mp4`;
+          console.log(videoFileName);
+          const videoFilePath = path.join(__dirname, "uploads", videoFileName);
 
                     if (prevLec.videolink) {
                         const prevVideoFilePath = path.join(
@@ -1806,24 +1810,29 @@ app.get("/student/routine", async (req, res) => {
     }
 });
 
-app.post('/student/routine', async (req, res) => {
-    try {
-        console.log("......post......");
-        const { tasks } = req.body;
-        const insertedTasks = [];
-        let duplicateRoutineMessage = '';
-        for (const task of tasks) {
-            const startTime = task.startTime.trim();
-            const endTime = task.endTime.trim();
-            const taskName = task.taskName.trim();
-            const currentTask = await db.oneOrNone('SELECT * FROM routine WHERE start_time = $1 AND end_time = $2 AND task_name = $3 AND student_id = $4', [startTime, endTime, taskName, Number(id)]);
-            if (currentTask)
-                continue;
+app.post("/student/routine", async (req, res) => {
+  try {
+    console.log("......post......");
+    const { tasks } = req.body;
+    const insertedTasks = [];
+    let duplicateRoutineMessage = "";
+    for (const task of tasks) {
+      const startTime = task.startTime.trim();
+      const endTime = task.endTime.trim();
+      const taskName = task.taskName.trim();
+      const currentTask = await db.oneOrNone(
+        "SELECT * FROM routine WHERE start_time = $1 AND end_time = $2 AND task_name = $3 AND student_id = $4",
+        [startTime, endTime, taskName, Number(id)]
+      );
+      if (currentTask) continue;
 
-            console.log("inserting...");
-            try {
-                const newTask = await db.one('INSERT INTO routine (start_time, end_time, task_name, student_id) VALUES ($1, $2, $3, $4) RETURNING *', [startTime, endTime, taskName, Number(id)]);
-                insertedTasks.push(newTask);
+      console.log("inserting...");
+      try {
+        const newTask = await db.one(
+          "INSERT INTO routine (start_time, end_time, task_name, student_id) VALUES ($1, $2, $3, $4) RETURNING *",
+          [startTime, endTime, taskName, Number(id)]
+        );
+        insertedTasks.push(newTask);
 
                 console.log("New Task Added:");
                 console.log("Start Time:", startTime);
