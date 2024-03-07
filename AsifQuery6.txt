@@ -1,0 +1,54 @@
+CREATE OR REPLACE PROCEDURE update_lecture(
+    IN p_lecture_id INT,
+    IN p_lecture_name VARCHAR,
+    IN p_description TEXT,
+    IN p_videolink VARCHAR,
+    IN p_pdflink VARCHAR,
+	OUT p_status_message VARCHAR
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    -- Retrieve the current attributes of the lecture
+    DECLARE
+        v_previous_lecture_name VARCHAR;
+        v_previous_description TEXT;
+        v_previous_videolink VARCHAR;
+        v_previous_pdflink VARCHAR;
+		v_previous_teacher_id INTEGER;
+		v_previous_course_id INTEGER;
+        v_new_pdflink VARCHAR;
+        v_new_videolink VARCHAR;
+		
+    BEGIN
+        SELECT lecture_name, description, videolink, pdflink,course_id,teacher_id
+        INTO v_previous_lecture_name, v_previous_description, v_previous_videolink, v_previous_pdflink,
+		v_previous_course_id,v_previous_teacher_id
+        FROM lecture
+        WHERE lecture_id = p_lecture_id;
+        
+        -- Check if any of the attributes are different
+        IF v_previous_lecture_name != p_lecture_name OR
+           v_previous_description != p_description OR
+           v_previous_videolink != p_videolink OR
+           v_previous_pdflink != p_pdflink
+        THEN
+            -- Generate new filenames for video and PDF
+            v_new_videolink := '/uploads/video_' || p_lecture_id || '_'||v_previous_course_id||'_'||v_previous_teacher_id||'.mp4';
+            v_new_pdflink := '/uploads/pdf_' || p_lecture_id || '_'||v_previous_course_id||'_'||v_previous_teacher_id|| '.pdf';
+            
+            -- If any attribute is different, update the lecture with the new attributes
+            UPDATE lecture
+            SET lecture_name = p_lecture_name,
+                description = p_description,
+                videolink = v_new_videolink,
+                pdflink = v_new_pdflink
+            WHERE lecture_id = p_lecture_id;
+		    p_status_message := 'Lecture updated successfully';
+        ELSE
+            -- Set status message
+            p_status_message := 'No changes were made to the lecture';
+        END IF;
+    END;
+END;
+$$;
