@@ -111,6 +111,7 @@
                 .done(function(data) {
                     // Handle success, if needed
                     console.log('Study hours saved successfully');
+                    stopTimer();
                 })
                 .fail(function(error) {
                     // Handle error, if any
