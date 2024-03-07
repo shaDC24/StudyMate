@@ -23,9 +23,9 @@
             background-position: center;
             background-repeat: no-repeat;
             filter: blur(5px);
-            /* Apply blur effect */
+
             -webkit-filter: blur(5px);
-            /* For compatibility with some older browsers */
+
             position: fixed;
             top: 0;
             left: 0;
@@ -41,18 +41,18 @@
 
         .navbar {
             background-color: rgba(0, 0, 0, 0.8);
-            /* Dark background color */
+
         }
 
         .navbar-brand,
         .navbar-nav .nav-link {
             color: #ffffff;
-            /* White text color */
+
         }
 
         .navbar-nav .nav-link:hover {
             color: #aaaaaa;
-            /* Lighter color on hover */
+
         }
 
         .jumbotron {
@@ -135,6 +135,67 @@
             margin: auto;
             /* Center the image */
         }
+
+        .student_card_container {
+            overflow-x: auto;
+            /* Enable horizontal scrolling */
+            white-space: nowrap;
+            /* Prevent line breaks */
+            padding-bottom: 20px;
+            /* Add some bottom padding for better spacing */
+        }
+
+        .student-grid-wrapper {
+            display: flex;
+            /* Display rows side by side */
+            overflow-x: auto;
+            /* Enable horizontal scrolling */
+            padding-bottom: 20px;
+            /* Add some bottom padding for better spacing */
+        }
+
+        .student-grid-container {
+            display: flex;
+            /* Display cards inline */
+            gap: 20px;
+            /* Adjust the gap between cards */
+        }
+
+
+
+
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            border: none;
+            border-radius: 15px;
+            transition: transform 0.3s;
+            display: inline-block;
+            /* Display cards inline */
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .circle-img {
+            width: 150px;
+            height: 150px;
+            overflow: hidden;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+        }
+
+        .circle-img img {
+            width: 100%;
+            height: auto;
+        }
+
+        .card-title {
+            color: #343a40;
+            font-weight: bold;
+            margin-bottom: 0;
+        }
     </style>
 </head>
 
@@ -153,7 +214,9 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/login" id="login-link">Log in</a>
+
+                        <a class="nav-link" href="#" id="login-link">Log in</a>
+
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/registration">Registration</a>
@@ -206,47 +269,97 @@
             <img src="public/teacher.jpg" class="card-img-top" alt="Teacher">
             <div class="card-body">
                 <h5 class="card-title">TEACHERS</h5>
-                <p class="card-text">Explore our experienced and relevant teachers.</p>
+                <p class="card-text">There are almost <%=tc%>+ teachers
+                        involved here. They are experienced and the most relevant teachers;</p><a href="#"
+                    class="btn btn-primary">Go somewhere</a>
             </div>
         </div>
         <div class="card">
             <img src="public/course.jpg" class="card-img-top" alt="Course">
             <div class="card-body">
                 <h5 class="card-title">COURSES</h5>
-                <p class="card-text">Discover our wide range of helpful courses.</p>
+                <p class="card-text">There are almost <%=cc%> courses
+                        that are very helpful with their content.</p><a href="#" class="btn btn-primary">Go
+                    somewhere</a>
             </div>
         </div>
         <div class="card">
             <img src="public/lecture.jpg" class="card-img-top" alt="Lecture">
             <div class="card-body">
                 <h5 class="card-title">LECTURES</h5>
-                <p class="card-text">Access quick example lectures to strengthen your skills.</p>
+                <p class="card-text">Almost <%=lc%> quick example text to build on mental strength and make up the bulk
+                        of the brain's content.</p>
+                <a href="#" class="btn btn-primary">Go somewhere</a>
             </div>
         </div>
         <div class="card">
             <img src="public/exam.jpg" class="card-img-top" alt="Explore">
             <div class="card-body">
-                <h5 class="card-title">EXPLORE</h5>
-                <p class="card-text">Prepare for exams with our extensive question bank.</p>
+                <h5 class="card-title">EXAM</h5>
+                <p class="card-text">Almost <%=qc%> quick example exam to build on preparation and make up the bulk
+                        of the book's content.</p>
+                <a href="#" class="btn btn-primary">Go somewhere</a>
             </div>
         </div>
     </div>
+    </div>
 
+    <div class="student_card_container">
+        <h1>Our Students</h1>
+        <div class="student-grid-wrapper">
+            <% for (let i = 0; i < 4; i++) { %>
+                <div class="student-grid-container">
+                    <!-- Repeat this card for each student in the current row -->
+                    <% for (let j = i * Math.ceil(students.length / 4); j < Math.min((i + 1) * Math.ceil(students.length / 4), students.length); j++) { %>
+                        <div class="card text-center">
+                            <div class="circle-img">
+                                <img src="public/<%= students[j].profilepiclink %>.jpeg" class="card-img-top rounded-circle"
+                                    alt="<%= students[j].first_name %> <%= students[j].last_name %>">
+                            </div>
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <%= students[j].first_name %> <%= students[j].last_name %>
+                                </h6>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+                <br><br><br> <!-- Optional: Add spacing between rows -->
+            <% } %>
+        </div>
+    </div>
+    
+    
+
+
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Do you have an account?</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>If you have an account, click "Yes" to log in, otherwise click "No" to register.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="loginYesBtn">Yes</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script>
         const text = "STUDYMATE";
         const text2 = "Learn, Connect, Succeed";
-
         // Delay between each letter (in milliseconds)
         const delay = 100;
-
         // Get the span element where the text will be displayed
         const dynamicText = document.getElementById("dynamic-text");
         const dynamicText2 = document.getElementById("dynamic-text2");
-
         // Initialize an index to keep track of the current letter being displayed
         let index = 0;
         let index2 = 0;
-
         // Function to display the text letter by letter
         function displayText() {
             // Check if all letters have been displayed
@@ -259,7 +372,6 @@
                 setTimeout(displayText, delay);
             }
         }
-
         function displayText2() {
             // Check if all letters have been displayed
             if (index2 < text2.length) {
@@ -271,19 +383,32 @@
                 setTimeout(displayText2, delay);
             }
         }
-
         // Start displaying the text
         displayText();
         setTimeout(displayText2, text.length * delay);
-
         // Add event listener to the login link
-        const loginLink = document.getElementById('login-link');
-        loginLink.addEventListener('click', function () {
-            // Show the login modal
-            const loginModal = new bootstrap.Modal(document.getElementById('loginModal'), {
-                keyboard: false
-            });
-            loginModal.show();
+        document.addEventListener('DOMContentLoaded', function () {
+            const loginLink = document.getElementById('login-link');
+            if (loginLink) {
+                loginLink.addEventListener('click', function () {
+                    const modalElement = document.getElementById('loginModal');
+                    if (modalElement) {
+                        try {
+                            const loginModal = new bootstrap.Modal(modalElement, {
+                                keyboard: false,
+                                backdrop: false // Adjust this configuration as needed
+                            });
+                            loginModal.show();
+                        } catch (error) {
+                            console.error('Error initializing modal:', error);
+                        }
+                    } else {
+                        console.error('Modal element not found.');
+                    }
+                });
+            } else {
+                console.error('Login link element not found.');
+            }
         });
 
         // Handle login Yes button click
@@ -294,6 +419,7 @@
             window.location.href = 'login'; // Replace '#' with your actual login page URL
         });
     </script>
+
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
         integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"

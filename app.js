@@ -51,6 +51,7 @@ app.use(bodyParser.json());
 app.get('/', async (req, res) => {
     try {
         const studentcount = await db.one('select count(*) as sc from student');
+        const student = await db.manyOrNone('select *from student');
         const coursecount = await db.one('select count(*) as cc from courses');
         const teachercount = await db.one('select count(*) as tc from teacher');
         const lecturecount = await db.one('select count(*) as lc from lecture');
@@ -60,7 +61,8 @@ app.get('/', async (req, res) => {
         const tc = teachercount.tc;
         const lc = lecturecount.lc;
         const qc = questioncount.qc;
-        res.render('homepage', { sc, tc, cc, lc, qc });
+        console.log(student);
+        res.render('homepage', { sc, tc, cc, lc, qc, students:student });
     }
     catch (error) {
         console.error(error);
