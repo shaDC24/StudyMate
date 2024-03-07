@@ -31,28 +31,6 @@ FOR EACH ROW
 EXECUTE FUNCTION check_routine_constraint();
 
 
-
-
-
-//picture add to student TABLE
-
-ALTER TABLE student
-ADD COLUMN profilePicLink VARCHAR(255); -- Assuming the link is stored as a VARCHAR
-
--- Step 2: Update each row to set the profile picture link based on the conditions
-UPDATE student
-SET profilePicLink = CASE 
-                        WHEN student_id % 2 = 0 THEN 'first_pic'
-                        WHEN student_id % 3 = 0 THEN 'second_pic'
-						WHEN student_id % 5 = 0 THEN 'third_pic'
-						WHEN student_id % 7 = 0 THEN 'fourth_pic'
-						ELSE 'student'||(student_id % 10)
-                     END;
-
-
-
-
-
 //ei nicher function ta age likhchilam akhon ektu update korchi
 
 CREATE OR REPLACE FUNCTION check_routine_constraint()
@@ -71,3 +49,26 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+
+
+//profile pic for students
+ALTER TABLE student
+ADD COLUMN profilePicLink VARCHAR(255); -- Assuming the link is stored as a VARCHAR
+
+-- Step 2: Update each row to set the profile picture link based on the conditions
+UPDATE student
+SET profilePicLink = CASE 
+                        WHEN student_id % 2 = 0 THEN 'first_pic'
+                        WHEN student_id % 3 = 0 THEN 'second_pic'
+						WHEN student_id % 5 = 0 THEN 'third_pic'
+						WHEN student_id % 7 = 0 THEN 'fourth_pic'
+						ELSE 'student'||(student_id % 10)
+                     END;
+
+//profile pic for teachers
+ALTER TABLE teacher
+ADD COLUMN profilePicLink VARCHAR(255); 
+
+UPDATE teacher
+SET profilePicLink = 'teacher'||(teacher_id % 10);
