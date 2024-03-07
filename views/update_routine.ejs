@@ -10,34 +10,81 @@
 </head>
 
 <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Student Dashboard</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/student/routine">Add Task</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/student/current_routine">Current Routine</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/student/track_study_hour">Tracking Study Hour</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
     <div class="container">
         <h1 class="my-4">Update Task</h1>
-        <form action="/student/update/<%= task.id %>" method="POST">
-            <!-- Task Name -->
-            <div class="form-group">
-                <label for="taskName">Task Name</label>
-                <input type="text" class="form-control" id="taskName" name="taskName" value="<%= task.task_name %>"
-                    required>
+        <% if(errorMessage) { %>
+            <div class="alert alert-danger" role="alert">
+                <%= errorMessage %>
             </div>
-            <!-- Start Time -->
-            <div class="form-group">
-                <label for="startTime">Start Time</label>
-                <input type="time" class="form-control" id="startTime" name="startTime" value="<%= task.start_time %>"
-                    required>
-            </div>
-            <!-- End Time -->
-            <div class="form-group">
-                <label for="endTime">End Time</label>
-                <input type="time" class="form-control" id="endTime" name="endTime" value="<%= task.end_time %>"
-                    required>
-            </div>
-            <!-- Submit Button -->
-            <button type="submit" class="btn btn-primary">Update Task</button>
-        </form>
+            <% } %>
+                <% if(successMessage) { %>
+                    <div class="alert alert-success" role="alert">
+                        <%= successMessage %>
+                    </div>
+                    <% } %>
+                        <% if(warningmessage) { %>
+                            <div class="alert alert-warning" role="alert">
+                                <%= warningmessage %>
+                            </div>
+                            <% } %>
+
+
+                                <form action="/student/update/<%= task.id %>" method="POST">
+
+                                    <div class="form-group">
+                                        <label for="taskName">Task Name</label>
+                                        <input type="text" class="form-control" id="taskName" name="taskName"
+                                            value="<%= task.task_name %>" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="startTime">Start Time</label>
+                                        <input type="time" class="form-control" id="startTime" name="startTime"
+                                            value="<%= task.start_time %>" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="endTime">End Time</label>
+                                        <input type="time" class="form-control" id="endTime" name="endTime"
+                                            value="<%= task.end_time %>" required>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary">Update Task</button>
+                                    <!-- Back Button -->
+                                    <a href="/student/current_routine" class="btn btn-secondary">Back to Current
+                                        Routine</a>
+                                </form>
     </div>
 
-    <!-- Bootstrap JS and jQuery (required for Bootstrap) -->
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

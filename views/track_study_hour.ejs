@@ -4,11 +4,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Study Hour Tracker</title>
+    <!-- Link to your CSS file -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js library -->
 </head>
 
 <body>
-    <h1>Track study hour</h1>
+    <header>
+        <h1>Study Hour Tracker</h1>
+    </header>
+
+    <section id="add-study-hours">
+        <h2>Add Study Hours</h2>
+        <form id="study-hour-form">
+            <label for="subject">Subject:</label>
+            <input type="text" id="subject" name="subject" required>
+
+            <label for="hours">Hours:</label>
+            <input type="number" id="hours" name="hours" required>
+
+            <button type="submit">Add Hours</button>
+        </form>
+    </section>
+
+    <section id="display-study-hours">
+        <h2>Study Hours Log</h2>
+        <ul id="hours-list">
+            <!-- Study hours will be dynamically added here -->
+        </ul>
+    </section>
+
+    <canvas id="study-hours-chart" width="400" height="200"></canvas> <!-- Chart canvas -->
+
+    <script>
+        // Function to update the study hours chart
+        // Function to update the study hours chart
+        function updateChart(data) {
+            // Destroy existing chart if it exists
+            if (window.studyHoursChart) {
+                window.studyHoursChart.destroy();
+            }
+
+            const ctx = document.getElementById('study-hours-chart').getContext('2d');
+            window.studyHoursChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(entry => entry.subject),
+                    datasets: [{
+                        label: 'Study Hours',
+                        data: data.map(entry => entry.hours),
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                stepSize: 1
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+
+
+        // Modify the addStudyHours function to call updateChart after adding study hours
+        // Function to handle form submission
+        function addStudyHours(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            // Get form inputs
+            const subject = document.getElementById('subject').value;
+            const hours = parseFloat(document.getElementById('hours').value);
+
+            // Create list item to display study hours
+            const listItem = document.createElement('li');
+            listItem.textContent = `${subject}: ${hours} hours`;
+
+            // Append list item to study hours list
+            const studyHoursList = document.getElementById('hours-list');
+            studyHoursList.appendChild(listItem);
+
+            // Clear form inputs
+            document.getElementById('subject').value = '';
+            document.getElementById('hours').value = '';
+
+            // Update chart with new data
+            updateChart([{ subject, hours }]);
+        }
+
+
+        // Event listener for form submission
+        const studyHourForm = document.getElementById('study-hour-form');
+        studyHourForm.addEventListener('submit', addStudyHours);
+
+        // Call updateChart initially to display any existing study hours
+        updateChart();
+    </script>
+
 </body>
 
 </html>
