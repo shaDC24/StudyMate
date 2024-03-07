@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Task</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <h1 class="my-4">Update Task</h1>
+        <form action="/student/update/<%= task.id %>" method="POST">
+            <!-- Task Name -->
+            <div class="form-group">
+                <label for="taskName">Task Name</label>
+                <input type="text" class="form-control" id="taskName" name="taskName" value="<%= task.task_name %>"
+                    required>
+            </div>
+            <!-- Start Time -->
+            <div class="form-group">
+                <label for="startTime">Start Time</label>
+                <input type="time" class="form-control" id="startTime" name="startTime" value="<%= task.start_time %>"
+                    required>
+            </div>
+            <!-- End Time -->
+            <div class="form-group">
+                <label for="endTime">End Time</label>
+                <input type="time" class="form-control" id="endTime" name="endTime" value="<%= task.end_time %>"
+                    required>
+            </div>
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary">Update Task</button>
+        </form>
+    </div>
+
+    <!-- Bootstrap JS and jQuery (required for Bootstrap) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>

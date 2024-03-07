@@ -6,6 +6,7 @@ const db = require('./db'); // Import your database connection
 const bcrypt = require('bcrypt');
 const fs = require('fs');
 const { name } = require('ejs');
+const { constants } = require('buffer');
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true })); // Parse form data
@@ -1222,9 +1223,9 @@ app.post('/teacher/update-lecture/:lecture_id', upload.fields([{ name: 'video_fi
 
                 if (prevLec.videolink) {
                     const prevVideoFilePath = path.join(__dirname, 'uploads', prevLec.videolink);
-                    deleteFile(prevVideoFilePath);
+                    deleteFile1(prevVideoFilePath);
                 }
-                saveFile(videoFile, videoFilePath);
+                saveFile1(videoFile, videoFilePath);
                 req.body.video_link = videoFileName;
             }
 
@@ -1235,9 +1236,9 @@ app.post('/teacher/update-lecture/:lecture_id', upload.fields([{ name: 'video_fi
 
                 if (prevLec.pdflink) {
                     const prevPdfFilePath = path.join(__dirname, 'uploads', prevLec.pdflink);
-                    deleteFile(prevPdfFilePath);
+                    deleteFile1(prevPdfFilePath);
                 }
-                saveFile(pdfFile, pdfFilePath);
+                saveFile1(pdfFile, pdfFilePath);
                 req.body.pdf_link = pdfFileName;
             }
             C_id = prevLec.course_id;
@@ -1252,11 +1253,11 @@ app.post('/teacher/update-lecture/:lecture_id', upload.fields([{ name: 'video_fi
 });
 
 
-function saveFile(file, filePath) {
+function saveFile1(file, filePath) {
     fs.writeFileSync(filePath, file.buffer);
 }
 
-function deleteFile(filePath) {
+function deleteFile1(filePath) {
     if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
     }
@@ -1275,14 +1276,68 @@ app.get('/student/mythingstodo', async (req, res) => {
 app.get('/student/current_routine', async (req, res) => {
     try {
         console.log("current routine");
-        res.render('student_current_routine');
+        const tasks = await db.manyOrNone('select *from routine where student_id = $1', Number(id));
+        console.log(tasks);
+        res.render('student_current_routine', { tasks });
     } catch (error) {
         console.error('Error opening page:', error);
         res.status(500).json({ error: 'Error opening page.' });
     }
 });
 
-app.get('/student/manage_todo_list',async (req, res) => {
+app.get('/student/update/:taskId', async (req, res) => {
+    try {
+        const taskId = req.params.taskId;
+        // Fetch the task details from the database using the taskId
+        const task = await db.oneOrNone('SELECT * FROM routine WHERE id = $1', taskId);
+        console.log(task);
+        if (task) {
+            res.render('update_routine', { task });
+        } else {
+            res.status(404).send('Task not found');
+        }
+    } catch (error) {
+        console.error('Error updating task:', error);
+        res.status(500).json({ error: 'Error updating task.' });
+    }
+});
+
+app.post('/student/update/:taskId', async (req, res) => {
+    try {
+        const taskId = req.params.taskId;
+        const { taskName, startTime, endTime } = req.body;
+
+        const existingTask = await db.oneOrNone('SELECT *FROM routine WHERE (start_time <= $1 AND end_time >= $1) OR (start_time <= $2 AND end_time >= $2) AND id != $3', [startTime, endTime, taskId]);
+
+        if (existingTask) {
+            const errorMessage = 'Update not possible. Duplicate routine found, skipping update for this task.';
+            res.render('update_routine', { task: { id: taskId, task_name: taskName, start_time: startTime, end_time: endTime }, errorMessage });
+        } else {
+            await db.none('UPDATE routine SET task_name = $1, start_time = $2, end_time = $3 WHERE id = $4', [taskName, startTime, endTime, taskId]);
+            res.redirect('/student/current_routine');
+        }
+    } catch (error) {
+        console.error('Error updating task:', error);
+        res.status(500).json({ error: 'Error updating task.' });
+    }
+});
+
+
+app.delete('/student/delete/:taskId', async (req, res) => {
+    try {
+        const taskId = req.params.taskId;
+        // Delete the task from the database
+        await db.none('DELETE FROM routine WHERE id = $1', taskId);
+        res.sendStatus(200); // Send success response
+    } catch (error) {
+        console.error('Error deleting task:', error);
+        res.status(500).json({ error: 'Error deleting task.' });
+    }
+});
+
+
+
+app.get('/student/manage_todo_list', async (req, res) => {
     try {
         console.log(" to do list");
         res.render('todo_list');
@@ -1292,7 +1347,7 @@ app.get('/student/manage_todo_list',async (req, res) => {
     }
 });
 
-app.get('/student/track_study_hour',async (req, res) => {
+app.get('/student/track_study_hour', async (req, res) => {
     try {
         console.log("track_study_hour");
         res.render('track_study_hour');
@@ -1301,38 +1356,43 @@ app.get('/student/track_study_hour',async (req, res) => {
         res.status(500).json({ error: 'Error opening page.' });
     }
 });
+
+// app.js
+
 app.get('/student/routine', async (req, res) => {
     try {
         console.log("......get......");
-        const tasks = await db.manyOrNone('select *from routine where student_id = $1',id);
+        const tasks = await db.manyOrNone('SELECT * FROM routine WHERE student_id = $1', Number(id));
         console.log(tasks);
-        res.render('student_routine', { tasks: tasks });
+        res.render('student_routine', { tasks: tasks, duplicateRoutineMessage: null });
     } catch (error) {
         console.error('Error opening page:', error);
-        res.status(500).json({ error: 'Error opening page.' });
+        res.status(500).render('error', { error: 'Error opening page.' });
     }
 });
-
 
 app.post('/student/routine', async (req, res) => {
     try {
         console.log("......post......");
-        // const existingtasks = await db.manyOrNone('SELECT * FROM routine WHERE student_id = $1', id);
-        // console.log(existingtasks);
+
         const { tasks } = req.body;
-        
-        // Process each task
+        const insertedTasks = [];
+        let duplicateRoutineMessage = '';
+
         for (const task of tasks) {
             const startTime = task.startTime.trim();
             const endTime = task.endTime.trim();
             const taskName = task.taskName.trim();
-            
+            const currentTask = await db.oneOrNone('SELECT * FROM routine WHERE start_time = $1 AND end_time = $2 AND task_name = $3 AND student_id = $4', [startTime, endTime, taskName, Number(id)]);
+            if (currentTask)
+                continue;
+
             console.log("inserting...");
-            
+
             try {
-                // Insert task into database
-                const newtask = await db.one('INSERT INTO routine (start_time, end_time, task_name, student_id) VALUES ($1, $2, $3, $4) RETURNING *', [startTime, endTime, taskName, Number(id)]);
-                
+                const newTask = await db.one('INSERT INTO routine (start_time, end_time, task_name, student_id) VALUES ($1, $2, $3, $4) RETURNING *', [startTime, endTime, taskName, Number(id)]);
+                insertedTasks.push(newTask);
+
                 console.log('New Task Added:');
                 console.log('Start Time:', startTime);
                 console.log('End Time:', endTime);
@@ -1340,22 +1400,39 @@ app.post('/student/routine', async (req, res) => {
             } catch (error) {
                 // If exception is raised, log the error
                 console.error('Error adding task:', error);
+
                 // Check if error message indicates a duplicate routine
                 if (error.message.includes('Routine with the same start time, end time, and student ID already exists')) {
-                    console.log('Duplicate routine found, skipping insertion for this task.');
-                } else {
+                    duplicateRoutineMessage += `Duplicate routine found for ${startTime} and ${endTime} slot, skipping insertion for ${taskName} task.`;
+                    console.log(duplicateRoutineMessage);
+                }
+                else {
                     // Re-throw other errors
                     throw error;
                 }
             }
         }
 
-        res.status(200).send('Tasks added successfully.');
+        // Fetch updated tasks after the loop completes
+        const nowTasks = await db.manyOrNone('SELECT * FROM routine WHERE student_id = $1', Number(id));
+
+        // Render the page with the updated tasks and duplicate message
+        if (duplicateRoutineMessage !== '') {
+            console.log(nowTasks);
+            console.log('Duplicate message exists');
+            res.render('student_routine', { tasks: nowTasks, duplicateRoutineMessage: duplicateRoutineMessage });
+            console.log('rendering');
+        } else {
+            console.log('No duplicate message');
+            res.render('student_routine', { tasks: nowTasks, duplicateRoutineMessage: null });
+        }
     } catch (error) {
+        console.log('eooror');
         console.error('Error adding tasks:', error);
-        res.status(500).json({ error: 'Error adding tasks.' });
+        res.status(500).render('error', { error: 'Error adding tasks.' });
     }
 });
+
 
 
 

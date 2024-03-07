@@ -1,11 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Student Current Routine</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Custom CSS */
+        body {
+            background-color: #f8f9fa;
+            padding-top: 40px;
+        }
+
+        .task-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-item p {
+            margin-bottom: 10px;
+        }
+
+        .btn-group {
+            margin-top: 10px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #343a40;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .btn {
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+
+        .update-btn {
+            margin-right: 10px;
+        }
+    </style>
 </head>
+
 <body>
-    <h1>student current routine</h1>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Student Dashboard</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="/student/routine">Add Task</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/student/current_routine">Current Routine</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/student/manage_todo_list">Manage To do List</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/student/track_study_hour">Tracking Study Hour</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <h1 class="my-4">Student Current Routine</h1>
+        <% tasks.forEach(task=> { %>
+            <div class="task-item">
+                <p><strong>Task Name:</strong>
+                    <%= task.task_name %>
+                </p>
+                <p><strong>Start Time:</strong>
+                    <%= task.start_time %>
+                </p>
+                <p><strong>End Time:</strong>
+                    <%= task.end_time %>
+                </p>
+                <div class="btn-group" role="group" aria-label="Task Actions">
+                    <!-- Update Button -->
+                    <button type="button" class="btn btn-sm btn-primary update-btn"
+                        onclick="updateTask('<%= task.id %>')">Update</button>
+
+                    <!-- Delete Button -->
+                    <button type="button" class="btn btn-sm btn-danger"
+                        onclick="deleteTask('<%= task.id %>')">Delete</button>
+                </div>
+            </div>
+            <% }); %>
+    </div>
+
+    <!-- Bootstrap JS and jQuery (required for Bootstrap) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Custom Script for Update and Delete -->
+    <script>
+        function updateTask(taskId) {
+            window.location.href = '/student/update/' + taskId;
+        }
+
+
+        function deleteTask(taskId) {
+            if (confirm("Are you sure you want to delete this task?")) {
+                fetch('/student/delete/' + taskId, {
+                    method: 'DELETE'
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            window.location.reload();
+                        } else {
+                            console.error('Error deleting task:', response.statusText);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error deleting task:', error);
+                    });
+            }
+        }
+    </script>
 </body>
+
 </html>
