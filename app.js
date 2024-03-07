@@ -784,8 +784,8 @@ app.post('/initiate/lecture', upload.fields([{ name: 'video', maxCount: 1 }, { n
         console.log(lectureId);
 
         // Save video and pdf files to the file system and get modified file names
-        const modifiedVideoFileName = `video_${lectureId.count}_${C_id}_${id}.mp4`; saveFile(videoFile, `video_${lectureId.count}_${C_id}_${id}.mp4`);
-        const modifiedPdfFileName = `pdf_${lectureId.count}_${C_id}_${id}.pdf`; saveFile(pdfFile, `pdf_${lectureId.count}_${C_id}_${id}.pdf`);
+        const modifiedVideoFileName = `/uploads/video_${lectureId.count}_${C_id}_${id}.mp4`; saveFile(videoFile, `video_${lectureId.count}_${C_id}_${id}.mp4`);
+        const modifiedPdfFileName = `/uploads/pdf_${lectureId.count}_${C_id}_${id}.pdf`; saveFile(pdfFile, `pdf_${lectureId.count}_${C_id}_${id}.pdf`);
 
         // Save lecture data to the database, including modified file names
         const newlecture = await db.one(
@@ -808,6 +808,7 @@ app.post('/initiate/lecture', upload.fields([{ name: 'video', maxCount: 1 }, { n
 function saveFile(file, fileName) {
     const filePath = path.join(__dirname, 'uploads', fileName);
     fs.writeFileSync(filePath, file.buffer);
+    console.log(filePath);
 }
 
 
