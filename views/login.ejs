@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/login.css">
     <style>
         body {
-            /* background-image:url('public/background-image.jpg'); */
+            background-image: url('public/login.jpeg');
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
             margin: 0;
@@ -20,12 +20,13 @@
         }
 
         .container {
+            position: relative;
             width: 400px;
-            /* background-image:url('public/background-image.jpg'); */
-            background-color: #e6ebf0;
+            background: transparent;
             padding: 40px;
             border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(2px); /* Apply blur effect to the background */
         }
 
         h1 {
@@ -53,6 +54,7 @@
             border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 16px;
+            background-color: #f9f9f9; /* Light gray background */
         }
 
         button {
@@ -60,6 +62,7 @@
             color: #fff;
             border: none;
             cursor: pointer;
+            transition: background-color 0.3s;
         }
 
         button:hover {
@@ -78,7 +81,9 @@
     <div class="container">
         <h1>Login Page</h1>
         <% if (error) { %>
-            <p class="error"><%= error %></p>
+        <p class="error">
+            <%= error %>
+        </p>
         <% } %>
         <form action="/login" method="post">
             <label for="userType">User Type:</label>

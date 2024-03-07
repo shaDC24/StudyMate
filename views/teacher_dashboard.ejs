@@ -52,11 +52,10 @@
         transition: color 0.3s;
       }
 
-      .options a:hover {
-        color: #0056b3;
-      }
-
-      /* Additional styling for the About section */
+        .options a:hover {
+            color: #0056b3;
+        }
+              /* Additional styling for the About section */
       .about-section {
         background-color: #fff;
         padding: 40px 20px;
@@ -75,6 +74,13 @@
         font-size: 16px;
         color: #555;
       }
+
+        .carousel-item img {
+            max-width: 1000px;
+            height: 500px;
+            border-radius: 10px;
+            margin: auto;
+        }
     </style>
   </head>
   <body>
@@ -94,28 +100,66 @@
     </ul>
 
     <h1 class="head">Welcome <%= userType %>!</h1>
+    <!-- <div class="options">
+        <p>Choose an option:</p>
+        <a href="#">Option 1</a>
+        <a href="#">Option 2</a>
+        <a href="#">Option 3</a>
+      
+    </div> -->
 
-    <!-- Other content goes here -->
-
+    <!-- Include Bootstrap JS (Optional, only if you need Bootstrap JavaScript features) -->
     <div class="about-section">
-      <h2>About StudyMate</h2>
-      <p>
-        StudyMate is your ultimate learning companion, designed to empower
-        students with the tools they need to succeed academically. Our mission
-        is to provide a seamless platform where students can access educational
-        resources, connect with peers, and engage in collaborative learning
-        experiences.
-      </p>
-      <p>
-        Contact Us:
-        <br />
-        Email: info@studymate.com
-        <br />
-        Phone: 123-456-7890
-        <br />
-        Address: 123 Study Lane, Cityville, State, Country
-      </p>
-      <p>Our Motto: "Empowering Learning, Together."</p>
+        <h2>About StudyMate</h2>
+        <p>
+          StudyMate is your ultimate learning companion, designed to empower
+          students with the tools they need to succeed academically. Our mission
+          is to provide a seamless platform where students can access educational
+          resources, connect with peers, and engage in collaborative learning
+          experiences.
+        </p>
+        <p>
+          Contact Us:
+          <br />
+          Email: info@studymate.com
+          <br />
+          Phone: 123-456-7890
+          <br />
+          Address: 123 Study Lane, Cityville, State, Country
+        </p>
+        <p>Our Motto: "Empowering Learning, Together."</p>
+      </div>
+      <h1 class="head">Welcome <%= userType %>!</h1>
+    <div id="carouselExample" class="carousel slide">
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="/public/teacher_dashboard1.jpeg" class="d-block w-100" alt="...">
+            </div>
+            <div class="carousel-item">
+                <img src="/public/teacher_dashboard2.jpeg" class="d-block w-100" alt="...">
+            </div>
+            <div class="carousel-item">
+                <img src="/public/teacher_dashboard3.jpeg" class="d-block w-100" alt="...">
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
     </div>
-  </body>
+
+    <!-- Include Bootstrap JS (Optional, only if you need Bootstrap JavaScript features) -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+        integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+        integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
 </html>

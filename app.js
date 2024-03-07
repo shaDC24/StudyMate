@@ -38,25 +38,27 @@ app.use(bodyParser.json());
 
 // Handle form submission
 
-app.get("/", async (req, res) => {
-  try {
-    const studentcount = await db.one("select count(*) as sc from student");
-    const student = await db.manyOrNone("select *from student");
-    const coursecount = await db.one("select count(*) as cc from courses");
-    const teachercount = await db.one("select count(*) as tc from teacher");
-    const lecturecount = await db.one("select count(*) as lc from lecture");
-    const questioncount = await db.one("select count(*) as qc from question");
-    const sc = studentcount.sc;
-    const cc = coursecount.cc;
-    const tc = teachercount.tc;
-    const lc = lecturecount.lc;
-    const qc = questioncount.qc;
-    console.log(student);
-    res.render("homepage", { sc, tc, cc, lc, qc, students: student });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Internal Server Error");
-  }
+
+app.get('/', async (req, res) => {
+    try {
+        const studentcount = await db.one('select count(*) as sc from student');
+        const student = await db.manyOrNone('select *from student');
+        const coursecount = await db.one('select count(*) as cc from courses');
+        const teachercount = await db.one('select count(*) as tc from teacher');
+        const lecturecount = await db.one('select count(*) as lc from lecture');
+        const questioncount = await db.one('select count(*) as qc from question');
+        const sc = studentcount.sc;
+        const cc = coursecount.cc;
+        const tc = teachercount.tc;
+        const lc = lecturecount.lc;
+        const qc = questioncount.qc;
+        console.log(student);
+        res.render('homepage', { sc, tc, cc, lc, qc, students: student });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
 });
 app.get("/registration", (req, res) => {
   res.render("registration", { error: "" });
@@ -464,35 +466,31 @@ app.get("/api/search/course", async (req, res) => {
   }
 });
 
-app.get("/teacher-search-results", async (req, res) => {
-  try {
-    console.log("teacher-search-results");
-    const searchTerm = req.query.q.toLowerCase();
-    console.log(searchTerm);
-    const teachers = await db.oneOrNone(
-      "SELECT *FROM teacher where lower(teacher_name)=$1",
-      searchTerm
-    );
-    if (teachers) {
-      const tid = teachers.teacher_id;
-      console.log(tid);
-      const inputs = await db.any(
-        "select t.teacher_name,t.teacher_proficiency,c.course_title,c.course_description from teacher t join courses c on t.teacher_id=c.teacher_id  where t.teacher_id = $1 group by  c.course_title,c.course_description,t.teacher_name, t.teacher_proficiency",
-        tid
-      );
-      console.log(inputs);
-      res.render("individual_dashboarsd", {
-        userType: "Student",
-        inputs: inputs,
-      });
-    } else {
-      alert("Teacher not found");
-      res.redirect("/student/dashboard");
+app.get('/teacher-search-results', async (req, res) => {
+    try {
+        console.log('teacher-search-results');
+        const searchTerm = req.query.q.toLowerCase();
+        console.log(searchTerm);
+        const teachers = await db.any('SELECT *FROM teacher where lower(teacher_name)=$1', searchTerm);
+        if (teachers) {
+            const tid = teachers[0].teacher_id;
+            console.log(tid);
+
+            const inputs = await db.any('select *from courses c join teacher t on t.teacher_id=c.teacher_id where t.teacher_id =$1', tid);
+            //const inputs = await db.any('select t.teacher_name,t.teacher_proficiency,t.profilepiclink,c.course_title,c.course_description from teacher t join courses c on t.teacher_id=c.teacher_id  where t.teacher_id = $1 group by  c.course_title,c.course_description,t.teacher_name, t.teacher_proficiency,t.profilepiclink', tid);
+
+            console.log(inputs);
+            res.render('individual_dashboarsd', { userType: 'Student', inputs: inputs, teachers: teachers });
+        }
+        else {
+            alert('Teacher not found');
+            res.redirect('/student/dashboard');
+        }
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
     }
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Internal Server Error");
-  }
 });
 app.get("/course-search-results", async (req, res) => {
   try {
