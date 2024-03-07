@@ -491,54 +491,55 @@ app.get('/teacher-search-results', async (req, res) => {
     }
 });
 app.get("/course-search-results", async (req, res) => {
-    try {
-        console.log("course-search-results");
-        const searchTerm = req.query.q.toLowerCase();
-        console.log(searchTerm);
-        const course = await db.oneOrNone(
-            "SELECT *FROM courses where lower(course_title)=$1",
-            searchTerm
+  try {
+    console.log("course-search-results");
+    const searchTerm = req.query.q.toLowerCase();
+    console.log(searchTerm);
+    const course = await db.oneOrNone(
+      "SELECT *FROM courses where lower(course_title)=$1",
+      searchTerm
+    );
+    const enrolledcourses =
+      ("select *from courses c where id in (select course_id from enrollments e where student_id=$1)",
+      id);
+    const unenrolledcourses =
+      ("select * from courses c1 where c1.id in (select c.id from courses c except(select e.course_id from enrollments e where e.student_id=$1))",
+      id);
+    const tid = course.id;
+    console.log(tid);
+    if (course) {
+      const c = await db.one(
+        "select count(*) as count from lecture where course_id= $1",
+        tid
+      );
+      console.log("count : " + c.count);
+      if (c.count > 0) {
+        const inputs = await db.any(
+          "select * from lecture l join courses c on l.course_id=c.id where c.id=$1;",
+          tid
         );
-        const enrolledcourses =
-            ("select *from courses c where id in (select course_id from enrollments e where student_id=$1)",
-                id);
-        const unenrolledcourses =
-            ("select * from courses c1 where c1.id in (select c.id from courses c except(select e.course_id from enrollments e where e.student_id=$1))",
-                id);
-        const tid = course.id;
-        console.log(tid);
-        if (course) {
-            const c = await db.one(
-                "select count(*) as count from lecture where course_id= $1",
-                tid
-            );
-            console.log("count : " + c.count);
-            if (c.count > 0) {
-                const inputs = await db.any(
-                    "select * from lecture l join courses c on l.course_id=c.id where c.id=$1;",
-                    tid
-                );
-                console.log(inputs);
-                res.render("individual_course_lecture_dashboarsd", {
-                    userType: "Student",
-                    inputs: inputs,
-                });
-            } else {
-                const inputs = await db.one("select * from courses where id= $1", tid);
-                console.log(inputs);
-                res.render("individual_course_dashboarsd", {
-                    userType: "Student",
-                    inputs: inputs,
-                });
-            }
-        } else {
-            alert("course not found");
-            res.redirect("/student/dashboard");
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(500).send("Internal Server Error");
+        console.log(inputs);
+        res.render("individual_course_dashboarsd", {
+          userType: "Student",
+          inputs: inputs,
+        });
+      } else {
+        const inputs = await db.one("select * from courses where id= $1", tid);
+        console.log(inputs + "LLLLLL");
+        console.log(inputs );
+        res.render("individual_course_dashboarsd", {
+          userType: "Student",
+          inputs: inputs,
+        });
+      }
+    } else {
+      alert("course not found");
+      res.redirect("/student/dashboard");
     }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
 // to check if course is already added or not

@@ -1,185 +1,242 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Personal Profile</title>
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-            color: #333;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+        color: #333;
+      }
 
-        h1 {
-            color: #1a237e;
-            font-weight: bold;
-            text-align: center;
-            margin-top: 50px;
-        }
+      h1 {
+        color: #1a237e;
+        font-weight: bold;
+        text-align: center;
+        margin-top: 50px;
+      }
 
-        .row {
-            margin-top: 50px;
-        }
+      .row {
+        margin-top: 50px;
+      }
 
-        .nav-pills .nav-link {
-            color: #1a237e !important;
-            font-weight: bold;
-            border-radius: 0;
-        }
+      .nav-pills .nav-link {
+        color: #1a237e !important;
+        font-weight: bold;
+        border-radius: 0;
+      }
 
-        .nav-pills .nav-link.active {
-            background-color: #1a237e;
-            color: #fff !important;
-        }
+      .nav-pills .nav-link.active {
+        background-color: #1a237e;
+        color: #fff !important;
+      }
 
-        .col-4 {
-            position: sticky;
-            top: 100px;
-        }
+      .col-4 {
+        position: sticky;
+        top: 100px;
+      }
 
-        .card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
+      .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+      }
 
-        .card:hover {
-            transform: translateY(-5px);
-        }
+      .card:hover {
+        transform: translateY(-5px);
+      }
 
-        .card-header {
-            background-color: #1a237e;
-            color: #fff;
-            border-radius: 10px 10px 0 0;
-            font-weight: bold;
-        }
+      .card-header {
+        background-color: #1a237e;
+        color: #fff;
+        border-radius: 10px 10px 0 0;
+        font-weight: bold;
+      }
 
-        .card-body {
-            background-color: #fff;
-            border-radius: 0 0 10px 10px;
-        }
+      .card-body {
+        background-color: #fff;
+        border-radius: 0 0 10px 10px;
+      }
 
-        .btn-back {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: #1a237e;
-            border: none;
-            border-radius: 5px;
-            padding: 10px 20px;
-            font-weight: bold;
-            color: #fff;
-            transition: background-color 0.3s;
-        }
+      .btn-back {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #1a237e;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        font-weight: bold;
+        color: #fff;
+        transition: background-color 0.3s;
+      }
 
-        .btn-back:hover {
-            background-color: #283593;
-        }
+      .btn-back:hover {
+        background-color: #283593;
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <% if(inputs) {%>
-        <h1>You have searched for <%= inputs.course_title %></h1>
-        <div class="container">
-            <div class="row">
-                <div class="col-4">
-                    <nav id="navbar-example3" class="h-100 flex-column align-items-stretch pe-4 border-end">
-                        <nav class="nav nav-pills flex-column">
-                            <a class="nav-link active" href="#COURSETITLE">Course Title</a>
-                            <nav class="nav nav-pills flex-column">
-                                <a class="nav-link ms-3 my-1" href="#COURSEDESCRIPTION">Course Description</a>
-                                <a class="nav-link ms-3 my-1" href="#TotalLectures">Total Lectures</a>
-                            </nav>
-                        </nav>
-                    </nav>
-                </div>
-                <div class="col-8">
-                    <div data-bs-spy="scroll" data-bs-target="#navbar-example3" data-bs-offset="0" class="scrollspy-example-2" tabindex="0">
-                        <div id="COURSETITLE">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4>Course Title</h4>
-                                </div>
-                                <div class="card-body">
-                                    <p>The name of the course is <%= inputs.course_title %><br>
-                                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptatibus exercitationem
-                                        veniam enim beatae, asperiores illum quis architecto quod atque animi similique,
-                                        veritatis distinctio quidem, corporis culpa dolorum eaque laboriosam quae.
-                                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione
-                                        reiciendis maxime repellat molestiae quam quod dicta explicabo unde veritatis accusantium
-                                        quidem adipisci earum impedit libero dignissimos ea sint, ipsam nemo!
-                                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Laboriosam
-                                        dicta eius labore aspernatur rerum tempora excepturi porro ratione dolorem minus odio,
-                                        delectus cupiditate non iusto ad, numquam omnis quis repellendus.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="COURSEDESCRIPTION">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4>Course Description</h4>
-                                </div>
-                                <div class="card-body">
-                                    <p><%= inputs.course_description %><br>
-                                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptatibus exercitationem
-                                        veniam enim beatae, asperiores illum quis architecto quod atque animi similique,
-                                        veritatis distinctio quidem, corporis culpa dolorum eaque laboriosam quae.
-                                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione
-                                        reiciendis maxime repellat molestiae quam quod dicta explicabo unde veritatis accusantium
-                                        quidem adipisci earum impedit libero dignissimos ea sint, ipsam nemo!
-                                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Laboriosam
-                                        dicta eius labore aspernatur rerum tempora excepturi porro ratione dolorem minus odio,
-                                        delectus cupiditate non iusto ad, numquam omnis quis repellendus.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="TotalLectures">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4>Total Lectures</h4>
-                                </div>
-                                <div class="card-body">
-                                    <p>Lecture Initiated: 0<br>
-                                        No lecture has been initiated for this course yet.<br>
-                                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptatibus exercitationem
-                                        veniam enim beatae, asperiores illum quis architecto quod atque animi similique,
-                                        veritatis distinctio quidem, corporis culpa dolorum eaque laboriosam quae.
-                                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione
-                                        reiciendis maxime repellat molestiae quam quod dicta explicabo unde veritatis accusantium
-                                        quidem adipisci earum impedit libero dignissimos ea sint, ipsam nemo!
-                                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Laboriosam
-                                        dicta eius labore aspernatur rerum tempora excepturi porro ratione dolorem minus odio,
-                                        delectus cupiditate non iusto ad, numquam omnis quis repellendus.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <h1>You have searched for <%= inputs[0].course_title %></h1>
+    <div class="container">
+      <div class="row">
+        <div class="col-4">
+          <nav
+            id="navbar-example3"
+            class="h-100 flex-column align-items-stretch pe-4 border-end"
+          >
+            <nav class="nav nav-pills flex-column">
+              <a class="nav-link active" href="#COURSETITLE">Course Title</a>
+              <nav class="nav nav-pills flex-column">
+                <a class="nav-link ms-3 my-1" href="#COURSEDESCRIPTION"
+                  >Course Description</a
+                >
+                <a class="nav-link ms-3 my-1" href="#TotalLectures"
+                  >Total Lectures</a
+                >
+              </nav>
+            </nav>
+          </nav>
         </div>
+        <div class="col-8">
+          <div
+            data-bs-spy="scroll"
+            data-bs-target="#navbar-example3"
+            data-bs-offset="0"
+            class="scrollspy-example-2"
+            tabindex="0"
+          >
+            <div id="COURSETITLE">
+              <div class="card">
+                <div class="card-header">
+                  <h4>Course Title</h4>
+                </div>
+                <div class="card-body">
+                  <p>
+                    The name of the course is <%= inputs[0].course_title %><br />
+                    Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                    Voluptatibus exercitationem veniam enim beatae, asperiores
+                    illum quis architecto quod atque animi similique, veritatis
+                    distinctio quidem, corporis culpa dolorum eaque laboriosam
+                    quae. Lorem ipsum dolor sit amet consectetur adipisicing
+                    elit. Ratione reiciendis maxime repellat molestiae quam quod
+                    dicta explicabo unde veritatis accusantium quidem adipisci
+                    earum impedit libero dignissimos ea sint, ipsam nemo! Lorem
+                    ipsum dolor sit amet consectetur adipisicing elit.
+                    Laboriosam dicta eius labore aspernatur rerum tempora
+                    excepturi porro ratione dolorem minus odio, delectus
+                    cupiditate non iusto ad, numquam omnis quis repellendus.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div id="COURSEDESCRIPTION">
+              <div class="card">
+                <div class="card-header">
+                  <h4>Course Description</h4>
+                </div>
+                <div class="card-body">
+                  <p>
+                    <%= inputs[0].course_description %><br />
+                    Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                    Voluptatibus exercitationem veniam enim beatae, asperiores
+                    illum quis architecto quod atque animi similique, veritatis
+                    distinctio quidem, corporis culpa dolorum eaque laboriosam
+                    quae. Lorem ipsum dolor sit amet consectetur adipisicing
+                    elit. Ratione reiciendis maxime repellat molestiae quam quod
+                    dicta explicabo unde veritatis accusantium quidem adipisci
+                    earum impedit libero dignissimos ea sint, ipsam nemo! Lorem
+                    ipsum dolor sit amet consectetur adipisicing elit.
+                    Laboriosam dicta eius labore aspernatur rerum tempora
+                    excepturi porro ratione dolorem minus odio, delectus
+                    cupiditate non iusto ad, numquam omnis quis repellendus.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div id="TotalLectures">
+              <div class="card">
+                <div class="card-header">
+                  <h4>Total Lectures</h4>
+                </div>
+                <div class="card-body">
+                  <p>
+                    Lecture Initiated: <%=inputs.length%><br /><br />
+                    Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                    Voluptatibus exercitationem veniam enim beatae, asperiores
+                    illum quis architecto quod atque animi similique, veritatis
+                    distinctio quidem, corporis culpa dolorum eaque laboriosam
+                    quae. Lorem ipsum dolor sit amet consectetur adipisicing
+                    elit. Ratione reiciendis maxime repellat molestiae quam quod
+                    dicta explicabo unde veritatis accusantium quidem adipisci
+                    earum impedit libero dignissimos ea sint, ipsam nemo! Lorem
+                    ipsum dolor sit amet consectetur adipisicing elit.
+                    Laboriosam dicta eius labore aspernatur rerum tempora
+                    excepturi porro ratione dolorem minus odio, delectus
+                    cupiditate non iusto ad, numquam omnis quis repellendus.
+                  </p>
+                  <% for (let i=0; i < inputs.length; i++) { %>
+                  <div id="lecture<%= i %>">
+                    <h4><%= inputs[i].lecture_name %></h4>
+                    <p>
+                      <%= inputs[i].description %><br />
+                      Lorem ipsum, dolor sit amet consectetur adipisicing elit.
+                      Voluptatibus exercitationem veniam enim beatae, asperiores
+                      illum quis architecto quod atque animi similique,
+                      veritatis distinctio quidem, corporis culpa dolorum eaque
+                      laboriosam quae. Lorem ipsum dolor sit amet consectetur
+                      adipisicing elit. Ratione reiciendis maxime repellat
+                      molestiae quam quod dicta explicabo unde veritatis
+                      accusantium quidem adipisci earum impedit libero
+                      dignissimos ea sint, ipsam nemo! Lorem ipsum dolor sit
+                      amet consectetur adipisicing elit. Laboriosam dicta eius
+                      labore aspernatur rerum tempora excepturi porro ratione
+                      dolorem minus odio, delectus cupiditate non iusto ad,
+                      numquam omnis quis repellendus.
+                    </p>
+                  </div>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <%} else { %>
-        <div class="container">
-            <div class="alert alert-warning" role="alert">
-                No data available.
-            </div>
-        </div>
+    <div class="container">
+      <div class="alert alert-warning" role="alert">No data available.</div>
+    </div>
     <% } %>
 
     <!-- Bootstrap JavaScript and Popper.js -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
+      integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
+      integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF"
+      crossorigin="anonymous"
+    ></script>
     <!-- Add your custom scripts or links to other scripts as needed -->
-    <button class="btn btn-primary btn-back" onclick="window.location.href='/student/dashboard'">Back</button>
-</body>
-
+    <button
+      class="btn btn-primary btn-back"
+      onclick="window.location.href='/student/dashboard'"
+    >
+      Back
+    </button>
+  </body>
 </html>
