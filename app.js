@@ -1526,6 +1526,7 @@ app.post(
         "OUT p_status_message",
       ]);
       console.log(result);
+      console.log('debug');
       if (result.p_status_message === "Lecture updated successfully") {
         if (
           req.files &&
@@ -1535,6 +1536,7 @@ app.post(
           console.log("in if0");
           const videoFile = req.files["video_file"][0];
           const videoFileName = `video_${lectureId}_${prevLec.course_id}_${prevLec.teacher_id}.mp4`;
+          console.log(videoFileName);
           const videoFilePath = path.join(__dirname, "uploads", videoFileName);
 
           if (prevLec.videolink) {
