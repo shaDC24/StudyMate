@@ -117,14 +117,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-
-
-
-ALTER TABLE to_do_list
+ALTER TABLE study_hour
 ADD COLUMN student_id INTEGER,
-ADD COLUMN time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-ADD CONSTRAINT fk_student_id FOREIGN KEY (student_id) REFERENCES student(id) ON DELETE CASCADE;
+ADD CONSTRAINT fk_student_id FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE;
 
-
-ALTER TABLE to_do_list
-ADD COLUMN completed BOOLEAN DEFAULT FALSE;

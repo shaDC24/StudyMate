@@ -1,0 +1,123 @@
+<!-- timer.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Timer</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Student Dashboard</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/student/dashboard">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="/student/routine">Add Task</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/student/current_routine">Current Routine</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/student/track_study_hour">Tracking Study Hour</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h2>Study Timer</h2>
+        <div class="form-group">
+            <label for="targetHours">Target Study Hours:</label>
+            <span id="targetHours">
+                <%= targetHours %>
+            </span>
+        </div>
+        <div class="form-group">
+            <label for="timer">Timer:</label>
+            <span id="timer">00:00:00</span>
+        </div>
+        <button id="startTimer" class="btn btn-primary">Start</button>
+        <button id="stopTimer" class="btn btn-danger">Stop</button>
+        <button id="resetTimer" class="btn btn-secondary">Reset</button>
+        <button id="doneForToday" class="btn btn-success">Done for Today</button>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <script>
+        let timerInterval;
+        let timerRunning = false;
+        let elapsedTime = 0;
+
+        // Function to start the timer
+        function startTimer() {
+            if (!timerRunning) {
+                timerInterval = setInterval(updateTimer, 1000);
+                timerRunning = true;
+            }
+        }
+
+        // Function to stop the timer
+        function stopTimer() {
+            clearInterval(timerInterval);
+            timerRunning = false;
+        }
+
+        // Function to reset the timer
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            elapsedTime = 0;
+            updateTimerDisplay();
+        }
+
+        // Function to update the timer display
+        function updateTimer() {
+            elapsedTime++;
+            updateTimerDisplay();
+        }
+
+        // Function to update the timer display with elapsed time
+        function updateTimerDisplay() {
+            const hours = Math.floor(elapsedTime / 3600);
+            const minutes = Math.floor((elapsedTime % 3600) / 60);
+            const seconds = elapsedTime % 60;
+            document.getElementById('timer').innerText = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Event listeners for timer controls
+        document.getElementById('startTimer').addEventListener('click', startTimer);
+        document.getElementById('stopTimer').addEventListener('click', stopTimer);
+        document.getElementById('resetTimer').addEventListener('click', resetTimer);
+
+        // Event listener for "Done for Today" button
+        document.getElementById('doneForToday').addEventListener('click', function() {
+            // Assuming you're using jQuery for simplicity
+            $.post('/saveStudyHours', { date: '<%= date %>', hoursStudied: Math.floor(elapsedTime / 3600) })
+                .done(function(data) {
+                    // Handle success, if needed
+                    console.log('Study hours saved successfully');
+                })
+                .fail(function(error) {
+                    // Handle error, if any
+                    console.error('Error saving study hours:', error);
+                });
+        });
+    </script>
+</body>
+
+</html>
