@@ -13,8 +13,9 @@ BEGIN
     IF EXISTS (
         SELECT 1
         FROM routine
-        WHERE start_time = NEW.start_time
-          AND end_time = NEW.end_time
+        WHERE ((start_time <= NEW.start_time AND NEW.start_time<=end_time) OR
+           (start_time <= NEW.end_time AND  NEW.end_time<=end_time) OR
+           NEW.start_time<=NEW.end_time)
           AND student_id = NEW.student_id
     ) THEN
         RAISE EXCEPTION 'Routine with the same start time, end time, and student ID already exists';
@@ -30,3 +31,23 @@ FOR EACH ROW
 EXECUTE FUNCTION check_routine_constraint();
 
 
+
+
+//ei nicher function ta age likhchilam akhon ektu update korchi
+
+CREATE OR REPLACE FUNCTION check_routine_constraint()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM routine
+        WHERE (( NEW.start_time>=start_time OR NEW.end_time<=end_time) 
+           OR
+           NEW.start_time>=NEW.end_time)
+          AND student_id = NEW.student_id
+    ) THEN
+        RAISE EXCEPTION 'Routine with the same start time, end time, and student ID already exists';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;

@@ -115,6 +115,7 @@ BEGIN
     END IF;
 END $$;
 
+
 CREATE OR REPLACE FUNCTION ddl_event_trigger_function() RETURNS event_trigger AS $$
 DECLARE
     obj record;
