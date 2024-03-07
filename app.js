@@ -38,27 +38,25 @@ app.use(bodyParser.json());
 
 // Handle form submission
 
-
-app.get('/', async (req, res) => {
-    try {
-        const studentcount = await db.one('select count(*) as sc from student');
-        const student = await db.manyOrNone('select *from student');
-        const coursecount = await db.one('select count(*) as cc from courses');
-        const teachercount = await db.one('select count(*) as tc from teacher');
-        const lecturecount = await db.one('select count(*) as lc from lecture');
-        const questioncount = await db.one('select count(*) as qc from question');
-        const sc = studentcount.sc;
-        const cc = coursecount.cc;
-        const tc = teachercount.tc;
-        const lc = lecturecount.lc;
-        const qc = questioncount.qc;
-        console.log(student);
-        res.render('homepage', { sc, tc, cc, lc, qc, students:student });
-    }
-    catch (error) {
-        console.error(error);
-        res.status(500).send('Internal Server Error');
-    }
+app.get("/", async (req, res) => {
+  try {
+    const studentcount = await db.one("select count(*) as sc from student");
+    const student = await db.manyOrNone("select *from student");
+    const coursecount = await db.one("select count(*) as cc from courses");
+    const teachercount = await db.one("select count(*) as tc from teacher");
+    const lecturecount = await db.one("select count(*) as lc from lecture");
+    const questioncount = await db.one("select count(*) as qc from question");
+    const sc = studentcount.sc;
+    const cc = coursecount.cc;
+    const tc = teachercount.tc;
+    const lc = lecturecount.lc;
+    const qc = questioncount.qc;
+    console.log(student);
+    res.render("homepage", { sc, tc, cc, lc, qc, students: student });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
 });
 app.get("/registration", (req, res) => {
   res.render("registration", { error: "" });
@@ -313,7 +311,11 @@ app.get("/students", async (req, res) => {
 
 app.get("/student/dashboard", async (req, res) => {
   try {
-    res.render("student_dashboard", { userType: "Student" });
+    const student = await db.any(
+      "select * from student where student_id=$1",
+      id
+    );
+    res.render("student_dashboard", { userType: "Student", student: student });
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error");
@@ -521,7 +523,7 @@ app.get("/course-search-results", async (req, res) => {
           tid
         );
         console.log(inputs);
-        res.render("individual_course_lecture_dashboarsd", {
+        res.render("individual_course_dashboarsd", {
           userType: "Student",
           inputs: inputs,
         });
@@ -1526,7 +1528,7 @@ app.post(
         "OUT p_status_message",
       ]);
       console.log(result);
-      console.log('debug');
+      console.log("debug");
       if (result.p_status_message === "Lecture updated successfully") {
         if (
           req.files &&
@@ -1692,16 +1694,14 @@ app.delete("/student/delete/:taskId", async (req, res) => {
   }
 });
 
-
-
-app.get('/student/manage_todo_list', async (req, res) => {
-    try {
-        console.log("to do list");
-        res.render('todo_list');
-    } catch (error) {
-        console.error('Error opening page:', error);
-        res.status(500).json({ error: 'Error opening page.' });
-    }
+app.get("/student/manage_todo_list", async (req, res) => {
+  try {
+    console.log("to do list");
+    res.render("todo_list");
+  } catch (error) {
+    console.error("Error opening page:", error);
+    res.status(500).json({ error: "Error opening page." });
+  }
 });
 
 app.get("/student/track_study_hour", async (req, res) => {
@@ -1734,24 +1734,29 @@ app.get("/student/routine", async (req, res) => {
   }
 });
 
-app.post('/student/routine', async (req, res) => {
-    try {
-        console.log("......post......");
-        const { tasks } = req.body;
-        const insertedTasks = [];
-        let duplicateRoutineMessage = '';
-        for (const task of tasks) {
-            const startTime = task.startTime.trim();
-            const endTime = task.endTime.trim();
-            const taskName = task.taskName.trim();
-            const currentTask = await db.oneOrNone('SELECT * FROM routine WHERE start_time = $1 AND end_time = $2 AND task_name = $3 AND student_id = $4', [startTime, endTime, taskName, Number(id)]);
-            if (currentTask)
-                continue;
+app.post("/student/routine", async (req, res) => {
+  try {
+    console.log("......post......");
+    const { tasks } = req.body;
+    const insertedTasks = [];
+    let duplicateRoutineMessage = "";
+    for (const task of tasks) {
+      const startTime = task.startTime.trim();
+      const endTime = task.endTime.trim();
+      const taskName = task.taskName.trim();
+      const currentTask = await db.oneOrNone(
+        "SELECT * FROM routine WHERE start_time = $1 AND end_time = $2 AND task_name = $3 AND student_id = $4",
+        [startTime, endTime, taskName, Number(id)]
+      );
+      if (currentTask) continue;
 
-            console.log("inserting...");
-            try {
-                const newTask = await db.one('INSERT INTO routine (start_time, end_time, task_name, student_id) VALUES ($1, $2, $3, $4) RETURNING *', [startTime, endTime, taskName, Number(id)]);
-                insertedTasks.push(newTask);
+      console.log("inserting...");
+      try {
+        const newTask = await db.one(
+          "INSERT INTO routine (start_time, end_time, task_name, student_id) VALUES ($1, $2, $3, $4) RETURNING *",
+          [startTime, endTime, taskName, Number(id)]
+        );
+        insertedTasks.push(newTask);
 
         console.log("New Task Added:");
         console.log("Start Time:", startTime);
