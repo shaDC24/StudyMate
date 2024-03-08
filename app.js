@@ -1798,12 +1798,28 @@ app.get('/todaydone', (req, res) => {
 });
 app.post('/saveStudyHours', async (req, res) => {
     try {
-        const { date, hoursStudied } = req.body;
+        const { date,targetHours, hoursStudied } = req.body;
         console.log(date);
         console.log(hoursStudied);
-        const st = await db.one('insert into study_hour(date,hours_studied,student_id) values($1,$2,$3) returning *', [date, hoursStudied, id]);
+        console.log(targetHours);
+        const st = await db.one('insert into study_hour(date,targetHours,hours_studied,student_id) values($1,$2,$3,$4) returning *', [date,targetHours, hoursStudied, id]);
         console.log(st);
-      
+
+
+    } catch (error) {
+        console.error('Error starting timer:', error);
+        res.status(500).send('Internal server error');
+    }
+});
+
+app.get('/saveStudyHours', async (req, res) => {
+    try {
+
+
+        const study_hours = await db.manyOrNone('select *from study_hour where student_id = $1', Number(id));
+        console.log(study_hours);
+
+        res.render('timer', { study_hours });
 
     } catch (error) {
         console.error('Error starting timer:', error);
@@ -1814,14 +1830,16 @@ app.post('/saveStudyHours', async (req, res) => {
 app.get("/student/track_study_hour", async (req, res) => {
     try {
         console.log("track_study_hour");
-        res.render("track_study_hour");
+        const study_hours = await db.manyOrNone('select *from study_hour where student_id = $1', Number(id));
+        console.log(study_hours);
+        res.render("track_study_hour", { study_hours });
     } catch (error) {
         console.error("Error opening page:", error);
         res.status(500).json({ error: "Error opening page." });
     }
 });
 
-// app.js
+
 
 app.get("/student/routine", async (req, res) => {
     try {
