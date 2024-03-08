@@ -42,3 +42,8 @@ set pdflink='/uploads/pdf_'||(lecture_id%10)||'_'||(lecture_id%10)||'_'||(lectur
 
 update lecture
 set videolink='/uploads/video_'||(lecture_id%10)||'_'||(lecture_id%10)||'_'||(lecture_id%10)||'.mp4';
+
+
+ALTER TABLE routine
+ADD COLUMN isdeleted BOOLEAN DEFAULT FALSE;
+
