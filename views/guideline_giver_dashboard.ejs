@@ -1,190 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Guideline Giver Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-            padding-top: 20px;
-            position: relative;
-        }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f8f9fa;
+        padding-top: 20px;
+        position: relative;
+      }
 
-        .navbar {
-            background-color: #007bff;
-        }
+      .navbar {
+        background-color: #007bff;
+      }
 
-        .navbar-brand {
-            color: #fff;
-            font-weight: bold;
-        }
+      .navbar-brand {
+        color: #fff;
+        font-weight: bold;
+        font-size: 1.5rem;
+      }
 
-        .navbar-nav .nav-link {
-            color: #fff;
-            font-weight: bold;
-        }
+      .navbar-nav .nav-link {
+        color: #fff;
+        font-weight: bold;
+      }
 
-        .jumbotron {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+      .jumbotron {
+        background-color: #007bff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        color: #fff;
+      }
 
-        .jumbotron h1 {
-            color: #007bff;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
+      .jumbotron h1 {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+      }
 
-        /* Message Icon Styles */
-        #messageIcon {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            z-index: 1000;
-            /* Ensure the icon is above other elements */
-        }
+      /* Message Icon Styles */
+      #messageIcon {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        z-index: 1000;
+        /* Ensure the icon is above other elements */
+      }
 
-        .unread-badge {
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            background-color: red;
-            color: #fff;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 12px;
-            font-weight: bold;
-        }
+      .unread-badge {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        background-color: red;
+        color: #fff;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 12px;
+        font-weight: bold;
+      }
 
-        .request-count {
-            color: red;
-            font-weight: bold;
-            margin-left: 5px;
-        }
+      .request-count {
+        color: red;
+        font-weight: bold;
+        margin-left: 5px;
+      }
     </style>
-</head>
+  </head>
 
-<body>
-
+  <body>
     <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="#">Guideline_Giver Dashboard</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-                aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Provide Guidance</a>
-                    </li>
-                    <li class="nav-item">
-                        <!-- Display the request count dynamically -->
-                        <% if (requestcount> 0) { %>
-                            <a class="nav-link" href="/view_request">
-                                View Requests <span
-                                    class="badge bg-danger position-relative top-0 start-0 translate-start p-1 rounded-circle">
-                                    <%= requestcount %>
-                                </span>
-                            </a>
-                            <% } else { %>
-                                <a class="nav-link" href="/view_request">View Requests</a>
-                                <% } %>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            More Options
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Share materials</a></li>
-
-                        </ul>
-                    </li>
-                </ul>
-
-            </div>
+      <div class="container">
+        <a class="navbar-brand" href="#">Guideline Giver Dashboard</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a
+                class="nav-link active"
+                aria-current="page"
+                href="/guideline_giver/dashboard"
+                >Home</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/connected_students"
+                >Provide Guidance</a
+              >
+            </li>
+            <li class="nav-item">
+              <!-- Display the request count dynamically -->
+              <% if (requestcount> 0) { %>
+              <a class="nav-link" href="/view_request">
+                View Requests
+                <span
+                  class="badge bg-danger position-relative top-0 start-0 translate-start p-1 rounded-circle"
+                >
+                  <%= requestcount %>
+                </span>
+              </a>
+              <% } else { %>
+              <a class="nav-link" href="/view_request">View Requests</a>
+              <% } %>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/">Logout</a>
+            </li>
+          </ul>
         </div>
+      </div>
     </nav>
 
     <div class="container mt-5">
-        <div class="jumbotron">
-            <h1>Welcome <%= userType %>!</h1>
-        </div>
+      <div class="jumbotron">
+        <h1>Welcome <%= userType %>!</h1>
+      </div>
     </div>
 
     <!-- Message icon -->
     <a href="/connected_students" id="messageIcon">
-        <div class="unread-badge" id="unreadBadge">2</div>
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-envelope"
-            viewBox="0 0 16 16">
-            <path
-                d="M.504 4.632A1.5 1.5 0 0 1 1.318 4h13.364c.385 0 .73.235.814.594l-6.335 7.93a2.5 2.5 0 0 1-3.584 0l-6.334-7.93a.855.855 0 0 1 .189-.962zM1.318 6 8 11.88 14.682 6H1.318z" />
-            <path d="M1 5.21V13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5.21l-5.5 6.89a.5.5 0 0 1-.72 0L1 5.21z" />
-        </svg>
+      <div class="unread-badge" id="unreadBadge">2</div>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        fill="currentColor"
+        class="bi bi-envelope"
+        viewBox="0 0 16 16"
+      >
+        <path
+          d="M.504 4.632A1.5 1.5 0 0 1 1.318 4h13.364c.385 0 .73.235.814.594l-6.335 7.93a2.5 2.5 0 0 1-3.584 0l-6.334-7.93a.855.855 0 0 1 .189-.962zM1.318 6 8 11.88 14.682 6H1.318z"
+        />
+        <path
+          d="M1 5.21V13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5.21l-5.5 6.89a.5.5 0 0 1-.72 0L1 5.21z"
+        />
+      </svg>
     </a>
 
     <script>
-        // Function to update the number of unread messages
-        function updateUnreadMessages(count) {
-            const unreadBadge = document.getElementById('unreadBadge');
-            unreadBadge.innerText = count;
-            unreadBadge.style.display = count > 0 ? 'flex' : 'none';
-        }
+      // Function to update the number of unread messages
+      function updateUnreadMessages(count) {
+        const unreadBadge = document.getElementById("unreadBadge");
+        unreadBadge.innerText = count;
+        unreadBadge.style.display = count > 0 ? "flex" : "none";
+      }
 
-        // Example: Update unread messages count (you can replace this with your actual logic)
-        //updateUnreadMessages(2);
+      // Example: Update unread messages count (you can replace this with your actual logic)
+      //updateUnreadMessages(2);
 
-        // Function to handle dragging of the message icon
-        function handleDrag(event) {
-            const icon = event.target;
-            const iconRect = icon.getBoundingClientRect();
-            const offsetX = event.clientX - iconRect.width / 2;
-            const offsetY = event.clientY - iconRect.height / 2;
-            icon.style.left = offsetX + 'px';
-            icon.style.top = offsetY + 'px';
-        }
+      // Function to handle dragging of the message icon
+      function handleDrag(event) {
+        const icon = event.target;
+        const iconRect = icon.getBoundingClientRect();
+        const offsetX = event.clientX - iconRect.width / 2;
+        const offsetY = event.clientY - iconRect.height / 2;
+        icon.style.left = offsetX + "px";
+        icon.style.top = offsetY + "px";
+      }
 
-        // Add event listeners for dragging the message icon
-        const messageIcon = document.getElementById('messageIcon');
-        messageIcon.addEventListener('mousedown', function (event) {
-            document.addEventListener('mousemove', handleDrag);
-            document.addEventListener('mouseup', function () {
-                document.removeEventListener('mousemove', handleDrag);
-            });
+      // Add event listeners for dragging the message icon
+      const messageIcon = document.getElementById("messageIcon");
+      messageIcon.addEventListener("mousedown", function (event) {
+        document.addEventListener("mousemove", handleDrag);
+        document.addEventListener("mouseup", function () {
+          document.removeEventListener("mousemove", handleDrag);
         });
+      });
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
-        integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
-        integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF"
-        crossorigin="anonymous"></script>
-</body>
-
+    <script
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
+      integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
+      integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF"
+      crossorigin="anonymous"
+    ></script>
+  </body>
 </html>

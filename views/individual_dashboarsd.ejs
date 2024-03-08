@@ -79,12 +79,40 @@
         .btn-back:hover {
             background-color: #283593;
         }
+
+        /* Navbar styles */
+        .navbar {
+            background-color: #007bff;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .navbar button {
+            background-color: inherit;
+            border: none;
+            color: white;
+            padding: 14px 20px;
+            cursor: pointer;
+            float: left;
+            transition: background-color 0.3s;
+        }
+
+        .navbar button:hover {
+            background-color: #0056b3;
+        }
     </style>
-
-
 </head>
 
 <body>
+    <!-- Navbar -->
+    <div class="navbar">
+        <button onclick="window.location.href='/student/dashboard'">Home</button>
+        <button onclick="window.location.href='/student/enroll-courses'">Enroll Courses</button>
+        <button onclick="window.location.href='/student/course-lists'">Course Lists</button>
+        <button onclick="window.location.href='/student/exam-section'">Exam Section</button>
+        <button onclick="window.location.href='/student/mythingstodo'">My Things to Do</button>
+    </div>
+
     <div class="container">
         <h1>Teacher Profile: <%= teachers[0].teacher_name %>
         </h1>
@@ -233,7 +261,6 @@
                 });
             });
         </script>
-
 </body>
 
 </html>

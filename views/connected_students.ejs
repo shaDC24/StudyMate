@@ -1,42 +1,157 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Connected Students</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+        padding-top: 20px;
+        position: relative;
+      }
 
-<head>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-  <title>Connected Students</title>
-</head>
+      .navbar {
+        background-color: #007bff;
+      }
 
-<body>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-    integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
-    crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
-    integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
-    crossorigin="anonymous"></script>
-    <h1>Connected Students</h1>
-    <div class="chat-container">
-      <% connectedStudents.forEach(student=> { %>
-        <div class="chat-message" onclick="openChat('<%= student.student_id %>')">
-          <img class="chat-icon" src="/public/studenticon.png" alt="Student Icon">
-          <div class="chat-info">
-            <span class="chat-text received">
-              <%= student.first_name %>
-                <%= student.last_name %>
-            </span>
-            <span class="student-id">(ID: <%= student.student_id %>)</span>
-          </div>
+      .navbar-brand {
+        color: #fff;
+        font-weight: bold;
+      }
+
+      .navbar-nav .nav-link {
+        color: #fff;
+        font-weight: bold;
+      }
+
+      .chat-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .chat-message {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        margin-bottom: 10px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+      }
+
+      .chat-message:hover {
+        background-color: #f0f0f0;
+      }
+
+      .chat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 10px;
+      }
+
+      .chat-info {
+        flex-grow: 1;
+      }
+
+      .chat-text {
+        font-weight: bold;
+      }
+
+      .student-id {
+        color: #888;
+      }
+    </style>
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand" href="#">Guideline Giver Dashboard</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a
+                class="nav-link active"
+                aria-current="page"
+                href="/guideline_giver/dashboard"
+                >Home</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/connected_students"
+                >Provide Guidance</a
+              >
+            </li>
+            <li class="nav-item">
+              <!-- Display the request count dynamically -->
+              <a class="nav-link" href="/view_request">View Requests</a>
+            </li>
+            <!-- Add your logout button here -->
+            <li class="nav-item">
+              <a class="nav-link" href="/logout">Logout</a>
+            </li>
+          </ul>
         </div>
-        <% }); %>
+      </div>
+    </nav>
+
+    <div class="chat-container">
+      <h1>Connected Students</h1>
+      <% connectedStudents.forEach(student=> { %>
+      <div class="chat-message" onclick="openChat('<%= student.student_id %>')">
+        <img
+          class="chat-icon"
+          src="/public/studenticon.png"
+          alt="Student Icon"
+        />
+        <div class="chat-info">
+          <span class="chat-text received">
+            <%= student.first_name %> <%= student.last_name %>
+          </span>
+          <span class="student-id">(ID: <%= student.student_id %>)</span>
+        </div>
+      </div>
+      <% }); %>
     </div>
 
     <script>
       // Function to open chat with student
       function openChat(studentId) {
-        window.location.href = '/get-chat/' + studentId;
+        window.location.href = "/get-chat/" + studentId;
       }
-
     </script>
-</body>
 
+    <script
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+      integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
+      integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
+      crossorigin="anonymous"
+    ></script>
+  </body>
 </html>
