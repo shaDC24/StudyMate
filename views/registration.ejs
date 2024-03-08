@@ -1,53 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Registration</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
     <style>
-        /* Custom styles specific to this form */
-        body {
-            background-image: url('public/login.jpg');
-            background-color: rgba(255, 255, 255, 0.5);
-            /* Adjust the alpha value (last parameter) to control the transparency */
-            background-blend-mode: overlay;
-            /* Blend the background image with the background color */
-            background-size: cover;
-            background-repeat: no-repeat;
-        }
+      /* Custom styles specific to this form */
+      body {
+        background-image: url("public/login.jpg");
+        background-color: rgba(255, 255, 255, 0.5);
+        /* Adjust the alpha value (last parameter) to control the transparency */
+        background-blend-mode: overlay;
+        /* Blend the background image with the background color */
+        background-size: cover;
+        background-repeat: no-repeat;
+      }
 
-        .form-container {
+      .form-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
+      form {
+        background-color: rgba(127, 131, 61, 0.5);
+        max-width: 600px;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 2);
+      }
 
-        form {
+      .form-label {
+        font-weight: bold;
+      }
 
-            background-color: rgba(127, 131, 61, 0.5);
-            max-width: 600px;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 2);
-        }
+      .form-control {
+        border-radius: 8px;
+      }
 
-        .form-label {
-            font-weight: bold;
-        }
-
-        .form-control {
-            border-radius: 8px;
-        }
-
-        .btn-primary {
-            border-radius: 8px;
-            width: 100%;
-        }
+      .btn-primary {
+        border-radius: 8px;
+        width: 100%;
+      }
     </style>
 
     <!-- Other meta tags and styles -->
@@ -56,251 +57,338 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Other scripts -->
+  </head>
 
-
-</head>
-
-<body>
+  <body>
     <div class="form-container">
+      <form
+        class="row g-3 needs-validation"
+        action="/registration"
+        method="post"
+        novalidate
+      >
+        <div class="col-md-6">
+          <label for="first_name" class="form-label">First name</label>
+          <input
+            type="text"
+            class="form-control"
+            id="first_name"
+            name="first_name"
+            placeholder="Enter your first name"
+            required
+          />
+          <div class="valid-feedback">Looks good!</div>
+          <div class="invalid-feedback">Please provide your first name.</div>
+        </div>
+        <div class="col-md-6">
+          <label for="last_name" class="form-label">Last name</label>
+          <input
+            type="text"
+            class="form-control"
+            id="last_name"
+            name="last_name"
+            placeholder="Enter your last name"
+            required
+          />
+          <div class="valid-feedback">Looks good!</div>
+          <div class="invalid-feedback">Please provide your last name.</div>
+        </div>
+        <div class="col-md-6">
+          <label for="gmail" class="form-label">Gmail</label>
+          <input
+            type="text"
+            class="form-control"
+            id="gmail"
+            name="gmail"
+            placeholder="Enter your gmail"
+            required
+          />
+          <div class="valid-feedback">Looks good!</div>
+          <div class="invalid-feedback">Please provide your gmail.</div>
+        </div>
 
-        <form class="row g-3 needs-validation" action="/registration" method="post" novalidate>
-            <div class="col-md-6">
-                <label for="first_name" class="form-label">First name</label>
-                <input type="text" class="form-control" id="first_name" name="first_name"
-                    placeholder="Enter your first name" required>
-                <div class="valid-feedback">Looks good!</div>
-                <div class="invalid-feedback">Please provide your first name.</div>
-            </div>
-            <div class="col-md-6">
-                <label for="last_name" class="form-label">Last name</label>
-                <input type="text" class="form-control" id="last_name" name="last_name"
-                    placeholder="Enter your last name" required>
-                <div class="valid-feedback">Looks good!</div>
-                <div class="invalid-feedback">Please provide your last name.</div>
-            </div>
-            <div class="col-md-6">
-                <label for="gmail" class="form-label">Gmail</label>
-                <input type="text" class="form-control" id="gmail" name="gmail" placeholder="Enter your gmail" required>
-                <div class="valid-feedback">Looks good!</div>
-                <div class="invalid-feedback">Please provide your gmail.</div>
-            </div>
+        <div class="col-md-6">
+          <label for="date_of_birth" class="form-label">Date of Birth</label>
+          <input
+            type="date"
+            class="form-control"
+            id="date_of_birth"
+            name="date_of_birth"
+            required
+          />
+          <div class="valid-feedback">Looks good!</div>
+          <div class="invalid-feedback">Please provide your date of birth.</div>
+        </div>
+        <div class="col-md-6">
+          <label for="city" class="form-label">City</label>
+          <input
+            type="text"
+            class="form-control"
+            id="city"
+            name="city"
+            placeholder="Enter your city"
+            required
+          />
+          <div class="valid-feedback">Looks good!</div>
+          <div class="invalid-feedback">Please provide a valid city.</div>
+        </div>
+        <div class="col-md-6">
+          <label for="userType" class="form-label">User Type</label>
+          <select class="form-select" id="userType" name="userType" required>
+            <option selected disabled value="">Choose...</option>
+            <option value="student">Student</option>
+            <option value="teacher">Teacher</option>
+            <option value="guideline_giver">Guideline Giver</option>
+          </select>
+          <div class="valid-feedback">Looks good!</div>
+          <div class="invalid-feedback">Please select a user type.</div>
+        </div>
+        <!-- Add this HTML snippet inside your form, right after the userType select element -->
+        <div id="universityField" class="col-md-6" style="display: none">
+          <label for="university" class="form-label">University</label>
+          <input
+            type="text"
+            class="form-control"
+            id="university"
+            name="university"
+            placeholder="Enter your university"
+          />
+          <div class="valid-feedback">Looks good!</div>
+          <div class="invalid-feedback">Please provide your university.</div>
+        </div>
+        <!-- Add this HTML snippet inside your form, right after the universityField div -->
+        <div id="phoneField" class="col-md-6" style="display: none">
+          <label for="phone" class="form-label">Phone Number</label>
+          <input
+            type="text"
+            class="form-control"
+            id="phone"
+            name="phone"
+            placeholder="Enter your phone number"
+          />
+          <div class="valid-feedback">Looks good!</div>
+          <div class="invalid-feedback">Please provide your phone number.</div>
+        </div>
 
-            <div class="col-md-6">
-                <label for="date_of_birth" class="form-label">Date of Birth</label>
-                <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" required>
-                <div class="valid-feedback">Looks good!</div>
-                <div class="invalid-feedback">Please provide your date of birth.</div>
-            </div>
-            <div class="col-md-6">
-                <label for="city" class="form-label">City</label>
-                <input type="text" class="form-control" id="city" name="city" placeholder="Enter your city" required>
-                <div class="valid-feedback">Looks good!</div>
-                <div class="invalid-feedback">Please provide a valid city.</div>
-            </div>
-            <div class="col-md-6">
-                <label for="userType" class="form-label">User Type</label>
-                <select class="form-select" id="userType" name="userType" required>
-                    <option selected disabled value="">Choose...</option>
-                    <option value="student">Student</option>
-                    <option value="teacher">Teacher</option>
-                    <option value="guideline_giver">Guideline Giver</option> 
-                </select>
-                <div class="valid-feedback">Looks good!</div>
-                <div class="invalid-feedback">Please select a user type.</div>
-            </div>
-            <!-- Add this HTML snippet inside your form, right after the userType select element -->
-            <div id="universityField" class="col-md-6" style="display: none;">
-                <label for="university" class="form-label">University</label>
-                <input type="text" class="form-control" id="university" name="university"
-                    placeholder="Enter your university">
-                <div class="valid-feedback">Looks good!</div>
-                <div class="invalid-feedback">Please provide your university.</div>
-            </div>
-            <!-- Add this HTML snippet inside your form, right after the universityField div -->
-            <div id="phoneField" class="col-md-6" style="display: none;">
-                <label for="phone" class="form-label">Phone Number</label>
-                <input type="text" class="form-control" id="phone" name="phone" placeholder="Enter your phone number">
-                <div class="valid-feedback">Looks good!</div>
-                <div class="invalid-feedback">Please provide your phone number.</div>
-            </div>
+        <div class="col-md-6">
+          <label for="password_hash" class="form-label">Password</label>
+          <input
+            type="password"
+            class="form-control"
+            id="password_hash"
+            name="password_hash"
+            placeholder="Enter your password"
+            required
+          />
+          <div class="valid-feedback">Looks good!</div>
+          <div class="invalid-feedback">Please provide a password.</div>
+        </div>
+        <div class="col-md-6">
+          <label for="proficiency" class="form-label"
+            >Proficiency/Favourite Subject</label
+          >
+          <input
+            type="text"
+            class="form-control"
+            id="proficiency"
+            name="proficiency"
+            placeholder="Enter your likely Subject"
+            required
+          />
+          <div class="valid-feedback">Looks good!</div>
+          <div class="invalid-feedback">Please provide a topic.</div>
+        </div>
+        <!-- Add this HTML snippet inside your form, right after the userType select element -->
 
-
-            <div class="col-md-6">
-                <label for="password_hash" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password_hash" name="password_hash"
-                    placeholder="Enter your password" required>
-                <div class="valid-feedback">Looks good!</div>
-                <div class="invalid-feedback">Please provide a password.</div>
+        <div class="col-12">
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              value=""
+              id="invalidCheck"
+              required
+            />
+            <label class="form-check-label" for="invalidCheck"
+              >Agree to terms and conditions</label
+            >
+            <div class="invalid-feedback">
+              You must agree before submitting.
             </div>
-            <div class="col-md-6">
-                <label for="proficiency" class="form-label">Proficiency/Favourite Subject</label>
-                <input type="text" class="form-control" id="proficiency" name="proficiency"
-                    placeholder="Enter your likely Subject" required>
-                <div class="valid-feedback">Looks good!</div>
-                <div class="invalid-feedback">Please provide a topic.</div>
-            </div>
-            <!-- Add this HTML snippet inside your form, right after the userType select element -->
-
-
-            <div class="col-12">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="invalidCheck" required>
-                    <label class="form-check-label" for="invalidCheck">Agree to terms and conditions</label>
-                    <div class="invalid-feedback">You must agree before submitting.</div>
-                </div>
-            </div>
-            <div class="col-12">
-                <button class="btn btn-primary" type="submit">Submit form</button>
-            </div>
-        </form>
-
+          </div>
+        </div>
+        <div class="col-12">
+          <button class="btn btn-primary" type="submit">Submit form</button>
+        </div>
+      </form>
     </div>
 
     <!-- Success and Error Message Modal -->
     <!-- Success and Error Message Modal -->
-    <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="messageModalLabel">Message</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p id="messageText"></p>
-                </div>
-                <div class="modal-footer">
-                    <!-- Footer buttons will be dynamically added -->
-                </div>
-            </div>
+    <div
+      class="modal fade"
+      id="messageModal"
+      tabindex="-1"
+      aria-labelledby="messageModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="messageModalLabel">Message</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p id="messageText"></p>
+          </div>
+          <div class="modal-footer">
+            <!-- Footer buttons will be dynamically added -->
+          </div>
         </div>
+      </div>
     </div>
 
     <script>
+      function showMessageInModal(message, type) {
+        const messageText = document.getElementById("messageText");
+        messageText.textContent = message;
 
+        // Update modal buttons based on message type
+        const modalFooter = document.querySelector(".modal-footer");
+        modalFooter.innerHTML = ""; // Clear existing buttons
 
-        function showMessageInModal(message, type) {
-            const messageText = document.getElementById('messageText');
-            messageText.textContent = message;
-
-            // Update modal buttons based on message type
-            const modalFooter = document.querySelector('.modal-footer');
-            modalFooter.innerHTML = ''; // Clear existing buttons
-
-            if (type === 'success') {
-                modalFooter.innerHTML = `
+        if (type === "success") {
+          modalFooter.innerHTML = `
                 <a href="/" >Back</a>
             <a href="/login" class="btn btn-secondary" >Login</a>
         `;
-            } else if (type === 'error') {
-                modalFooter.innerHTML = `
+        } else if (type === "error") {
+          modalFooter.innerHTML = `
             <a href="/" >Back</a>
             <a href="/registration">Try Again</a>
         `;
-            }
-
-            const messageModal = new bootstrap.Modal(document.getElementById('messageModal'));
-            //messageModal.show();
-            // After showing the modal, set focus to the university input field
-            messageModal.show();
-            setTimeout(function () {
-                document.getElementById('university').focus();
-                document.getElementById('phone').focus();
-            }, 100);
-
         }
 
-        $(document).ready(function () {
-            // Example AJAX request to handle form submission and show messages
-            $('form').submit(function (event) {
-                event.preventDefault();
-                var formData = $(this).serialize();
-                $.ajax({
-                    type: 'POST',
-                    url: '/registration', // or '/guideline_offer'
-                    data: formData,
-                    // Inside your AJAX success callback
-                    success: function (response) {
-                        console.log(response.message);
-                        showMessageInModal(response.message, 'success');
+        const messageModal = new bootstrap.Modal(
+          document.getElementById("messageModal")
+        );
+        //messageModal.show();
+        // After showing the modal, set focus to the university input field
+        messageModal.show();
+        setTimeout(function () {
+          document.getElementById("university").focus();
+          document.getElementById("phone").focus();
+        }, 100);
+      }
 
-                        // Check if the server returned a message indicating guideline giver option
-                        if (response.showGuidelineGiverOption) {
-                            // If yes, add an additional button to the modal
-                            const modalFooter = document.querySelector('.modal-footer');
-                            modalFooter.insertAdjacentHTML('beforeend', `
+      $(document).ready(function () {
+        // Example AJAX request to handle form submission and show messages
+        $("form").submit(function (event) {
+          event.preventDefault();
+          var formData = $(this).serialize();
+          $.ajax({
+            type: "POST",
+            url: "/registration", // or '/guideline_offer'
+            data: formData,
+            // Inside your AJAX success callback
+            success: function (response) {
+              console.log(response.message);
+              showMessageInModal(response.message, "success");
+
+              // Check if the server returned a message indicating guideline giver option
+              if (response.showGuidelineGiverOption) {
+                // If yes, add an additional button to the modal
+                const modalFooter = document.querySelector(".modal-footer");
+                modalFooter.insertAdjacentHTML(
+                  "beforeend",
+                  `
             <button type="button" class="btn btn-primary" id="becomeGuidelineGiverBtn">Become a Guideline Giver</button>
-        `);
+        `
+                );
 
-                            // Add click event listener for the new button
-                            const becomeGuidelineGiverBtn = document.getElementById('becomeGuidelineGiverBtn');
-                            becomeGuidelineGiverBtn.addEventListener('click', function () {
-                                // Show the university field
-                                document.getElementById('universityField').style.display = 'block';
-                                document.getElementById('phoneField').style.display = 'block';
-                                document.getElementById('userType').value = 'guideline_giver';
-                            });
-                        }
-                    },
-
-                    error: function (xhr, status, error) {
-                        var errorMessage = xhr.responseJSON.message;
-                        console.log(errorMessage);
-                        showMessageInModal(errorMessage, 'error');
-                    }
+                // Add click event listener for the new button
+                const becomeGuidelineGiverBtn = document.getElementById(
+                  "becomeGuidelineGiverBtn"
+                );
+                becomeGuidelineGiverBtn.addEventListener("click", function () {
+                  // Show the university field
+                  document.getElementById("universityField").style.display =
+                    "block";
+                  document.getElementById("phoneField").style.display = "block";
+                  document.getElementById("userType").value = "guideline_giver";
                 });
-            });
+              }
+            },
 
-
-            // JavaScript to add validation classes dynamically
-            (function () {
-                'use strict'
-
-                // Fetch all the forms we want to apply custom Bootstrap validation styles to
-                var forms = document.querySelectorAll('.needs-validation')
-
-                // Loop over them and prevent submission
-                Array.prototype.slice.call(forms)
-                    .forEach(function (form) {
-                        form.addEventListener('submit', function (event) {
-                            if (!form.checkValidity()) {
-                                event.preventDefault();
-                                event.stopPropagation();
-                                showMessageInModal('Please fill out all required fields correctly.', 'error');
-                            } else {
-                                showMessageInModal('Form submitted successfully! Go to gmail', 'success');
-                            }
-                            form.classList.add('was-validated');
-                        }, false);
-                    });
-            })();
+            error: function (xhr, status, error) {
+              var errorMessage = xhr.responseJSON.message;
+              console.log(errorMessage);
+              showMessageInModal(errorMessage, "error");
+            },
+          });
         });
 
+        // JavaScript to add validation classes dynamically
+        (function () {
+          "use strict";
+
+          // Fetch all the forms we want to apply custom Bootstrap validation styles to
+          var forms = document.querySelectorAll(".needs-validation");
+
+          // Loop over them and prevent submission
+          Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener(
+              "submit",
+              function (event) {
+                if (!form.checkValidity()) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  showMessageInModal(
+                    "Please fill out all required fields correctly.",
+                    "error"
+                  );
+                } else {
+                  showMessageInModal(
+                    "User exists or error happened",
+                    "error"
+                  );
+                }
+                form.classList.add("was-validated");
+              },
+              false
+            );
+          });
+        })();
+      });
     </script>
 
     <!-- Add this JavaScript code after your form -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const userTypeSelect = document.getElementById('userType');
-        const universityField = document.getElementById('universityField');
-        const phoneField = document.getElementById('phoneField');
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const userTypeSelect = document.getElementById("userType");
+        const universityField = document.getElementById("universityField");
+        const phoneField = document.getElementById("phoneField");
 
         // Add event listener to the userType select element
-        userTypeSelect.addEventListener('change', function() {
-            const selectedOption = userTypeSelect.value;
+        userTypeSelect.addEventListener("change", function () {
+          const selectedOption = userTypeSelect.value;
 
-            // If the selected option is 'guideline_giver', show the university and phone fields
-            if (selectedOption === 'guideline_giver') {
-                universityField.style.display = 'block';
-                phoneField.style.display = 'block';
-            } else {
-                // Otherwise, hide the fields
-                universityField.style.display = 'none';
-                phoneField.style.display = 'none';
-            }
+          // If the selected option is 'guideline_giver', show the university and phone fields
+          if (selectedOption === "guideline_giver") {
+            universityField.style.display = "block";
+            phoneField.style.display = "block";
+          } else {
+            // Otherwise, hide the fields
+            universityField.style.display = "none";
+            phoneField.style.display = "none";
+          }
         });
-    });
-</script>
-
-</body>
-
+      });
+    </script>
+  </body>
 </html>
