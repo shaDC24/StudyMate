@@ -99,25 +99,16 @@ UPDATE teacher
 SET profilePicLink = 'teacher'||(teacher_id % 10);
 
 
-//asif
-CREATE OR REPLACE FUNCTION check_routine_constraint()
-RETURNS TRIGGER AS $$
-BEGIN
-    IF EXISTS (
-        SELECT 1
-        FROM routine
-        WHERE ((start_time <= NEW.start_time AND NEW.start_time <= end_time) OR
-              (start_time <= NEW.end_time AND NEW.end_time <= end_time))
-              AND student_id = NEW.student_id
-    ) THEN
-        RAISE EXCEPTION 'Routine with the same start time, end time, and student ID already exists';
-    END IF;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
 
 
 ALTER TABLE study_hour
 ADD COLUMN student_id INTEGER,
 ADD CONSTRAINT fk_student_id FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE;
+
+ALTER TABLE study_hour
+ADD COLUMN targetHours INTEGER NOT NULL DEFAULT 6;
+
+
+
+
 

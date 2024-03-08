@@ -34,6 +34,9 @@
                     <li class="nav-item">
                         <a class="nav-link active" href="/student/track_study_hour">Tracking Study Hour</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/progress">Progress of Study</a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -54,8 +57,32 @@
         <button id="startTimer" class="btn btn-primary">Start</button>
         <button id="stopTimer" class="btn btn-danger">Stop</button>
         <button id="resetTimer" class="btn btn-secondary">Reset</button>
-        <button id="doneForToday" class="btn btn-success">Done for Today</button>
+        <button id="doneForToday" class="btn btn-success" data-toggle="modal" data-target="#confirmDoneModal">Done for
+            Today</button>
     </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="confirmDoneModal" tabindex="-1" role="dialog" aria-labelledby="confirmDoneModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDoneModalLabel">Confirm Done for Today</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to mark today's study as completed?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                    <button id="confirmDoneButton" type="button" class="btn btn-primary">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
     <script>
@@ -68,6 +95,16 @@
             if (!timerRunning) {
                 timerInterval = setInterval(updateTimer, 1000);
                 timerRunning = true;
+            }
+            checkTargetHoursReached();
+        }
+
+        // Function to check if the target hours have been reached
+        function checkTargetHoursReached() {
+            const targetHoursElement = document.getElementById('targetHours');
+            const targetHours = parseInt(targetHoursElement.innerText);
+            if (elapsedTime >= targetHours * 3600) {
+                $('#confirmDoneModal').modal('show'); // Show the confirmation modal
             }
         }
 
@@ -104,21 +141,25 @@
         document.getElementById('stopTimer').addEventListener('click', stopTimer);
         document.getElementById('resetTimer').addEventListener('click', resetTimer);
 
-        // Event listener for "Done for Today" button
-        document.getElementById('doneForToday').addEventListener('click', function() {
-            // Assuming you're using jQuery for simplicity
-            $.post('/saveStudyHours', { date: '<%= date %>', hoursStudied: Math.floor(elapsedTime / 3600) })
-                .done(function(data) {
+        
+        document.getElementById('confirmDoneButton').addEventListener('click', function () {
+            
+            $.post('/saveStudyHours', { date: '<%= date %>',targetHours:'<%= targetHours %>', hoursStudied: Math.floor(elapsedTime / 3600) })
+                .done(function (data) {
                     // Handle success, if needed
                     console.log('Study hours saved successfully');
                     stopTimer();
+                    // Redirect to the progress page
+                    window.location.href = "/progress"; // Modify the URL as per your application
                 })
-                .fail(function(error) {
+                .fail(function (error) {
                     // Handle error, if any
                     console.error('Error saving study hours:', error);
                 });
         });
     </script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 </body>
 
 </html>
