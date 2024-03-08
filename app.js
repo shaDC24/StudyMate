@@ -1440,9 +1440,18 @@ app.get("/get-chat/:studentId", async (req, res) => {
       "SELECT * FROM messages WHERE from_student_id=$1 AND to_guideline_giver_id=$2",
       [studentId, id]
     );
+    const name = await db.oneOrNone(
+      "SELECT first_name FROM student WHERE student_id=$1 ",
+      [studentId]
+    );
     console.log("Retrieved messages:", messages);
+    console.log(name);
     //res.json({messages});
-    res.render("open_chat", { studentId: studentId, messages: messages });
+    res.render("open_chat", {
+      studentId: studentId,
+      messages: messages,
+      name: name,
+    });
   } catch (error) {
     console.error("Error opening chat:", error);
     res.status(500).json({ error: "Error opening chat." }); // Sending a JSON response with error message

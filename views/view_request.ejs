@@ -1,171 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>View Request</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+      }
 
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
+      .container {
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
 
-        h2 {
-            color: #333;
-            margin-bottom: 20px;
-        }
+      h2 {
+        color: #333;
+        margin-bottom: 20px;
+      }
 
-        .list-group {
-            list-style: none;
-            padding: 0;
-        }
+      .list-group {
+        list-style: none;
+        padding: 0;
+      }
 
-        .list-group-item {
-            background-color: #f9f9f9;
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 4px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-        }
+      .list-group-item {
+        background-color: #f9f9f9;
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 4px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+      }
 
-        button {
-            padding: 5px 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
+      button {
+        padding: 5px 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
 
-        button.accept {
-            background-color: green;
-            color: #fff;
-        }
+      button.accept {
+        background-color: green;
+        color: #fff;
+      }
 
-        button.accept.accepted {
-            background-color: gray;
-            cursor: not-allowed;
-        }
+      button.accept.accepted {
+        background-color: gray;
+        cursor: not-allowed;
+      }
 
-        button.reject {
-            background-color: red;
-            color: #fff;
-        }
+      button.reject {
+        background-color: red;
+        color: #fff;
+      }
 
-        button.reject.rejected {
-            background-color: gray;
-            cursor: not-allowed;
-        }
+      button.reject.rejected {
+        background-color: gray;
+        cursor: not-allowed;
+      }
+
+      /* Styles for the navbar */
+      .navbar {
+        background-color: #333;
+        overflow: hidden;
+        margin-bottom: 20px; /* Add margin to separate navbar from content */
+      }
+
+      .navbar a {
+        float: left;
+        display: block;
+        color: white;
+        text-align: center;
+        padding: 14px 20px;
+        text-decoration: none;
+      }
+
+      .navbar a:hover {
+        background-color: #ddd;
+        color: black;
+      }
+
+      .navbar a.active {
+        background-color: #666;
+        color: white;
+      }
+
+      /* Styles for the logout button */
+      .logout {
+        float: right;
+        color: red;
+        padding: 14px 20px;
+        text-decoration: none;
+      }
+
+      .logout:hover {
+        background-color: darkred;
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
+    <div class="navbar">
+      <a href="/guideline_giver/dashboard">Home</a>
+      <a href="/connected_students">Provide Guidance</a>
+      <a href="/view_request" class="active">View Requests</a>
+      <a href="/" class="logout">Logout</a>
+    </div>
     <div class="container">
-
-
-        <% if (viewrequest.length> 0) { %>
-            <h2>Hi <%= ggname[0].first_name %>
-                    <%= ggname[0].last_name %> !!!</h2>
-            <h1>Requests</h1>
-            <% for (let i=0; i < viewrequest.length; i++) { %>
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <!-- <%=viewrequest[i].id%> -->
-                        <%= viewrequest[i].first_name +' '+viewrequest[i].last_name %> has sent you a request
-                        <button class="accept" data-request-id="<%= viewrequest[i].id %>">Accept</button>
-                        <button class="reject" data-request-id="<%= viewrequest[i].id %>">Reject</button>
-
-                    </li>
-                </ul>
-            <% } %>
-        <% } else { %>
-            <p style="color: antiquewhite;background-color: black;">None have sent you request</p>
-        <% } %>
-        <button style="background-color: rgb(116, 104, 128);"><a href="/guideline_giver/dashboard">Back</a></button>
+      <% if (viewrequest.length> 0) { %>
+      <h2>Hi <%= ggname[0].first_name %> <%= ggname[0].last_name %> !!!</h2>
+      <h1>Requests</h1>
+      <% for (let i=0; i < viewrequest.length; i++) { %>
+      <ul class="list-group">
+        <li class="list-group-item">
+          <!-- <%=viewrequest[i].id%> -->
+          <%= viewrequest[i].first_name +' '+viewrequest[i].last_name %> has
+          sent you a request
+          <button class="accept" data-request-id="<%= viewrequest[i].id %>">
+            Accept
+          </button>
+          <button class="reject" data-request-id="<%= viewrequest[i].id %>">
+            Reject
+          </button>
+        </li>
+      </ul>
+      <% } %> <% } else { %>
+      <p style="color: antiquewhite; background-color: black">
+        None have sent you request
+      </p>
+      <% } %>
+      <button style="background-color: rgb(116, 104, 128)">
+        <a href="/guideline_giver/dashboard">Back</a>
+      </button>
     </div>
 
     <script>
-        const acceptButtons = document.querySelectorAll(' .accept'); const
-            rejectButtons = document.querySelectorAll('.reject');
-             acceptButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const requestId = button.dataset.requestId; // Assuming you have a data attribute with the
-                    console.log('..........' + requestId);
-                    fetch('/accept-request', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ requestId, action: 'accepted' })
-                    })
-                        .then(response => {
-                            if (response.ok) {
-                                // Update UI or show success message
-                                button.innerText = 'Accepted'; // Update button text to indicate acceptance
-                                button.classList.add('accepted');
-                                button.disabled = true;
-                                button.nextElementSibling.disabled = true; // Disable corresponding reject button
-                                // You can also update other parts of the UI as needed
-                                // For example, you can remove the list item or update its style to indicate acceptance
-                                const listItem = button.closest('.list-group-item');
-                                listItem.style.backgroundColor = '#c8e6c9'; // Change background color to greenish to
-
-                            } else {
-                                // Handle error
-                                console.error('Error:', response.statusText);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                        });
-                });
-            });
-
-        rejectButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const requestId = button.dataset.requestId; // Assuming you have a data attribute with the
-                console.log('..........' + requestId);
-                fetch('/reject-request', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ requestId, action: 'rejected' })
-                })
-                    .then(response => {
-                        if (response.ok) {
-                            // Update UI or show success message
-                            button.innerText = 'Rejected'; // Update button text to indicate rejection
-                            button.classList.add('rejected');
-                            button.disabled = true;
-                            button.previousElementSibling.disabled = true; // Disable corresponding accept button
-                            // You can also update other parts of the UI as needed
-                            // For example, you can remove the list item or update its style to indicate rejection
-                            const listItem = button.closest('.list-group-item');
-                            listItem.style.backgroundColor = '#ffcdd2'; // Change background color to reddish to
-
-                        } else {
-                            // Handle error
-                            console.error('Error:', response.statusText);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
+      const acceptButtons = document.querySelectorAll(" .accept");
+      const rejectButtons = document.querySelectorAll(".reject");
+      acceptButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const requestId = button.dataset.requestId; // Assuming you have a data attribute with the
+          console.log(".........." + requestId);
+          fetch("/accept-request", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ requestId, action: "accepted" }),
+          })
+            .then((response) => {
+              if (response.ok) {
+                // Update UI or show success message
+                button.innerText = "Accepted"; // Update button text to indicate acceptance
+                button.classList.add("accepted");
+                button.disabled = true;
+                button.nextElementSibling.disabled = true; // Disable corresponding reject button
+                // You can also update other parts of the UI as needed
+                // For example, you can remove the list item or update its style to indicate acceptance
+                const listItem = button.closest(".list-group-item");
+                listItem.style.backgroundColor = "#c8e6c9"; // Change background color to greenish to
+              } else {
+                // Handle error
+                console.error("Error:", response.statusText);
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
             });
         });
+      });
 
-
-
+      rejectButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const requestId = button.dataset.requestId; // Assuming you have a data attribute with the
+          console.log(".........." + requestId);
+          fetch("/reject-request", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ requestId, action: "rejected" }),
+          })
+            .then((response) => {
+              if (response.ok) {
+                // Update UI or show success message
+                button.innerText = "Rejected"; // Update button text to indicate rejection
+                button.classList.add("rejected");
+                button.disabled = true;
+                button.previousElementSibling.disabled = true; // Disable corresponding accept button
+                // You can also update other parts of the UI as needed
+                // For example, you can remove the list item or update its style to indicate rejection
+                const listItem = button.closest(".list-group-item");
+                listItem.style.backgroundColor = "#ffcdd2"; // Change background color to reddish to
+              } else {
+                // Handle error
+                console.error("Error:", response.statusText);
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+        });
+      });
     </script>
-</body>
-
+  </body>
 </html>
