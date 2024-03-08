@@ -1,0 +1,91 @@
+INSERT INTO courses (course_title, course_description, teacher_id, course_creator)
+VALUES 
+    ('Introduction to Environmental Science', 'This course provides an overview of environmental science, covering topics such as ecology, pollution, and conservation.', 11, (SELECT teacher_name FROM teacher WHERE teacher_id=11)),
+    ('Climate Change and Sustainability', 'Explore the science behind climate change and its impact on our planet, as well as strategies for sustainable living and mitigation.', 11, (SELECT teacher_name FROM teacher WHERE teacher_id=11)),
+    ('Environmental Policy and Regulation', 'Delve into the policies and regulations that govern environmental protection and management, examining their implementation and effectiveness.', 11, (SELECT teacher_name FROM teacher WHERE teacher_id=11)),
+    ('Ecosystem Dynamics', 'Study the dynamics of ecosystems, including biodiversity, food webs, and ecosystem services, and learn about the factors that influence their stability and resilience.', 11, (SELECT teacher_name FROM teacher WHERE teacher_id=11)),
+    ('Renewable Energy Technologies', 'Learn about various renewable energy technologies, their principles, applications, and potential to address energy challenges and mitigate climate change.', 11, (SELECT teacher_name FROM teacher WHERE teacher_id=11));
+
+-- Insert courses for teacher_id=12 (Music Theory)
+INSERT INTO courses (course_title, course_description, teacher_id, course_creator)
+VALUES 
+    ('Fundamentals of Music Theory', 'This course covers the basic principles of music theory, including notation, scales, chords, and rhythm, providing a foundation for understanding and creating music.', 12, (SELECT teacher_name FROM teacher WHERE teacher_id=12)),
+    ('Harmony and Counterpoint', 'Explore the principles of harmony and counterpoint, learning how chords and melodies interact to create rich musical textures and compositions.', 12, (SELECT teacher_name FROM teacher WHERE teacher_id=12)),
+    ('Analysis of Musical Forms', 'Study the structure and form of musical compositions, analyzing works from different genres and periods to understand their organization and expressive techniques.', 12, (SELECT teacher_name FROM teacher WHERE teacher_id=12)),
+    ('Music Composition Techniques', 'Learn techniques for composing music, including melody writing, chord progressions, and orchestration, and develop your skills in creating original musical works.', 12, (SELECT teacher_name FROM teacher WHERE teacher_id=12)),
+    ('Music Theory for Songwriters', 'Discover how music theory concepts can enhance songwriting and arrangement skills, providing tools for creating compelling and effective songs across various genres.', 12, (SELECT teacher_name FROM teacher WHERE teacher_id=12));
+
+-- Insert courses for teacher_id=13 (Finance)
+INSERT INTO courses (course_title, course_description, teacher_id, course_creator)
+VALUES 
+    ('Introduction to Finance', 'This course provides an introduction to key concepts in finance, including financial markets, investment analysis, and corporate finance principles.', 13, (SELECT teacher_name FROM teacher WHERE teacher_id=13)),
+    ('Financial Planning and Analysis', 'Learn how to create and analyze financial statements, develop budgets, and make strategic financial decisions to optimize business performance.', 13, (SELECT teacher_name FROM teacher WHERE teacher_id=13)),
+    ('Investment Strategies', 'Explore different investment strategies and techniques, including portfolio management, risk assessment, and asset allocation, to build wealth and achieve financial goals.', 13, (SELECT teacher_name FROM teacher WHERE teacher_id=13)),
+    ('Corporate Finance Fundamentals', 'Study the principles of corporate finance, including capital budgeting, capital structure, and dividend policy, and learn how businesses manage their financial resources.', 13, (SELECT teacher_name FROM teacher WHERE teacher_id=13)),
+    ('Financial Risk Management', 'Examine methods for identifying, assessing, and mitigating financial risks, such as market risk, credit risk, and operational risk, to protect assets and enhance value.', 13, (SELECT teacher_name FROM teacher WHERE teacher_id=13));
+
+-- Insert courses for teacher_id=14 (Mechanical Engineering)
+INSERT INTO courses (course_title, course_description, teacher_id, course_creator)
+VALUES 
+    ('Mechanics and Materials', 'This course covers the fundamental principles of mechanics and materials science, including statics, dynamics, and the behavior of materials under various conditions.', 14, (SELECT teacher_name FROM teacher WHERE teacher_id=14)),
+    ('Thermodynamics and Heat Transfer', 'Explore the laws of thermodynamics and heat transfer mechanisms, and learn how they apply to the analysis and design of mechanical systems and processes.', 14, (SELECT teacher_name FROM teacher WHERE teacher_id=14)),
+    ('Fluid Mechanics and Aerodynamics', 'Study the behavior of fluids and gases in motion, including fluid statics, fluid dynamics, and aerodynamic principles, and their applications in engineering.', 14, (SELECT teacher_name FROM teacher WHERE teacher_id=14)),
+    ('Machine Design and Manufacturing', 'Learn about the principles of machine design, including mechanical components, mechanisms, and manufacturing processes, and develop skills in designing and building mechanical systems.', 14, (SELECT teacher_name FROM teacher WHERE teacher_id=14)),
+    ('Control Systems Engineering', 'Examine the principles of control systems, feedback control, and system dynamics, and learn how to design and analyze control systems for various applications.', 14, (SELECT teacher_name FROM teacher WHERE teacher_id=14));
+
+-- Insert courses for teacher_id=15 (Business Administration)
+INSERT INTO courses (course_title, course_description, teacher_id, course_creator)
+VALUES 
+    ('Principles of Business Management', 'This course provides an overview of business management principles, including planning, organizing, leading, and controlling, essential for effective leadership and decision-making.', 15, (SELECT teacher_name FROM teacher WHERE teacher_id=15)),
+    ('Marketing Strategy and Analysis', 'Learn how to develop and implement marketing strategies, conduct market research, and analyze consumer behavior to create competitive advantage and drive business growth.', 15, (SELECT teacher_name FROM teacher WHERE teacher_id=15)),
+    ('Operations Management', 'Study the principles of operations management, including production planning, inventory control, and quality management, to optimize processes and enhance efficiency.', 15, (SELECT teacher_name FROM teacher WHERE teacher_id=15)),
+    ('Strategic Management and Innovation', 'Explore the strategic management process, including strategy formulation, implementation, and evaluation, and learn how to foster innovation and adapt to change.', 15, (SELECT teacher_name FROM teacher WHERE teacher_id=15)),
+    ('Entrepreneurship and Small Business Management', 'Discover the principles of entrepreneurship and small business management, including opportunity recognition, business planning, and growth strategies.', 15, (SELECT teacher_name FROM teacher WHERE teacher_id=15));
+
+-- Insert courses for teacher_id=16 (Philosophy)
+INSERT INTO courses (course_title, course_description, teacher_id, course_creator)
+VALUES 
+    ('Introduction to Philosophy', 'This course provides an introduction to major philosophical questions and methods, exploring topics such as ethics, metaphysics, epistemology, and the philosophy of mind.', 16, (SELECT teacher_name FROM teacher WHERE teacher_id=16)),
+    ('Ethical Theory and Moral Philosophy', 'Examine different ethical theories and moral philosophies, including utilitarianism, deontology, virtue ethics, and existentialism, and apply them to ethical dilemmas.', 16, (SELECT teacher_name FROM teacher WHERE teacher_id=16)),
+    ('Philosophy of Science', 'Study the nature and methods of science from a philosophical perspective, exploring questions about scientific knowledge, explanation, and the relationship between science and society.', 16, (SELECT teacher_name FROM teacher WHERE teacher_id=16)),
+    ('Political Philosophy', 'Explore the philosophical foundations of political theory and governance, examining concepts such as justice, rights, democracy, and social contract theory.', 16, (SELECT teacher_name FROM teacher WHERE teacher_id=16)),
+    ('Philosophy of Religion', 'Examine philosophical questions related to religion, including the existence of God, the problem of evil, religious experience, and the nature of faith and reason.', 16, (SELECT teacher_name FROM teacher WHERE teacher_id=16));
+
+-- Insert courses for teacher_id=17 (Math)
+INSERT INTO courses (course_title, course_description, teacher_id, course_creator)
+VALUES 
+    ('Algebra and Calculus Fundamentals', 'This course covers fundamental concepts in algebra and calculus, including equations, functions, derivatives, and integrals, essential for understanding higher-level mathematics.', 17, (SELECT teacher_name FROM teacher WHERE teacher_id=17)),
+    ('Linear Algebra and Differential Equations', 'Study linear algebra and differential equations, exploring topics such as matrix operations, eigenvalues, vectors, differential equations, and their applications.', 17, (SELECT teacher_name FROM teacher WHERE teacher_id=17)),
+    ('Probability and Statistics', 'Learn about probability theory and statistical methods, including descriptive statistics, probability distributions, hypothesis testing, and regression analysis.', 17, (SELECT teacher_name FROM teacher WHERE teacher_id=17)),
+    ('Discrete Mathematics', 'Explore discrete mathematical structures and concepts, including set theory, logic, graph theory, and combinatorics, and their applications in computer science and cryptography.', 17, (SELECT teacher_name FROM teacher WHERE teacher_id=17)),
+    ('Mathematical Modeling', 'Discover how to create mathematical models to represent and analyze real-world phenomena, using techniques from calculus, differential equations, and probability theory.', 17, (SELECT teacher_name FROM teacher WHERE teacher_id=17));
+
+-- Insert courses for teacher_id=18 (Science)
+INSERT INTO courses (course_title, course_description, teacher_id, course_creator)
+VALUES 
+    ('Introduction to Scientific Inquiry', 'This course introduces the scientific method and principles of scientific inquiry, emphasizing critical thinking, experimental design, and data analysis.', 18, (SELECT teacher_name FROM teacher WHERE teacher_id=18)),
+    ('Biology: The Science of Life', 'Explore the fundamental concepts of biology, including cellular biology, genetics, evolution, and ecology, and their relevance to understanding life processes.', 18, (SELECT teacher_name FROM teacher WHERE teacher_id=18)),
+    ('Chemistry: The Central Science', 'Study the principles of chemistry, including atomic structure, chemical bonding, thermodynamics, and chemical reactions, and their applications in various fields.', 18, (SELECT teacher_name FROM teacher WHERE teacher_id=18)),
+    ('Physics: The Fundamental Science', 'Learn about the principles of physics, including mechanics, electromagnetism, thermodynamics, and quantum mechanics, and their role in explaining the behavior of the universe.', 18, (SELECT teacher_name FROM teacher WHERE teacher_id=18)),
+    ('Earth and Environmental Science', 'Examine the Earths systems, including the atmosphere, hydrosphere, geosphere, and biosphere, and their interactions, as well as human impacts on the environment.', 18, (SELECT teacher_name FROM teacher WHERE teacher_id=18));
+
+-- Insert courses for teacher_id=19 (Actuarial Science)
+INSERT INTO courses (course_title, course_description, teacher_id, course_creator)
+VALUES 
+    ('Introduction to Actuarial Science', 'This course provides an introduction to actuarial science, covering topics such as probability theory, risk assessment, and financial modeling, essential for the actuarial profession.', 19, (SELECT teacher_name FROM teacher WHERE teacher_id=19)),
+    ('Life Insurance and Pension Mathematics', 'Learn about the mathematics of life insurance and pension plans, including mortality and morbidity models, annuities, and retirement planning.', 19, (SELECT teacher_name FROM teacher WHERE teacher_id=19)),
+    ('Property and Casualty Insurance', 'Study the principles of property and casualty insurance, including risk assessment, underwriting, claims management, and regulatory compliance.', 19, (SELECT teacher_name FROM teacher WHERE teacher_id=19)),
+    ('Actuarial Models and Methods', 'Explore advanced actuarial models and methods, such as stochastic modeling, credibility theory, and reserve analysis, and their applications in insurance and finance.', 19, (SELECT teacher_name FROM teacher WHERE teacher_id=19)),
+    ('Financial Economics', 'Examine the intersection of actuarial science and financial economics, including asset-liability management, investment strategies, and risk management in financial markets.', 19, (SELECT teacher_name FROM teacher WHERE teacher_id=19));
+
+-- Insert courses for teacher_id=20 (Geology)
+INSERT INTO courses (course_title, course_description, teacher_id, course_creator)
+VALUES 
+    ('Introduction to Geology', 'This course provides an introduction to the study of Earths materials, processes, and history, covering topics such as minerals, rocks, plate tectonics, and geological time scales.', 20, (SELECT teacher_name FROM teacher WHERE teacher_id=20)),
+    ('Geomorphology and Landforms', 'Study the processes that shape Earths surface, including weathering, erosion, and deposition, and learn how landforms such as mountains, valleys, and coastlines are formed.', 20, (SELECT teacher_name FROM teacher WHERE teacher_id=20)),
+    ('Sedimentology and Stratigraphy', 'Explore the study of sedimentary rocks and their depositional environments, as well as the principles and methods of stratigraphy for interpreting Earths history.', 20, (SELECT teacher_name FROM teacher WHERE teacher_id=20)),
+    ('Structural Geology', 'Examine the deformation of Earths crust, including folds, faults, and fractures, and learn how to interpret geological structures and their implications for tectonic processes.', 20, (SELECT teacher_name FROM teacher WHERE teacher_id=20)),
+    ('Environmental Geology', 'Learn about the interactions between humans and the geological environment, including natural hazards, resource management, and environmental impact assessment.', 20, (SELECT teacher_name FROM teacher WHERE teacher_id=20));
+
+
+

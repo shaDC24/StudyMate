@@ -97,13 +97,12 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                        <a class="nav-link active" aria-current="page" href="/guideline_giver/dashboard">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Provide Guidance</a>
+                        <a class="nav-link" href="/connected_students">Provide Guidance</a>
                     </li>
                     <li class="nav-item">
-                        <!-- Display the request count dynamically -->
                         <% if (requestcount> 0) { %>
                             <a class="nav-link" href="/view_request">
                                 View Requests <span
@@ -139,7 +138,7 @@
 
     <!-- Message icon -->
     <a href="/connected_students" id="messageIcon">
-        <div class="unread-badge" id="unreadBadge">2</div>
+        <div class="unread-badge" id="unreadBadge"></div>
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-envelope"
             viewBox="0 0 16 16">
             <path

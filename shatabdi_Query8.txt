@@ -1,0 +1,35 @@
+--lecture insert korar jonno amar teacher id 11 theke 15.......course_id 31 theke 5 ta kore course er prottektate 
+--5 ta kore lecture insert kortechi,ar lecture_id 1 theke start korchi
+
+CREATE or replace FUNCTION insert_lectures()
+RETURNS VOID AS
+$$
+DECLARE
+    v_teacher_id INT;
+    v_course_id INT;
+    v_lecture_id INT;
+	x INT :=1; 
+BEGIN
+    FOR v_teacher_id IN 11..15 LOOP
+        FOR v_course_id IN ((v_teacher_id - 11) * 5 + 31) .. ((v_teacher_id - 11) * 5 + 35) LOOP
+            FOR v_lecture_id IN 1..5 LOOP
+                INSERT INTO lecture (lecture_id,lecture_name, description, teacher_id, course_id, videolink, pdflink)
+                VALUES (x,
+                    'Lecture ' || x || ' for Course ' || v_course_id,
+                    'Description for Lecture ' || x || ' of Course ' || v_course_id,
+                    v_teacher_id,
+                    v_course_id,
+                    '/uploads/video_' || x || '_' || v_course_id || '_' || v_teacher_id || '.mp4',
+                    '/uploads/pdf_' || x || '_' || v_course_id || '_' || v_teacher_id || '.pdf'
+                );
+				x:=x+1;
+            END LOOP;
+        END LOOP;
+    END LOOP;
+END;
+$$
+LANGUAGE plpgsql;
+
+SELECT insert_lectures();
+
+SELECT *FROM lecture;
