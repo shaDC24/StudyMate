@@ -1,30 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <title>Study Progress</title>
     <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            color: #495057; /* Brighter font color */
+        }
+
+        nav.navbar {
+            background-color: #343a40;
+        }
+
+        .navbar-brand,
+        .navbar-nav .nav-link {
+            color: #fff !important;
+        }
+
+        .navbar-toggler-icon {
+            background-color: #fff;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 40px;
+            color: #343a40;
+        }
+
         table {
             border-collapse: collapse;
-            width: 100%;
+            margin: 0 auto; /* Center the table */
+            width: 90%; /* Adjust the width */
+            max-width: 800px; /* Limit the maximum width */
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
         }
 
         th,
         td {
-            border: 1px solid #dddddd;
-            text-align: left;
-            padding: 8px;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            text-align: center;
         }
 
         th {
-            background-color: #f2f2f2;
+            background-color: #f8f9fa;
+        }
+
+        tbody tr:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .view-progress {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .view-progress a {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff; /* White font color */
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        .view-progress a:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
-
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
@@ -45,7 +99,6 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/student/current_routine">Current Routine</a>
                     </li>
-
                     <li class="nav-item">
                         <a class="nav-link" href="/student/track_study_hour">Tracking Study Hour</a>
                     </li>
@@ -57,39 +110,52 @@
         </div>
     </nav>
 
-    <h1>Table Of study hours of <%= name.first_name %>
-            <%= name.last_name %>
-    </h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Target Hours</th>
-                <th>Hours Studied</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% study_hours.forEach(hour=> { %>
+    <div class="container">
+        <h1>Table Of Study Hours of <%= name.first_name %> <%= name.last_name %></h1>
+        <table>
+            <thead>
                 <tr>
-                    <td>
-                         <%= new Date(hour.date).toLocaleDateString() %>
-                    </td>
-                    <td>
-                        <%= hour.targethours %>
-                    </td>
-                    <td>
-                        <%= hour.hours_studied %>
-                    </td>
+                    <th>Date</th>
+                    <th>Target Hours</th>
+                    <th>Hours Studied</th>
+                    <th>Percentage(Hours Studied/Target Hours)%</th>
+                    <th>Progress</th>
                 </tr>
+            </thead>
+            <tbody>
+                <% study_hours.forEach(hour=> { %>
+                    <tr>
+                        <td>
+                            <%= new Date(hour.date).toLocaleDateString() %>
+                        </td>
+                        <td>
+                            <%= hour.targethours %>
+                        </td>
+                        <td>
+                            <%= hour.hours_studied %>
+                        </td>
+                        <td>
+                            <%= hour.percentage %>
+                        </td>
+                        <td>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar bg-success" role="progressbar"
+                                    style="width: <%= hour.percentage %>%;" aria-valuenow="<%= hour.percentage %>"
+                                    aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </td>
+                    </tr>
                 <% }); %>
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
+<br><br><br>
     <div class="view-progress">
         <a href="/progress/graph">View Progress Graph</a>
     </div>
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
-
 </html>
