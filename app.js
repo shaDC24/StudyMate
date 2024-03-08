@@ -1208,7 +1208,8 @@ app.get("/leaderboard/:exam_id", async (req, res) => {
                 s.student_id,
                 s.first_name,
                 (r.correct_answers * 100.0 / r.total_questions) AS percentage_score,
-                es.exam_topic
+                es.exam_topic,
+                t.rank as rank
             FROM 
                 topper t
             INNER JOIN 
@@ -1224,6 +1225,7 @@ app.get("/leaderboard/:exam_id", async (req, res) => {
         `,
       [exam_id]
     );
+    console.log(leaderboardData);
 
     // Render leaderboard EJS template with exam_id wise leaderboard data
     res.render("leaderboard_exam_id_wise", { exam_id, leaderboardData });
@@ -1773,107 +1775,124 @@ app.delete("/student/delete/:taskId", async (req, res) => {
   }
 });
 
-
-
-app.post('/startTimer', async (req, res) => {
-    try {
-        const { date, targetHours } = req.body;
-        console.log(date);
-        console.log(targetHours);
-        res.render('timer', { date: date, targetHours: targetHours });
-    } catch (error) {
-        console.error('Error starting timer:', error);
-        res.status(500).send('Internal server error');
-    }
+app.post("/startTimer", async (req, res) => {
+  try {
+    const { date, targetHours } = req.body;
+    console.log(date);
+    console.log(targetHours);
+    res.render("timer", { date: date, targetHours: targetHours });
+  } catch (error) {
+    console.error("Error starting timer:", error);
+    res.status(500).send("Internal server error");
+  }
 });
 
 app.get("/todaydone", (req, res) => {
   res.render("todaydone");
 });
-app.post('/saveStudyHours', async (req, res) => {
-    try {
-        const { date, targetHours, hoursStudied } = req.body;
-        console.log(date);
-        console.log(hoursStudied);
-        console.log(targetHours);
-        const st = await db.one('insert into study_hour(date,targetHours,hours_studied,student_id) values($1,$2,$3,$4) returning *', [date, targetHours, hoursStudied, id]);
-        res.status(200).json({ message: 'Study hours saved successfully' });
-
-    } catch (error) {
-        console.error('Error starting timer:', error);
-        res.status(500).send('Internal server error');
-    }
+app.post("/saveStudyHours", async (req, res) => {
+  try {
+    const { date, targetHours, hoursStudied } = req.body;
+    console.log(date);
+    console.log(hoursStudied);
+    console.log(targetHours);
+    const st = await db.one(
+      "insert into study_hour(date,targetHours,hours_studied,student_id) values($1,$2,$3,$4) returning *",
+      [date, targetHours, hoursStudied, id]
+    );
+    res.status(200).json({ message: "Study hours saved successfully" });
+  } catch (error) {
+    console.error("Error starting timer:", error);
+    res.status(500).send("Internal server error");
+  }
 });
 
-app.get('/studyHours', async (req, res) => {
-    try {
-        const study_hours = await db.manyOrNone('SELECT * FROM study_hour WHERE student_id = $1', Number(id));
-        console.log(study_hours);
-        res.render('timer', { study_hours });
-    } catch (error) {
-        console.error('Error fetching study hours:', error);
-        res.status(500).send('Internal server error');
-    }
+app.get("/studyHours", async (req, res) => {
+  try {
+    const study_hours = await db.manyOrNone(
+      "SELECT * FROM study_hour WHERE student_id = $1",
+      Number(id)
+    );
+    console.log(study_hours);
+    res.render("timer", { study_hours });
+  } catch (error) {
+    console.error("Error fetching study hours:", error);
+    res.status(500).send("Internal server error");
+  }
 });
-
 
 app.get("/student/track_study_hour", async (req, res) => {
-    try {
-        console.log("track_study_hour");
-        const study_hours = await db.manyOrNone('select *from study_hour where student_id = $1', Number(id));
-        console.log(study_hours);
-        res.render("track_study_hour", { study_hours });
-    } catch (error) {
-        console.error("Error opening page:", error);
-        res.status(500).json({ error: "Error opening page." });
-    }
+  try {
+    console.log("track_study_hour");
+    const study_hours = await db.manyOrNone(
+      "select *from study_hour where student_id = $1",
+      Number(id)
+    );
+    console.log(study_hours);
+    res.render("track_study_hour", { study_hours });
+  } catch (error) {
+    console.error("Error opening page:", error);
+    res.status(500).json({ error: "Error opening page." });
+  }
 });
 
 app.get("/progress", async (req, res) => {
-    try {
-        console.log("progress");
-        const name = await db.one('select first_name,last_name from student where student_id = $1', Number(id));
-        const study_hours = await db.manyOrNone('select *from study_hour where student_id = $1', Number(id));
-        console.log(study_hours);
-        res.render("progress", { study_hours, name });
-    } catch (error) {
-        console.error("Error opening page:", error);
-        res.status(500).json({ error: "Error opening page." });
-    }
+  try {
+    console.log("progress");
+    const name = await db.one(
+      "select first_name,last_name from student where student_id = $1",
+      Number(id)
+    );
+    const study_hours = await db.manyOrNone(
+      "select *from study_hour where student_id = $1",
+      Number(id)
+    );
+    console.log(study_hours);
+    res.render("progress", { study_hours, name });
+  } catch (error) {
+    console.error("Error opening page:", error);
+    res.status(500).json({ error: "Error opening page." });
+  }
 });
 
 app.get("/progress/graph", async (req, res) => {
-    try {
-        console.log("progress");
-        const name = await db.one('select first_name,last_name from student where student_id = $1', Number(id));
-        const study_hours = await db.manyOrNone('select date ,avg(hours_studied) as ahs from study_hour where student_id = $1 group by date ', Number(id));
-        console.log(study_hours);
-        const date = study_hours.map(entry => entry.date);
-        const average_hours_studied = study_hours.map(entry => entry.ahs);
-        res.render("studyprogressgraph", { date,average_hours_studied, name });
-    } catch (error) {
-        console.error("Error opening page:", error);
-        res.status(500).json({ error: "Error opening page." });
-    }
+  try {
+    console.log("progress");
+    const name = await db.one(
+      "select first_name,last_name from student where student_id = $1",
+      Number(id)
+    );
+    const study_hours = await db.manyOrNone(
+      "select date ,avg(hours_studied) as ahs from study_hour where student_id = $1 group by date ",
+      Number(id)
+    );
+    console.log(study_hours);
+    const date = study_hours.map((entry) => entry.date);
+    const average_hours_studied = study_hours.map((entry) => entry.ahs);
+    res.render("studyprogressgraph", { date, average_hours_studied, name });
+  } catch (error) {
+    console.error("Error opening page:", error);
+    res.status(500).json({ error: "Error opening page." });
+  }
 });
 
 app.get("/student/routine", async (req, res) => {
-    try {
-        console.log("......get......");
+  try {
+    console.log("......get......");
 
-        const tasks = await db.manyOrNone(
-            "SELECT * FROM routine WHERE student_id = $1",
-            Number(id)
-        );
-        console.log(tasks);
-        res.render("student_routine", {
-            tasks: tasks,
-            duplicateRoutineMessage: null,
-        });
-    } catch (error) {
-        console.error("Error opening page:", error);
-        res.status(500).render("error", { error: "Error opening page." });
-    }
+    const tasks = await db.manyOrNone(
+      "SELECT * FROM routine WHERE student_id = $1",
+      Number(id)
+    );
+    console.log(tasks);
+    res.render("student_routine", {
+      tasks: tasks,
+      duplicateRoutineMessage: null,
+    });
+  } catch (error) {
+    console.error("Error opening page:", error);
+    res.status(500).render("error", { error: "Error opening page." });
+  }
 });
 
 app.post("/student/routine", async (req, res) => {

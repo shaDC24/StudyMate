@@ -84,9 +84,12 @@
         Exam Section
       </button>
       <button onclick="window.location.href='/leaderboard'">Leaderboard</button>
-      <button onclick="window.location.href='/exam-wise-leaderboard'">Exam Wise Leaderboard</button>
+      <button onclick="window.location.href='/exam-wise-leaderboard'">
+        Exam Wise Leaderboard
+      </button>
     </div>
 
+    <% if (leaderboardData.length > 0) { %>
     <h1>Leaderboard for Exam <%= exam_id %></h1>
     <h2>Exam Topic: <%= leaderboardData[0].exam_topic %></h2>
     <table>
@@ -99,7 +102,8 @@
         </tr>
       </thead>
       <tbody>
-        <% leaderboardData.forEach((data, index) => { %>
+        <% leaderboardData.sort(function(a, b) { return a.rank - b.rank;
+        }).forEach(function(data, index) { %>
         <tr>
           <td><%= index + 1 %></td>
           <td><%= data.student_id %></td>
@@ -109,5 +113,8 @@
         <% }); %>
       </tbody>
     </table>
+    <% } else { %>
+    <h2>Nobody attended the exam.</h2>
+    <% } %>
   </body>
 </html>
