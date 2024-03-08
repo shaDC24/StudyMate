@@ -103,13 +103,13 @@ app.post("/registration", async (req, res) => {
                     "INSERT INTO guideline_giver(proficiency, phone_no, university, password_hash) VALUES ($1, $2, $3, $4) RETURNING *",
                     [proficiency, phone, university, password_hash]
                 );
-    
+
                 // Select the student_id
                 let sid = await db.oneOrNone(
                     "SELECT student_id FROM student WHERE first_name=$1 AND last_name=$2 AND date_of_birth=$3 AND password_hash=$4",
                     [first_name, last_name, date_of_birth, password_hash]
                 );
-    
+
                 // If sid is null, insert a new record into the student table
                 if (!sid) {
                     const newStudent = await db.one(
@@ -118,23 +118,23 @@ app.post("/registration", async (req, res) => {
                     );
                     sid = newStudent.student_id; // Assign the new student_id
                 }
-    
+
                 // Select the guideline_giver_id
                 const gid = await db.one(
                     "SELECT guideline_giver_id FROM most_recent_guide_id WHERE id=(SELECT COUNT(*) FROM most_recent_guide_id)"
                 );
-    
+
                 // Insert into isaGuidelineGiver table
                 const newStudentGuider = await db.one(
                     "INSERT INTO isaGuidelineGiver(student_id, guideline_giver_id) VALUES ($1, $2) RETURNING *",
                     [sid, gid.guideline_giver_id]
                 );
-    
+
                 // Success message
                 const successMessage = `Account created successfully. Remember your student user id ${sid}, guideline_giver user id ${gid.guideline_giver_id}, and password ${password_hash}.`;
                 return res.status(200).json({ message: successMessage });
             }
-             else if (userType === "student") {
+            else if (userType === "student") {
                 const scount = await db.one(
                     "SELECT IS_Student_Exists($1, $2, $3) AS c",
                     [first_name, last_name, date_of_birth]
@@ -1745,55 +1745,6 @@ app.delete("/student/delete/:taskId", async (req, res) => {
     }
 });
 
-/*app.get('/student/manage_todo_list', async (req, res) => {
-    const task = req.body.task; // Extract task from request body
-    try {
-
-        const rows = await db.manyOrNone('SELECT * FROM to_do_list where student_id= $1', id);
-        res.status(200).json({ rows: rows, successmessage: false, errormessage: false });
-    } catch (error) {
-        console.error('Error adding task:', error);
-        res.status(500).json({ error: 'Error adding task.' });
-    }
-});
-
-
-app.post('/student/manage_todo_list', async (req, res) => {
-    const task = req.body.task; // Extract task from request body
-    try {
-        const newTask = await db.one('INSERT INTO to_do_list(task_name,student_id) values ($1,$2) returning *', [task, Number(id)]);
-        const rows = await db.manyOrNone('SELECT * FROM to_do_list where student_id= $1', id);
-        res.status(200).json({ rows: rows, successmessage: 'Successfully inserted', errormessage: false });
-    } catch (error) {
-        console.error('Error adding task:', error);
-        res.status(500).json({ error: 'Error adding task.' });
-    }
-});
-
-app.put('/student/manage_todo_list/:id', async (req, res) => {
-    const taskId = req.params.id;
-    const { task } = req.body;
-    try {
-        await db.any('UPDATE to_do_list SET task_name = $1 WHERE id = $2', [task, taskId]);
-        const rows = await db.manyOrNone('SELECT * FROM to_do_list where student_id= $1', id);
-        res.status(200).json({ rows: rows, successmessage: 'Successfully updated', errormessage: false });
-    } catch (error) {
-        console.error('Error updating task:', error);
-        res.status(500).json({ error: 'Error updating task.' });
-    }
-});
-
-app.delete('/student/manage_todo_list/:id', async (req, res) => {
-    const taskId = req.params.id;
-    try {
-        await db.none('DELETE FROM to_do_list WHERE id = $1', taskId);
-        const rows = await db.manyOrNone('SELECT * FROM to_do_list where student_id= $1', id);
-        res.status(200).json({ rows: rows, successmessage: 'Successfully deleted', errormessage: false });
-    } catch (error) {
-        console.error('Error deleting task:', error);
-        res.status(500).json({ error: 'Error deleting task.' });
-    }
-});*/
 
 
 app.post('/startTimer', async (req, res) => {
@@ -1813,13 +1764,12 @@ app.get('/todaydone', (req, res) => {
 });
 app.post('/saveStudyHours', async (req, res) => {
     try {
-        const { date,targetHours, hoursStudied } = req.body;
+        const { date, targetHours, hoursStudied } = req.body;
         console.log(date);
         console.log(hoursStudied);
         console.log(targetHours);
-        const st = await db.one('insert into study_hour(date,targetHours,hours_studied,student_id) values($1,$2,$3,$4) returning *', [date,targetHours, hoursStudied, id]);
-        console.log(st);
-
+        const st = await db.one('insert into study_hour(date,targetHours,hours_studied,student_id) values($1,$2,$3,$4) returning *', [date, targetHours, hoursStudied, id]);
+        res.status(200).json({ message: 'Study hours saved successfully' });
 
     } catch (error) {
         console.error('Error starting timer:', error);
@@ -1827,20 +1777,17 @@ app.post('/saveStudyHours', async (req, res) => {
     }
 });
 
-app.get('/saveStudyHours', async (req, res) => {
+app.get('/studyHours', async (req, res) => {
     try {
-
-
-        const study_hours = await db.manyOrNone('select *from study_hour where student_id = $1', Number(id));
+        const study_hours = await db.manyOrNone('SELECT * FROM study_hour WHERE student_id = $1', Number(id));
         console.log(study_hours);
-
         res.render('timer', { study_hours });
-
     } catch (error) {
-        console.error('Error starting timer:', error);
+        console.error('Error fetching study hours:', error);
         res.status(500).send('Internal server error');
     }
 });
+
 
 app.get("/student/track_study_hour", async (req, res) => {
     try {
@@ -1854,11 +1801,38 @@ app.get("/student/track_study_hour", async (req, res) => {
     }
 });
 
+app.get("/progress", async (req, res) => {
+    try {
+        console.log("progress");
+        const name = await db.one('select first_name,last_name from student where student_id = $1', Number(id));
+        const study_hours = await db.manyOrNone('select *from study_hour where student_id = $1', Number(id));
+        console.log(study_hours);
+        res.render("progress", { study_hours, name });
+    } catch (error) {
+        console.error("Error opening page:", error);
+        res.status(500).json({ error: "Error opening page." });
+    }
+});
 
+app.get("/progress/graph", async (req, res) => {
+    try {
+        console.log("progress");
+        const name = await db.one('select first_name,last_name from student where student_id = $1', Number(id));
+        const study_hours = await db.manyOrNone('select date ,avg(hours_studied) as ahs from study_hour where student_id = $1 group by date ', Number(id));
+        console.log(study_hours);
+        const date = study_hours.map(entry => entry.date);
+        const average_hours_studied = study_hours.map(entry => entry.ahs);
+        res.render("studyprogressgraph", { date,average_hours_studied, name });
+    } catch (error) {
+        console.error("Error opening page:", error);
+        res.status(500).json({ error: "Error opening page." });
+    }
+});
 
 app.get("/student/routine", async (req, res) => {
     try {
         console.log("......get......");
+
         const tasks = await db.manyOrNone(
             "SELECT * FROM routine WHERE student_id = $1",
             Number(id)

@@ -4,28 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Progress Graph</title>
+    <!-- Include necessary libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <title>Study Progress</title>
-    <style>
-        table {
-            border-collapse: collapse;
-            width: 100%;
-        }
-
-        th,
-        td {
-            border: 1px solid #dddddd;
-            text-align: left;
-            padding: 8px;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-    </style>
 </head>
 
 <body>
+
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="#">Student Dashboard</a>
@@ -57,39 +43,62 @@
         </div>
     </nav>
 
-    <h1>Table Of study hours of <%= name.first_name %>
+    <h1>Study Progress Graph of <%= name.first_name %>
             <%= name.last_name %>
     </h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Target Hours</th>
-                <th>Hours Studied</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% study_hours.forEach(hour=> { %>
-                <tr>
-                    <td>
-                         <%= new Date(hour.date).toLocaleDateString() %>
-                    </td>
-                    <td>
-                        <%= hour.targethours %>
-                    </td>
-                    <td>
-                        <%= hour.hours_studied %>
-                    </td>
-                </tr>
-                <% }); %>
-        </tbody>
-    </table>
-    <div class="view-progress">
-        <a href="/progress/graph">View Progress Graph</a>
-    </div>
+    <canvas id="study-progress-chart" width="800" height="400"></canvas>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Get data from the server-side
+            const dates = JSON.parse('<%- JSON.stringify(date) %>');
+            const averageHours = JSON.parse('<%- JSON.stringify(average_hours_studied) %>');
+
+            // Create a new Chart instance
+            const ctx = document.getElementById('study-progress-chart').getContext('2d');
+            const studyProgressChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Average Study Hours',
+                        data: averageHours,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        xAxes: [{
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                displayFormats: {
+                                    day: 'MMM D'
+                                }
+                            },
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Date'
+                            }
+                        }],
+                        yAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Average Study Hours'
+                            }
+                        }]
+                    }
+                }
+            });
+        });
+
+
+    </script>
 </body>
 
 </html>
