@@ -25,10 +25,45 @@
             max-width: 800px;
             margin: 0 auto;
         }
+
+        .navbar {
+            background-color: #007bff;
+            overflow: hidden;
+            margin-bottom: 20px;
+            max-width: 800px; /* Adjust the max-width of the navbar */
+            margin-left: auto;
+            margin-right: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .navbar button {
+            background-color: inherit;
+            border: none;
+            color: white;
+            padding: 14px 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .navbar button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 
 <body>
+    <!-- Navbar -->
+    <div class="navbar">
+        <button onclick="window.location.href='/student/dashboard'">Home</button>
+        <button onclick="window.location.href='/exam_section/result'">Result</button>
+        <button onclick="window.location.href='/exam_section/results'">Progress</button>
+        <button onclick="window.location.href='/student/exam-section'">Exam Section</button>
+        <button onclick="window.location.href='/leaderboard'">Leaderboard</button>
+    </div>
+
     <div class="container">
         <h1>Exam Results</h1>
         <div class="table-container">

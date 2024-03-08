@@ -1,76 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Leaderboard for Exam <%= exam_id %></title>
     <!-- Add your CSS styles here -->
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            padding: 20px;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        padding: 20px;
+      }
 
-        h1 {
-            text-align: center;
-            color: #333;
-        }
+      h1 {
+        text-align: center;
+        color: #333;
+      }
 
-        h2 {
-            text-align: center;
-            color: #666;
-            margin-top: 10px;
-        }
+      h2 {
+        text-align: center;
+        color: #666;
+        margin-top: 10px;
+      }
 
-        table {
-            width: 80%;
-            margin: 20px auto;
-            border-collapse: collapse;
-        }
+      table {
+        width: 80%;
+        margin: 20px auto;
+        border-collapse: collapse;
+      }
 
-        th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
+      th,
+      td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: left;
+      }
 
-        th {
-            background-color: #f2f2f2;
-            color: #333;
-        }
+      th {
+        background-color: #f2f2f2;
+        color: #333;
+      }
 
-        tbody tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
+      tbody tr:nth-child(even) {
+        background-color: #f2f2f2;
+      }
 
-        tbody tr:hover {
-            background-color: #ddd;
-        }
+      tbody tr:hover {
+        background-color: #ddd;
+      }
+
+      .navbar {
+        background-color: #007bff;
+        overflow: hidden;
+        margin-bottom: 20px;
+      }
+
+      .navbar button {
+        background-color: inherit;
+        border: none;
+        color: white;
+        padding: 14px 20px;
+        cursor: pointer;
+        float: left;
+        transition: background-color 0.3s;
+      }
+
+      .navbar button:hover {
+        background-color: #0056b3;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <div class="navbar">
+      <button onclick="window.location.href='/student/dashboard'">Home</button>
+      <button onclick="window.location.href='/exam_section/result'">
+        Result
+      </button>
+      <button onclick="window.location.href='/exam_section/results'">
+        Progress
+      </button>
+      <button onclick="window.location.href='/student/exam-section'">
+        Exam Section
+      </button>
+      <button onclick="window.location.href='/leaderboard'">Leaderboard</button>
+      <button onclick="window.location.href='/exam-wise-leaderboard'">Exam Wise Leaderboard</button>
+    </div>
+
     <h1>Leaderboard for Exam <%= exam_id %></h1>
     <h2>Exam Topic: <%= leaderboardData[0].exam_topic %></h2>
     <table>
-        <thead>
-            <tr>
-                <th>Rank</th>
-                <th>Student ID</th>
-                <th>Student Name</th>
-                <th>Percentage Score</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% leaderboardData.forEach((data, index) => { %>
-                <tr>
-                    <td><%= index + 1 %></td>
-                    <td><%= data.student_id %></td>
-                    <td><%= data.first_name %></td>
-                    <td><%= parseFloat(data.percentage_score).toFixed(2) %> %</td>
-                </tr>
-            <% }); %>
-        </tbody>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Student ID</th>
+          <th>Student Name</th>
+          <th>Percentage Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% leaderboardData.forEach((data, index) => { %>
+        <tr>
+          <td><%= index + 1 %></td>
+          <td><%= data.student_id %></td>
+          <td><%= data.first_name %></td>
+          <td><%= parseFloat(data.percentage_score).toFixed(2) %> %</td>
+        </tr>
+        <% }); %>
+      </tbody>
     </table>
-</body>
+  </body>
 </html>
