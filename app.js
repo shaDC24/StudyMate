@@ -544,10 +544,11 @@ app.get("/course-search-results", async (req, res) => {
           "select * from lecture l join courses c on l.course_id=c.id where c.id=$1;",
           tid
         );
+        const course=await db.any('select *from courses where id = $1',tid);
         console.log(inputs);
         res.render("individual_course_dashboarsd", {
           userType: "Student",
-          inputs: inputs,
+          inputs: inputs,course:course
         });
       } else {
         const inputs = await db.one("select * from courses where id= $1", tid);
@@ -555,7 +556,7 @@ app.get("/course-search-results", async (req, res) => {
         console.log(inputs);
         res.render("individual_course_dashboarsd", {
           userType: "Student",
-          inputs: inputs,
+          inputs: inputs,course:course
         });
       }
     } else {

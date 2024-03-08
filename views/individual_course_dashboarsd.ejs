@@ -114,7 +114,7 @@
     </div>
 
     <% if(inputs) {%>
-    <h1>You have searched for <%= inputs[0].course_title %></h1>
+    <h1>You have searched for <%= course.course_title %></h1>
     <div class="container">
         <div class="row">
             <div class="col-4">
@@ -137,8 +137,8 @@
                             </div>
                             <div class="card-body">
                                 <p>
-                                    The name of the course is <%= inputs[0].course_title %><br />
-                                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptatibus exercitationem veniam enim beatae, asperiores illum quis architecto quod atque animi similique, veritatis distinctio quidem, corporis culpa dolorum eaque laboriosam quae. Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione reiciendis maxime repellat molestiae quam quod dicta explicabo unde veritatis accusantium quidem adipisci earum impedit libero dignissimos ea sint, ipsam nemo! Lorem ipsum dolor sit amet consectetur adipisicing elit. Laboriosam dicta eius labore aspernatur rerum tempora excepturi porro ratione dolorem minus odio, delectus cupiditate non iusto ad, numquam omnis quis repellendus.
+                                    The name of the course is <%= course.course_title %><br />
+                                   
                                 </p>
                             </div>
                         </div>
@@ -150,8 +150,8 @@
                             </div>
                             <div class="card-body">
                                 <p>
-                                    <%= inputs[0].course_description %><br />
-                                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptatibus exercitationem veniam enim beatae, asperiores illum quis architecto quod atque animi similique, veritatis distinctio quidem, corporis culpa dolorum eaque laboriosam quae. Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione reiciendis maxime repellat molestiae quam quod dicta explicabo unde veritatis accusantium quidem adipisci earum impedit libero dignissimos ea sint, ipsam nemo! Lorem ipsum dolor sit amet consectetur adipisicing elit. Laboriosam dicta eius labore aspernatur rerum tempora excepturi porro ratione dolorem minus odio, delectus cupiditate non iusto ad, numquam omnis quis repellendus.
+                                    <%= course.course_description %><br />
+
                                 </p>
                             </div>
                         </div>
@@ -164,7 +164,7 @@
                             <div class="card-body">
                                 <p>
                                     Lecture Initiated: <%=inputs.length%><br /><br />
-                                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptatibus exercitationem veniam enim beatae, asperiores illum quis architecto quod atque animi similique, veritatis distinctio quidem, corporis culpa dolorum eaque laboriosam quae. Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione reiciendis maxime repellat molestiae quam quod dicta explicabo unde veritatis accusantium quidem adipisci earum impedit libero dignissimos ea sint, ipsam nemo! Lorem ipsum dolor sit amet consectetur adipisicing elit. Laboriosam dicta eius labore aspernatur rerum tempora excepturi porro ratione dolorem minus odio, delectus cupiditate non iusto ad, numquam omnis quis repellendus.
+                                
                                 </p>
                                 <% for (let i=0; i < inputs.length; i++) { %>
                                 <div id="lecture<%= i %>">

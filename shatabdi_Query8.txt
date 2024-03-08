@@ -33,3 +33,12 @@ LANGUAGE plpgsql;
 SELECT insert_lectures();
 
 SELECT *FROM lecture;
+
+update lecture
+set pdflink='/uploads/pdf_'||(lecture_id%10)||'_'||(lecture_id%10)||'_'||(lecture_id%10)||'.pdf';	
+
+update lecture
+set pdflink='/uploads/pdf_'||(lecture_id%10)||'_'||(lecture_id%10)||'_'||(lecture_id%10)||'.pdf';	
+
+update lecture
+set videolink='/uploads/video_'||(lecture_id%10)||'_'||(lecture_id%10)||'_'||(lecture_id%10)||'.mp4';
