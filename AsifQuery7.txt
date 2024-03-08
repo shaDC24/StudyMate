@@ -28,3 +28,49 @@ BEGIN
     END LOOP;
 END;
 $$;
+---(hoynai ,execute korish na)---
+
+
+SELECT tgname AS trigger_name,
+       relname AS table_name,
+       tgrelid AS table_oid,
+       tgtype AS trigger_type,
+       tgdeferrable AS is_deferrable,
+       tginitdeferred AS initially_deferred,
+       proname AS function_name
+FROM pg_trigger
+JOIN pg_class ON tgrelid = pg_class.oid
+LEFT JOIN pg_proc ON tgfoid = pg_proc.oid
+WHERE tgname NOT LIKE 'RI_%'
+ORDER BY relname, tgname;
+
+
+CREATE TABLE ExecutionLog (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    FunctionName VARCHAR(255),
+    ExecutionTime DATETIME
+);
+
+DELIMITER //
+
+CREATE TRIGGER log_function_execution
+AFTER FUNCTION
+ON DATABASE
+FOR EACH STATEMENT
+BEGIN
+    INSERT INTO ExecutionLog (FunctionName, ExecutionTime)
+    VALUES (TRIGGER_FUNCTION(), NOW());
+END;
+
+CREATE TRIGGER log_procedure_execution
+AFTER PROCEDURE
+ON DATABASE
+FOR EACH STATEMENT
+BEGIN
+    INSERT INTO ExecutionLog (FunctionName, ExecutionTime)
+    VALUES (TRIGGER_PROCEDURE(), NOW());
+END;
+//
+
+DELIMITER ;
+---(hoynai ,execute korish na)---

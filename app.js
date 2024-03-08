@@ -1497,7 +1497,7 @@ app.delete("/teacher/delete-lecture/:lecture_id", async (req, res) => {
 
   try {
     // Delete the lecture from the database
-    await db.none("DELETE FROM watched WHERE lecture_id = $1", lectureId);
+    //await db.none("DELETE FROM watched WHERE lecture_id = $1", lectureId);
     await db.none("DELETE FROM lecture WHERE lecture_id = $1", lectureId);
     res.status(200).send("Lecture deleted successfully");
   } catch (error) {
