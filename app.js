@@ -98,28 +98,43 @@ app.post("/registration", async (req, res) => {
             ); //, mail_password/mail_password,
             console.log(newuser);
             if (userType === "guideline_giver") {
-                const newgg = await db.one(
-                    "Insert into guideline_giver(proficiency,phone_no,university,password_hash) values ($1,$2,$3,$4) returning *",
+                // Insert a new record into guideline_giver table
+                const newGG = await db.one(
+                    "INSERT INTO guideline_giver(proficiency, phone_no, university, password_hash) VALUES ($1, $2, $3, $4) RETURNING *",
                     [proficiency, phone, university, password_hash]
                 );
-                console.log(newgg);
-                const sid = await db.one(
+    
+                // Select the student_id
+                let sid = await db.oneOrNone(
                     "SELECT student_id FROM student WHERE first_name=$1 AND last_name=$2 AND date_of_birth=$3 AND password_hash=$4",
                     [first_name, last_name, date_of_birth, password_hash]
                 );
+    
+                // If sid is null, insert a new record into the student table
+                if (!sid) {
+                    const newStudent = await db.one(
+                        "INSERT INTO student (first_name, last_name, date_of_birth, password_hash) VALUES ($1, $2, $3, $4) RETURNING *",
+                        [first_name, last_name, date_of_birth, password_hash]
+                    );
+                    sid = newStudent.student_id; // Assign the new student_id
+                }
+    
+                // Select the guideline_giver_id
                 const gid = await db.one(
-                    "SELECT guideline_giver_id FROM most_recent_guide_id  where id=(select count(*) from most_recent_guide_id)"
+                    "SELECT guideline_giver_id FROM most_recent_guide_id WHERE id=(SELECT COUNT(*) FROM most_recent_guide_id)"
                 );
-                const newstudentguider = await db.one(
-                    "insert into isaGuidelineGiver(student_id,guideline_giver_id) values($1,$2) returning *",
-                    [sid.student_id, gid.guideline_giver_id]
+    
+                // Insert into isaGuidelineGiver table
+                const newStudentGuider = await db.one(
+                    "INSERT INTO isaGuidelineGiver(student_id, guideline_giver_id) VALUES ($1, $2) RETURNING *",
+                    [sid, gid.guideline_giver_id]
                 );
-
-                console.log(newstudentguider);
-                const successMessage = `Account created successfully. Remember your student userid ${sid.student_id} and guideline_giver user id ${gid.guideline_giver_id} Password ${password_hash} .
-                                           `;
+    
+                // Success message
+                const successMessage = `Account created successfully. Remember your student user id ${sid}, guideline_giver user id ${gid.guideline_giver_id}, and password ${password_hash}.`;
                 return res.status(200).json({ message: successMessage });
-            } else if (userType === "student") {
+            }
+             else if (userType === "student") {
                 const scount = await db.one(
                     "SELECT IS_Student_Exists($1, $2, $3) AS c",
                     [first_name, last_name, date_of_birth]

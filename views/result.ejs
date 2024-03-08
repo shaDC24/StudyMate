@@ -1,42 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Exam Result</title>
     <!-- Add your CSS styles here -->
     <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .result {
-            text-align: center;
-            margin-bottom: 20px;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .result {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .navbar {
+        background-color: #007bff;
+        overflow: hidden;
+        margin-bottom: 20px;
+      }
+      .navbar button {
+        background-color: inherit;
+        border: none;
+        color: white;
+        padding: 14px 20px;
+        cursor: pointer;
+        float: left;
+        transition: background-color 0.3s;
+      }
+      .navbar button:hover {
+        background-color: #0056b3;
+      }
     </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Exam Result</h1>
-        <div class="result">
-            <% if (totalQuestions !== undefined && correctAnswers !== undefined) { %>
-                <p>Total Questions: <%= totalQuestions %></p>
-                <p>Correct Answers: <%= correctAnswers %></p>
-                <% const percentage = totalQuestions !== 0 ? (correctAnswers / totalQuestions) * 100 : 0; %>
-                <p>Percentage: <%= percentage.toFixed(2) %>%</p>
-            <% } else { %>
-                <p>Unable to retrieve exam result.</p>
-            <% } %>
-        </div>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <div class="navbar">
+      <button onclick="window.location.href='/student/dashboard'">Home</button>
+      <button onclick="window.location.href='/exam_section/result'">
+        Result
+      </button>
+      <button onclick="window.location.href='/exam_section/results'">
+        Progress
+      </button>
+      <button onclick="window.location.href='/student/exam-section'">
+        Exam Section
+      </button>
+      <button onclick="window.location.href='/leaderboard'">Leaderboard</button>
     </div>
-</body>
+
+    <div class="container">
+      <h1>Exam Result</h1>
+      <div class="result">
+        <% if (totalQuestions !== undefined && correctAnswers !== undefined) {
+        %>
+        <p>Total Questions: <%= totalQuestions %></p>
+        <p>Correct Answers: <%= correctAnswers %></p>
+        <% const percentage = totalQuestions !== 0 ? (correctAnswers /
+        totalQuestions) * 100 : 0; %>
+        <p>Percentage: <%= percentage.toFixed(2) %>%</p>
+        <% } else { %>
+        <p>Unable to retrieve exam result.</p>
+        <% } %>
+      </div>
+    </div>
+  </body>
 </html>

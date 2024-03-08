@@ -276,6 +276,31 @@
         });
 
     </script>
+
+    <!-- Add this JavaScript code after your form -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const userTypeSelect = document.getElementById('userType');
+        const universityField = document.getElementById('universityField');
+        const phoneField = document.getElementById('phoneField');
+
+        // Add event listener to the userType select element
+        userTypeSelect.addEventListener('change', function() {
+            const selectedOption = userTypeSelect.value;
+
+            // If the selected option is 'guideline_giver', show the university and phone fields
+            if (selectedOption === 'guideline_giver') {
+                universityField.style.display = 'block';
+                phoneField.style.display = 'block';
+            } else {
+                // Otherwise, hide the fields
+                universityField.style.display = 'none';
+                phoneField.style.display = 'none';
+            }
+        });
+    });
+</script>
+
 </body>
 
 </html>

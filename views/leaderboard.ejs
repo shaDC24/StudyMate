@@ -51,6 +51,25 @@
             text-overflow: ellipsis;
         }
 
+        .navbar {
+            background-color: #007bff;
+            overflow: hidden;
+        }
+
+        .navbar button {
+            background-color: inherit;
+            border: none;
+            color: white;
+            padding: 14px 20px;
+            cursor: pointer;
+            float: left;
+            transition: background-color 0.3s;
+        }
+
+        .navbar button:hover {
+            background-color: #0056b3;
+        }
+
         .button-container {
             text-align: center;
             margin-top: 20px;
@@ -72,6 +91,14 @@
     </style>
 </head>
 <body>
+    <!-- Navbar -->
+    <div class="navbar">
+        <button onclick="window.location.href='/student/dashboard'">Home</button>
+        <button onclick="window.location.href='/exam_section/result'">Result</button>
+        <button onclick="window.location.href='/exam_section/results'">Progress</button>
+        <button onclick="window.location.href='/student/exam-section'">Exam Section</button>
+    </div>
+
     <h1>Leaderboard</h1>
     <table>
         <thead>
