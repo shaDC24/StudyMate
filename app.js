@@ -1639,7 +1639,7 @@ app.get("/student/current_routine", async (req, res) => {
   try {
     console.log("current routine");
     const tasks = await db.manyOrNone(
-      "select *from routine where student_id = $1",
+      "select *from routine where student_id = $1 AND date = CURRENT_DATE",
       Number(id)
     );
     console.log(tasks);
@@ -1655,7 +1655,7 @@ app.get("/student/update/:taskId", async (req, res) => {
     const taskId = req.params.taskId;
     // Fetch the task details from the database using the taskId
     const task = await db.oneOrNone(
-      "SELECT * FROM routine WHERE id = $1",
+      "SELECT * FROM routine WHERE id = $1 AND date = CURRENT_DATE",
       taskId
     );
     //console.log(task);
@@ -1694,7 +1694,7 @@ app.post("/student/update/:taskId", async (req, res) => {
     // Check for conflicting tasks
     console.log(taskId);
     const current_task = await db.one(
-      "select *from routine where id=$1",
+      "select *from routine where id=$1 AND date = CURRENT_DATE",
       taskId
     );
     if (
@@ -1862,7 +1862,7 @@ app.get("/student/routine", async (req, res) => {
         console.log("......get......");
 
         const tasks = await db.manyOrNone(
-            "SELECT * FROM routine WHERE student_id = $1",
+            "SELECT * FROM routine WHERE student_id = $1 AND date = CURRENT_DATE",
             Number(id)
         );
         console.log(tasks);
@@ -1887,7 +1887,7 @@ app.post("/student/routine", async (req, res) => {
       const endTime = task.endTime.trim();
       const taskName = task.taskName.trim();
       const currentTask = await db.oneOrNone(
-        "SELECT * FROM routine WHERE start_time = $1 AND end_time = $2 AND task_name = $3 AND student_id = $4",
+        "SELECT * FROM routine WHERE start_time = $1 AND end_time = $2 AND task_name = $3 AND student_id = $4 AND date = CURRENT_DATE",
         [startTime, endTime, taskName, Number(id)]
       );
       if (currentTask) continue;
@@ -1917,7 +1917,7 @@ app.post("/student/routine", async (req, res) => {
           duplicateRoutineMessage += `Duplicate routine found for ${startTime} and ${endTime} slot, skipping insertion for ${taskName} task.`;
           console.log(duplicateRoutineMessage);
           const nowTasks = await db.any(
-            "SELECT * FROM routine WHERE student_id = $1",
+            "SELECT * FROM routine WHERE student_id = $1 AND date = CURRENT_DATE",
             Number(id)
           );
           return res.status(200).json({
@@ -1934,7 +1934,7 @@ app.post("/student/routine", async (req, res) => {
 
     // Fetch updated tasks after the loop completes
     const nowTasks = await db.any(
-      "SELECT * FROM routine WHERE student_id = $1",
+      "SELECT * FROM routine WHERE student_id = $1 AND date = CURRENT_DATE",
       Number(id)
     );
 

@@ -8,6 +8,42 @@
     <!-- Include necessary libraries -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Custom CSS styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            background-color: #343a40;
+        }
+
+        .navbar-brand,
+        .nav-link {
+            color: #fff !important;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            color: #343a40;
+        }
+
+        .container {
+            margin-top: 50px;
+        }
+
+        canvas {
+            display: block;
+            margin: auto;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 
 <body>
@@ -31,7 +67,6 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/student/current_routine">Current Routine</a>
                     </li>
-
                     <li class="nav-item">
                         <a class="nav-link" href="/student/track_study_hour">Tracking Study Hour</a>
                     </li>
@@ -43,10 +78,11 @@
         </div>
     </nav>
 
-    <h1>Study Progress Graph of <%= name.first_name %>
-            <%= name.last_name %>
-    </h1>
-    <canvas id="study-progress-chart" width="800" height="400"></canvas>
+    <div class="container">
+        <h1>Study Progress Graph of <%= name.first_name %> <%= name.last_name %></h1>
+        <canvas id="study-progress-chart" width="800" height="400"></canvas>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -96,9 +132,8 @@
                 }
             });
         });
-
-
     </script>
+
 </body>
 
 </html>
