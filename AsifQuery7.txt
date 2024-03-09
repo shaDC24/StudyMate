@@ -51,6 +51,8 @@ CREATE TABLE ExecutionLog (
     ExecutionTime DATETIME
 );
 
+--hoynai execute korish na--
+
 DELIMITER //
 
 CREATE TRIGGER log_function_execution
