@@ -186,7 +186,9 @@
 
             if (lecture.pdflink) {
                 lectureDetails.innerHTML += `
-                <iframe src="${lecture.pdflink}" frameborder="0"></iframe>`;
+                    <div class="pdf-container">
+                        <iframe src="${lecture.pdflink}" frameborder="0"></iframe>
+                    </div>`;
             } else {
                 lectureDetails.innerHTML += `
                     <div class="pdf-container">
