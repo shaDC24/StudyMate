@@ -1,0 +1,1496 @@
+CREATE DATABASE studymate;
+
+
+--student table creation
+CREATE TABLE Student (
+    student_id SERIAL PRIMARY KEY,
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    age INTEGER,
+    enrollment_date DATE,
+    password_hash VARCHAR(255), 
+    creation_timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+alter table student add column date_of_birth date;
+
+--to calculate age before insertion
+CREATE OR REPLACE FUNCTION calculate_age()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.age := FLOOR(EXTRACT(YEAR FROM age(NEW.date_of_birth)));
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER age_student_trigger
+BEFORE INSERT ON student
+FOR EACH ROW
+EXECUTE FUNCTION calculate_age();
+
+insert into student (first_name,last_name,date_of_birth,password_hash)
+values('A','B','2003-01-07','s3');
+
+ALTER TABLE Student
+ALTER COLUMN enrollment_date SET DEFAULT CURRENT_DATE;
+
+CREATE OR REPLACE FUNCTION update_last_login_time()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.last_login_time := CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+--deleted the below trigger
+CREATE TRIGGER update_last_login_trigger
+BEFORE UPDATE ON Student
+FOR EACH ROW
+WHEN (OLD.password_hash IS DISTINCT FROM NEW.password_hash)
+EXECUTE FUNCTION update_last_login_time();
+
+INSERT INTO student (
+        first_name,
+        last_name,
+        age,
+        enrollment_date,
+        password_hash
+    )
+VALUES (
+        'ASIF',
+        'KHAN',
+        22,
+        '2024-01-07',
+        'hashed_password'
+    );
+	
+	
+	
+
+-- Create the teacher table
+CREATE TABLE Teacher (
+    teacher_id SERIAL PRIMARY KEY,
+   -- Assuming user_id is a foreign key referencing the user table
+    teacher_name VARCHAR(255),
+    teacher_proficiency VARCHAR(255),
+    teacher_birth_date DATE,
+    age INTEGER,
+    initiated_courses_name VARCHAR(255),--need not
+    last_uploaded TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    password_hash VARCHAR(255)
+);
+
+ALTER TABLE teacher
+RENAME COLUMN teacher_birth_date TO date_of_birth;
+
+
+--no need this trigger
+
+CREATE TRIGGER update_last_login_trigger
+BEFORE UPDATE ON teacher
+FOR EACH ROW
+WHEN (OLD.password_hash IS DISTINCT FROM NEW.password_hash)
+EXECUTE FUNCTION update_last_login_time();
+-- Create a new trigger to set teacher_id before insert
+CREATE TRIGGER before_insert_teacher_set_id BEFORE
+INSERT ON teacher FOR EACH ROW EXECUTE FUNCTION set_teacher_id();
+
+
+--this was used to delete the previous trigger of teacher table
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM pg_trigger
+        WHERE tgname = 'before_insert_or_update_teacher'
+    ) THEN
+        DROP TRIGGER before_insert_or_update_teacher ON teacher;
+    END IF;
+END $$;
+
+drop function update_teacher_age();
+
+-- Create a function to calculate age and update the age field
+CREATE OR REPLACE FUNCTION update_teacher_age() RETURNS TRIGGER AS $$ BEGIN NEW.age = EXTRACT(
+        YEAR
+        FROM age(NEW.date_of_birth)
+    );
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER before_insert_or_update_teacher BEFORE
+INSERT
+    OR
+UPDATE ON teacher FOR EACH ROW EXECUTE FUNCTION update_teacher_age();
+
+-- Update the trigger to set teacher_id from user_id
+CREATE OR REPLACE FUNCTION set_teacher_id() RETURNS TRIGGER AS $$ BEGIN IF NEW.teacher_id IS NULL THEN NEW.teacher_id := NEW.user_id;
+END IF;
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+INSERT INTO teacher (
+       teacher_id,
+        teacher_name,
+        teacher_proficiency,
+        teacher_birth_date,password_hash
+    )
+VALUES (1, 'John Doe', 'Mathematics', '1990-05-15','1'),
+    (2, 'Jane Smith', 'Physics', '1985-09-22','2');
+
+
+--course table creation
+CREATE TABLE courses (
+    id SERIAL PRIMARY KEY,
+    course_title VARCHAR(255) NOT NULL,
+    course_description TEXT,
+    creation_timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    course_creator VARCHAR(255) NOT NULL,
+    enrolled_id INTEGER REFERENCES student(student_id),
+    update_timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+   teacher_id INTEGER REFERENCES teacher(teacher_id) -- Adding teacher reference
+);
+alter table courses add column rate_id INTEGER REFERENCES feedback(feedback_serial);
+
+
+
+--junction table for student and course
+CREATE TABLE enrollments (
+    enrollment_id SERIAL PRIMARY KEY,
+    student_id INTEGER REFERENCES student(student_id),
+    course_id INTEGER REFERENCES courses(id),
+    enrollment_timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+--we dont use the watch table
+CREATE TABLE watched (
+    watched_id SERIAL PRIMARY KEY,
+    student_id INTEGER REFERENCES student(student_id),
+    lecture_id INTEGER REFERENCES Lecture(lecture_id),
+    watched_timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+--lecture creation
+CREATE TABLE Lecture (
+    lecture_id SERIAL PRIMARY KEY,
+    description TEXT,
+    pdf_note BYTEA,--need not
+    lecture_name VARCHAR(255),
+    video BYTEA,--need not
+    upload_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+    teacher_id INTEGER REFERENCES teacher(teacher_id), 
+    course_id INTEGER REFERENCES courses(id), 
+);
+
+
+ALTER TABLE LECTURE
+DROP COLUMN COURSE_ID;
+ALTER TABLE Lecture
+ADD COLUMN course_id INTEGER REFERENCES courses(id),
+ADD CONSTRAINT fk_lecture_course
+FOREIGN KEY (course_id) REFERENCES courses(id);
+
+ALTER TABLE Lecture
+ADD COLUMN videolink TEXT,
+ADD COLUMN pdflink  TEXT;
+
+
+--we dont use topic table
+CREATE TABLE TOPIC (
+    topic_id SERIAL PRIMARY KEY,
+    topic_name VARCHAR(255) NOT NULL
+);
+
+--exam section table
+CREATE TABLE exam_section (
+    id SERIAL PRIMARY KEY,
+    exam_topic VARCHAR(255) NOT NULL,
+    question_id INTEGER NOT NULL
+);
+alter table exam_section add column topic_id INTEGER REFERENCES TOPIC(topic_id);
+
+ALTER TABLE exam_section DROP COLUMN question_id;
+ALTER TABLE exam_section 
+ADD COLUMN course_id INTEGER,
+ADD CONSTRAINT fk_course_id FOREIGN KEY (course_id) REFERENCES courses(id); 
+
+--question table
+CREATE TABLE question (
+    id SERIAL PRIMARY KEY,
+    question_statement TEXT NOT NULL
+);
+alter table question add column exam_id INTEGER REFERENCES exam_section(id);
+
+
+
+--answer table
+CREATE TABLE answer (
+    id SERIAL PRIMARY KEY,
+    ans_statement TEXT NOT NULL,
+    explanation TEXT
+);
+alter table answer add column question_id INTEGER REFERENCES question(id);
+
+
+--multiple choice table
+CREATE TABLE choice (
+    id SERIAL PRIMARY KEY,
+    option_text TEXT NOT NULL
+);
+alter table choice add column question_id INTEGER REFERENCES question(id);
+
+
+--we dont use feedback table
+CREATE TABLE feedback (
+    feedback_serial SERIAL PRIMARY KEY,
+    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    comment TEXT
+);
+alter table feedback add column student_id INTEGER REFERENCES student(student_id);
+
+
+--we dont use lecture progress table
+CREATE TABLE lecture_progress (
+    lecture_progress_id SERIAL PRIMARY KEY,
+    current_id INTEGER REFERENCES lecture(lecture_id),
+    finished_id INTEGER REFERENCES lecture(lecture_id)
+);
+
+
+--we dont use exam performance table
+CREATE TABLE exam_performance (
+    exam_id SERIAL PRIMARY KEY,
+    accuracy_pct DECIMAL(5, 2), -- Assuming accuracy percentage can have two decimal places
+    avg_time_per_question INTEGER -- Assuming average time is measured in seconds
+);
+
+--we dont use the below table
+CREATE TABLE tracking_section (
+    track_id SERIAL PRIMARY KEY,
+    exam_performance_id INTEGER REFERENCES exam_performance(exam_id),
+    lecture_progress_id INTEGER REFERENCES lecture_progress(lecture_progress_id)
+);
+
+--we dont use the below table
+CREATE TABLE to_do_list (
+    id SERIAL PRIMARY KEY,
+    task_name VARCHAR(255) NOT NULL
+);
+
+
+CREATE TABLE routine (
+    id SERIAL PRIMARY KEY,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    task_name VARCHAR(255) NOT NULL
+);
+
+--we dont use the below table
+CREATE TABLE study_info (
+    id SERIAL PRIMARY KEY,
+    routine_id INTEGER REFERENCES routine(id),
+    todo_list_id INTEGER REFERENCES to_do_list(id),
+    study_hour INTEGER REFERENCES study_hour(id)
+);
+
+
+CREATE TABLE study_hour (
+    id SERIAL PRIMARY KEY,
+    date DATE NOT NULL,
+    hours_studied INTEGER NOT NULL,
+    study_info_id INTEGER REFERENCES study_info(id)
+);
+
+
+CREATE TABLE guideline_giver (
+    guide_id SERIAL PRIMARY KEY,
+    proficiency VARCHAR(255) NOT NULL,
+    phone_no VARCHAR(15) NOT NULL,
+    university VARCHAR(255) NOT NULL
+);
+
+alter table guideline_giver add column password_hash varchar(255);
+
+ALTER TABLE guideline_giver
+RENAME COLUMN guide_id TO guideline_giver_id;
+insert into guideline_giver(proficiency,phone_no,university,password_hash) values('Math',01731254534,'BUET','g2');
+
+
+--junction table of student and guideline giver
+--we have not use this
+CREATE TABLE guidance (
+    guidance_id SERIAL PRIMARY KEY,
+    guide_id INTEGER REFERENCES guideline_giver(guide_id),
+    student_id INTEGER REFERENCES student(student_id),
+    guidance_start_date DATE,
+    guidance_end_date DATE
+);
+ALTER TABLE guidance
+ADD CONSTRAINT unique_guidance_for_student
+UNIQUE (student_id);
+
+--we have not use this
+CREATE TABLE forum (
+    post_id SERIAL PRIMARY KEY,
+    student_id INTEGER REFERENCES student(student_id),
+    post_content TEXT,
+    post_timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+
+--we have not use this
+CREATE TABLE discussion (
+    discussion_id SERIAL PRIMARY KEY,
+    forum_post_id INTEGER REFERENCES forum(post_id),
+    reply_giver_id INTEGER,
+    reply_giver_type VARCHAR(20),
+    reply_content TEXT,
+    reply_timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+--we have not use this
+CREATE TABLE reply_givers (
+    reply_giver_id INTEGER PRIMARY KEY,
+    reply_giver_type VARCHAR(20) NOT NULL
+);
+ALTER TABLE reply_givers
+ADD CONSTRAINT uq_reply_givers_id_type UNIQUE (reply_giver_id, reply_giver_type);
+
+ALTER TABLE discussion
+ADD CONSTRAINT fk_reply_giver
+FOREIGN KEY (reply_giver_id, reply_giver_type) 
+REFERENCES reply_givers(reply_giver_id, reply_giver_type);
+
+
+
+--the code of making users table is missing
+
+ALTER TABLE USERS 
+ADD COLUMN USERTYPE VARCHAR(25);
+
+alter table users drop constraint users_gmail_key;
+
+ALTER TABLE users
+ADD CONSTRAINT unique_gmail_usertype UNIQUE (gmail, usertype);
+
+CREATE OR REPLACE FUNCTION IS_User_Exists(gmail in VARCHAR, userType in VARCHAR) 
+RETURNS INTEGER 
+AS
+$$
+DECLARE
+    ans INTEGER;
+BEGIN
+    SELECT COUNT(*) INTO ans
+    FROM USERS u
+    WHERE u.GMAIL = IS_User_Exists.gmail
+    AND u.USERTYPE = IS_User_Exists.userType;
+
+    RETURN ans;
+END;
+$$
+LANGUAGE PLPGSQL;
+
+
+--junction table of guideline_giver and student tablr.....when a student is also a guideline giver
+CREATE TABLE isaGuidelineGiver (
+    isaGuidelineGiver_id SERIAL PRIMARY KEY,
+    student_id INT,
+    guideline_giver_id INT,
+    CONSTRAINT unique_student_guideline_giver UNIQUE (student_id, guideline_giver_id),
+    FOREIGN KEY (student_id) REFERENCES student(student_id),
+    FOREIGN KEY (guideline_giver_id) REFERENCES guideline_giver(guideline_giver_id)
+);
+
+--to keep most recent inserted guideline_giver_id
+CREATE TABLE most_recent_guide_id (
+    id SERIAL PRIMARY KEY,
+    guideline_giver_id INTEGER
+);
+
+CREATE OR REPLACE FUNCTION update_most_recent_guide_id(jid IN INTEGER)
+RETURNS INTEGER AS
+$$
+BEGIN
+    UPDATE most_recent_guide_id
+    SET guideline_giver_id = jid;
+    RETURN jid;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION insert_guideline_giver_function()
+RETURNS TRIGGER AS
+$$
+BEGIN
+    INSERT INTO most_recent_guide_id (guideline_giver_id) VALUES (NEW.guideline_giver_id);
+    RETURN NEW;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER after_insert_guideline_giver
+AFTER INSERT ON guideline_giver
+FOR EACH ROW
+EXECUTE FUNCTION insert_guideline_giver_function();
+
+
+INSERT INTO guideline_giver (proficiency, phone_no, university)
+VALUES ('math', '01533496875', 'kuet');
+SELECT guideline_giver_id FROM most_recent_guide_id;
+
+
+--before insertion check students
+CREATE OR REPLACE FUNCTION IS_Student_Exists(first_name in VARCHAR, last_name in VARCHAR, date_of_birth in DATE) 
+RETURNS INTEGER 
+AS
+$$
+DECLARE
+    ans INTEGER;
+BEGIN
+    SELECT COUNT(*) INTO ans
+    FROM STUDENT S
+    WHERE UPPER(S.FIRST_NAME) = UPPER(IS_Student_Exists.first_name)
+    AND UPPER(S.LAST_NAME) = UPPER(IS_Student_Exists.last_name)
+	AND S.DATE_OF_BIRTH=Is_Student_Exists.date_of_birth;
+
+    RETURN ans;
+END;
+$$
+LANGUAGE PLPGSQL;
+
+--before insertion check teacher
+CREATE OR REPLACE FUNCTION IS_Teacher_Exists(first_name in VARCHAR, last_name in VARCHAR, date_of_birth in DATE,teacher_proficiency in VARCHAR) 
+RETURNS INTEGER 
+AS
+$$
+DECLARE
+    ans INTEGER;
+BEGIN
+    SELECT COUNT(*) INTO ans
+    FROM TEACHER T1
+    WHERE UPPER(T1.TEACHER_NAME) = UPPER(IS_Teacher_Exists.first_name||' '||IS_Teacher_Exists.last_name)
+    AND UPPER(T1.TEACHER_PROFICIENCY) = UPPER(IS_Teacher_Exists.teacher_proficiency)
+	AND T1.DATE_OF_BIRTH=IS_Teacher_Exists.date_of_birth;
+
+    RETURN ans;
+END;
+$$
+LANGUAGE PLPGSQL;
+
+
+
+insert into exam_section (exam_topic,course_id) values ('BST',2); (eita ase tor maybe dekhish)
+
+ CREATE TABLE exam (
+    id SERIAL PRIMARY KEY,
+    examSectionId INTEGER,
+    CONSTRAINT fk_examSectionId FOREIGN KEY (examSectionId) REFERENCES exam_section(id)
+); (eitao ase tor maybe dekhish)
+
+
+insert into choice (option_text,question_id) values ('logn',1);
+insert into choice (option_text,question_id) values ('n',1);
+insert into choice (option_text,question_id) values ('1',1);
+insert into choice (option_text,question_id) values ('n^3',1);
+
+insert into question (question_statement,exam_id) values ('What is the time complexity of BST deletion?',1);
+
+CREATE OR REPLACE FUNCTION is_question_exists_by_statement(
+    p_question_statement VARCHAR
+) RETURNS BOOLEAN
+AS $$
+DECLARE
+    v_count INTEGER;
+BEGIN
+    -- Check if the question exists in the database
+    SELECT COUNT(*)
+    INTO v_count
+    FROM questions
+    WHERE question_statement = p_question_statement;
+
+    -- Return true if the count is greater than 0, indicating the question exists
+    RETURN v_count > 0;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN FALSE; -- Question not found
+    WHEN OTHERS THEN
+        -- Handle exceptions as needed, such as logging errors
+        RETURN FALSE; -- Return false in case of errors
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION insert_question(
+    p_question_statement VARCHAR
+) RETURNS INTEGER 
+AS $$
+DECLARE
+    v_question_id INTEGER;
+BEGIN
+    -- Check if the question already exists
+    IF is_question_exists_by_statement(p_question_statement) THEN
+        -- If the question already exists, return -1 to indicate failure
+        RETURN -1;
+    ELSE
+        -- Insert the question if it doesn't exist
+        INSERT INTO questions (question_statement)
+        VALUES (p_question_statement)
+        RETURNING id INTO v_question_id;
+        
+        -- Return the ID of the inserted question
+        RETURN v_question_id;
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        -- Handle exceptions if any
+        RETURN -1; -- Return -1 to indicate failure
+END;
+$$ LANGUAGE plpgsql;
+
+INSERT INTO TEACHER (TEACHER_NAME,PASSWORD_HASH) VALUES ('DR.ALAM',3);
+INSERT INTO TEACHER (TEACHER_ID,TEACHER_NAME,PASSWORD_HASH) VALUES (4,'DR.KHAN',4);
+INSERT INTO TEACHER (TEACHER_NAME,PASSWORD_HASH) VALUES ('DR.HASAN',6);
+INSERT INTO teacher (
+        teacher_name,
+        teacher_proficiency,
+        teacher_birth_date,password_hash
+    )
+VALUES ( 'Mr.Smith', 'Science', '1995-06-15','7'),
+    ('Miss Nahar', 'Language', '1977-07-22','8');
+
+insert into choice (option_text,question_id) values ('logn',2),('n',2),('1',2),('n^3',2);
+
+ALTER TABLE question
+ADD COLUMN question_ans VARCHAR(255); -- Adjust the data type and size according to your requirements
+UPDATE question
+SET question_ans = 'logn'
+WHERE id = 1;
+UPDATE question
+SET question_ans = 'logn'
+WHERE id = 2;
+
+
+CREATE TABLE student_ans (
+    student_id INT,
+    question_id INT,
+    submitted_ans_text TEXT,
+    PRIMARY KEY (student_id, question_id),
+    FOREIGN KEY (student_id) REFERENCES student(student_id),
+    FOREIGN KEY (question_id) REFERENCES question(id)
+);
+
+
+CREATE OR REPLACE PROCEDURE calculate_result(
+    p_exam_id INTEGER,
+    OUT p_total_questions INTEGER,
+    OUT p_correct_answers INTEGER
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_correct_answers INTEGER := 0;
+    v_submitted_answer TEXT;
+    question_rec RECORD;
+BEGIN
+    -- Initialize variables
+    p_total_questions := 0;
+    p_correct_answers := 0;
+
+    -- Get the total number of questions for the exam
+    SELECT COUNT(*) INTO p_total_questions
+    FROM question
+    WHERE exam_id = p_exam_id;
+
+    -- Loop through each question to compare the submitted answer with the correct answer
+    FOR question_rec IN
+        SELECT id, question_ans
+        FROM question
+        WHERE exam_id = p_exam_id
+    LOOP
+        -- Retrieve the submitted answer for the current question
+        BEGIN
+            -- Retrieve the submitted answer from the table where the user's answers are stored
+            SELECT answer INTO v_submitted_answer
+            FROM student_ans
+            WHERE question_id = question_rec.id;
+
+        EXCEPTION
+            WHEN NO_DATA_FOUND THEN
+                -- Handle the case where the user has not submitted an answer for this question
+                v_submitted_answer := NULL;
+        END;
+
+        -- Compare the submitted answer with the correct answer
+        IF question_rec.question_ans = v_submitted_answer THEN
+            v_correct_answers := v_correct_answers + 1;
+        END IF;
+    END LOOP;
+
+    -- Set the total number of correct answers
+    p_correct_answers := v_correct_answers;
+EXCEPTION
+    WHEN OTHERS THEN
+        -- Handle exceptions as needed
+        p_total_questions := -1; -- Return -1 to indicate failure for total questions
+        p_correct_answers := -1; -- Return -1 to indicate failure for correct answers
+END;
+$$;
+
+
+CREATE OR REPLACE FUNCTION check_previous_entry()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Check if there is a previous entry for the same student_id and question_id
+    IF EXISTS (
+        SELECT 1 FROM student_ans
+        WHERE student_id = NEW.student_id AND question_id = NEW.question_id
+    ) THEN
+        -- Raise an alert
+        RAISE NOTICE 'A previous entry exists for the same student and question.';
+
+        -- Here you can customize the behavior based on your requirement
+        -- For example, you can prompt the user or proceed automatically
+
+        -- To automatically proceed and overwrite the previous entry
+         DELETE FROM student_ans WHERE student_id = NEW.student_id AND question_id = NEW.question_id;
+
+        -- To prompt the user, you can't directly interact with the user interface from the trigger
+        -- You might consider logging an entry or sending a message to a messaging system
+    END IF;
+
+    -- Ensure the trigger continues to the actual insert
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER before_student_ans_insert
+BEFORE INSERT ON student_ans
+FOR EACH ROW
+EXECUTE FUNCTION check_previous_entry();
+
+
+
+ CREATE TABLE result (
+    result_id SERIAL PRIMARY KEY,
+    exam_id INT,
+    student_id INT,
+    correct_answers INT,
+    total_questions INT,
+    FOREIGN KEY (exam_id) REFERENCES exam_section(id),
+    FOREIGN KEY (student_id) REFERENCES student(student_id)
+);
+
+ALTER TABLE exam_section
+ADD COLUMN exam_duration INTEGER; -- Change the data type as needed
+
+update  exam_section set exam_duration = 1;
+
+DO $$
+DECLARE
+    v_video_link TEXT;
+    lecture_rec RECORD;
+BEGIN
+    FOR lecture_rec IN SELECT lecture_id, course_id, teacher_id FROM lecture LOOP
+        v_video_link := '/uploads/video_' || lecture_rec.lecture_id || '_' || lecture_rec.course_id || '_' || lecture_rec.teacher_id || '.mp4';
+        
+        UPDATE lecture
+        SET videolink = v_video_link
+        WHERE lecture_id = lecture_rec.lecture_id;
+        
+        COMMIT; -- Commit after each update to persist changes immediately
+    END LOOP;
+END;
+$$;
+
+update lecture set course_id = 3 where course_id is null;
+update lecture set teacher_id = 1 where teacher_id is null;
+update lecture set videolink = '<iframe width="560" height="315" src='https://www.youtube.com/watch?v=KLuTLF3x9sA' where videolink is null;
+
+
+CREATE TABLE sendrequest (
+    id SERIAL PRIMARY KEY,
+    guideline_giver_id INT,
+    student_id INT,
+    FOREIGN KEY (guideline_giver_id) REFERENCES guideline_giver(guideline_giver_id),
+    FOREIGN KEY (student_id) REFERENCES student(student_id),
+    UNIQUE(guideline_giver_id, student_id)
+);
+
+ALTER TABLE sendrequest
+ADD COLUMN isadded VARCHAR(25) DEFAULT 'false';
+
+CREATE TABLE messages (
+    id SERIAL PRIMARY KEY,
+    from_student_id INT REFERENCES student(student_id),
+    to_guideline_giver_id INT REFERENCES guideline_giver(guideline_giver_id),
+    message_text TEXT,
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE messages
+ADD COLUMN sender_role text;
+
+
+CREATE TABLE topper (
+    id SERIAL PRIMARY KEY,
+    exam_id INT REFERENCES exam_section(id),
+    student_id INT REFERENCES student(student_id)
+);
+
+
+CREATE OR REPLACE PROCEDURE find_and_update_toppers()
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    exam_record RECORD;
+    topper_record RECORD;
+BEGIN
+    -- Loop through distinct exam IDs in the result table
+    FOR exam_record IN SELECT DISTINCT exam_id FROM result LOOP
+        -- Find the top scorer for each exam
+        SELECT INTO topper_record * 
+        FROM result 
+        WHERE exam_id = exam_record.exam_id 
+        ORDER BY correct_answers DESC 
+        LIMIT 1;
+        
+        -- Check if the top scorer exists
+        IF topper_record IS NOT NULL THEN
+            -- Insert or update the topper record in the topper table
+            INSERT INTO topper (exam_id, student_id) VALUES (topper_record.exam_id, topper_record.student_id)
+            ON CONFLICT (exam_id)
+            DO UPDATE SET student_id = topper_record.student_id;
+        END IF;
+    END LOOP;
+END;
+$$;
+
+ALTER TABLE topper ADD CONSTRAINT unique_exam_id UNIQUE (exam_id);
+
+-- Drop the previous procedure if it exists
+DROP PROCEDURE IF EXISTS find_and_update_toppers;
+
+-- Create the new procedure
+CREATE OR REPLACE PROCEDURE find_and_update_toppers()
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    exam_record RECORD;
+    topper_cursor CURSOR FOR
+        SELECT exam_id, student_id
+        FROM (
+            SELECT 
+                exam_id, 
+                student_id,
+                ROW_NUMBER() OVER(PARTITION BY exam_id ORDER BY correct_answers DESC) AS rank
+            FROM result
+        ) ranked_results
+        WHERE rank <= 3;
+    topper_record RECORD;
+BEGIN
+    -- Open the cursor
+    OPEN topper_cursor;
+    
+    -- Fetch and process each row from the cursor
+    LOOP
+        FETCH topper_cursor INTO topper_record;
+        EXIT WHEN NOT FOUND;
+
+        -- Insert or update the topper record in the topper table
+        INSERT INTO topper (exam_id, student_id) VALUES (topper_record.exam_id, topper_record.student_id)
+        ON CONFLICT (exam_id)
+        DO UPDATE SET student_id = topper_record.student_id;
+    END LOOP;
+
+    -- Close the cursor
+    CLOSE topper_cursor;
+END;
+$$;
+
+
+ALTER TABLE TOPPER
+DROP CONSTRAINT unique_exam_id;
+
+
+ALTER TABLE topper
+DROP CONSTRAINT IF EXISTS unique_exam_student,
+ADD CONSTRAINT unique_exam_student
+UNIQUE (exam_id, student_id);
+
+
+-- First, drop the existing unique constraint on (exam_id, student_id)
+ALTER TABLE topper DROP CONSTRAINT IF EXISTS unique_exam_student;
+
+-- Add a rank column to the topper table
+ALTER TABLE topper ADD COLUMN rank INT;
+
+-- Add a composite unique constraint on (exam_id, student_id, rank)
+ALTER TABLE topper ADD CONSTRAINT topper_exam_student_rank_unique UNIQUE (exam_id, student_id, rank);
+
+-- Now, modify the find_and_update_toppers procedure to update the rank accordingly
+CREATE OR REPLACE PROCEDURE find_and_update_toppers()
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    exam_record RECORD;
+    topper_record RECORD;
+    rank_count INT := 0;
+BEGIN
+    -- Loop through distinct exam IDs in the result table
+    FOR exam_record IN SELECT DISTINCT exam_id FROM result LOOP
+        -- Reset the rank count for each exam
+        rank_count := 0;
+
+        -- Find the top scorers for each exam
+        FOR topper_record IN (
+            SELECT student_id
+            FROM result
+            WHERE exam_id = exam_record.exam_id
+            ORDER BY correct_answers DESC
+        ) LOOP
+            -- Increment the rank count
+            rank_count := rank_count + 1;
+
+            -- Insert or update the topper record in the topper table
+            INSERT INTO topper (exam_id, student_id, rank)
+            VALUES (exam_record.exam_id, topper_record.student_id, rank_count)
+            ON CONFLICT (exam_id, student_id)
+            DO UPDATE SET rank = EXCLUDED.rank;
+        END LOOP;
+    END LOOP;
+END;
+$$;
+--above is the final
+
+
+
+ALTER TABLE topper DROP CONSTRAINT topper_exam_student_rank_unique;
+ALTER TABLE topper ADD CONSTRAINT topper_exam_id_rank_key UNIQUE (exam_id, rank);
+
+CREATE OR REPLACE PROCEDURE find_and_update_toppers()
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    exam_record RECORD;
+    topper_record RECORD;
+    rank_counter INTEGER;
+BEGIN
+    -- Loop through distinct exam IDs in the result table
+    FOR exam_record IN SELECT DISTINCT exam_id FROM result LOOP
+        rank_counter := 1; -- Initialize rank counter for each exam
+        -- Find the top 3 scorers for each exam
+        FOR topper_record IN 
+            SELECT * 
+            FROM result 
+            WHERE exam_id = exam_record.exam_id 
+            ORDER BY correct_answers DESC 
+            LIMIT 3
+        LOOP
+            -- Insert or update the topper record in the topper table
+            INSERT INTO topper (exam_id, student_id, rank) 
+            VALUES (topper_record.exam_id, topper_record.student_id, rank_counter)
+            ON CONFLICT (exam_id, rank)
+            DO UPDATE SET student_id = EXCLUDED.student_id;
+            rank_counter := rank_counter + 1; -- Increment rank counter
+        END LOOP;
+    END LOOP;
+END;
+$$;
+
+
+
+ALTER TABLE courses DROP COLUMN rate_id;
+
+CREATE TABLE rate (
+    rate_id SERIAL PRIMARY KEY,
+    student_id INT REFERENCES student(student_id),
+    course_id INT REFERENCES course(id),
+    rating INT CHECK (rating >= 0 AND rating <= 5)
+);
+
+
+CREATE OR REPLACE PROCEDURE insert_or_update_rate (
+    p_student_id INT,
+    p_course_id INT,
+    p_rating INT
+)
+AS $$
+DECLARE
+    v_row_count INT;
+BEGIN
+    -- Check if a record already exists for the given student_id and course_id
+    SELECT COUNT(*)
+    INTO v_row_count
+    FROM rate
+    WHERE student_id = p_student_id
+    AND course_id = p_course_id;
+
+    IF v_row_count > 0 THEN
+        -- Update the existing record
+        UPDATE rate
+        SET rating = p_rating
+        WHERE student_id = p_student_id
+        AND course_id = p_course_id;
+    ELSE
+        -- Insert a new record
+        INSERT INTO rate (student_id, course_id, rating)
+        VALUES (p_student_id, p_course_id, p_rating);
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+
+CREATE OR REPLACE PROCEDURE update_lecture(
+    IN p_lecture_id INT,
+    IN p_lecture_name VARCHAR,
+    IN p_description TEXT,
+    IN p_videolink VARCHAR,
+    IN p_pdflink VARCHAR,
+	OUT p_status_message VARCHAR
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    -- Retrieve the current attributes of the lecture
+    DECLARE
+        v_previous_lecture_name VARCHAR;
+        v_previous_description TEXT;
+        v_previous_videolink VARCHAR;
+        v_previous_pdflink VARCHAR;
+		v_previous_teacher_id INTEGER;
+		v_previous_course_id INTEGER;
+        v_new_pdflink VARCHAR;
+        v_new_videolink VARCHAR;
+		
+    BEGIN
+        SELECT lecture_name, description, videolink, pdflink,course_id,teacher_id
+        INTO v_previous_lecture_name, v_previous_description, v_previous_videolink, v_previous_pdflink,
+		v_previous_course_id,v_previous_teacher_id
+        FROM lecture
+        WHERE lecture_id = p_lecture_id;
+        
+        -- Check if any of the attributes are different
+        IF v_previous_lecture_name != p_lecture_name OR
+           v_previous_description != p_description OR
+           v_previous_videolink != p_videolink OR
+           v_previous_pdflink != p_pdflink
+        THEN
+            -- Generate new filenames for video and PDF
+            v_new_videolink := 'video_' || p_lecture_id || '_'||v_previous_course_id||'_'||v_previous_teacher_id||'.mp4';
+            v_new_pdflink := 'pdf_' || p_lecture_id || '_'||v_previous_course_id||'_'||v_previous_teacher_id|| '.pdf';
+            
+            -- If any attribute is different, update the lecture with the new attributes
+            UPDATE lecture
+            SET lecture_name = p_lecture_name,
+                description = p_description,
+                videolink = v_new_videolink,
+                pdflink = v_new_pdflink
+            WHERE lecture_id = p_lecture_id;
+		    p_status_message := 'Lecture updated successfully';
+        ELSE
+            -- Set status message
+            p_status_message := 'No changes were made to the lecture';
+        END IF;
+    END;
+END;
+$$;
+
+
+alter table courses
+drop column enrolled_id;
+
+
+ALTER TABLE watched
+ADD COLUMN course_id INT;
+
+ALTER TABLE watched
+ADD CONSTRAINT fk_watched_course_id
+FOREIGN KEY (course_id)
+REFERENCES courses(id);
+
+DO $$
+DECLARE
+    constraint_rec RECORD;
+    drop_sql TEXT;
+    create_sql TEXT;
+    has_constraints BOOLEAN := FALSE;
+BEGIN
+    -- Check if there are existing foreign key constraints without ON DELETE CASCADE
+    FOR constraint_rec IN (
+        SELECT constraint_name, table_schema, table_name
+        FROM information_schema.table_constraints
+        WHERE constraint_type = 'FOREIGN KEY'
+        AND constraint_schema = 'public'  -- Adjust schema name if necessary
+        AND constraint_name NOT IN (
+            SELECT constraint_name
+            FROM information_schema.referential_constraints
+            WHERE delete_rule = 'CASCADE'
+            AND constraint_schema = 'public'  -- Adjust schema name if necessary
+        )
+    ) LOOP
+        has_constraints := TRUE;
+        
+        drop_sql := 'ALTER TABLE ' || constraint_rec.table_schema || '.' || constraint_rec.table_name ||
+                    ' DROP CONSTRAINT ' || constraint_rec.constraint_name || ' CASCADE;';
+        
+        EXECUTE drop_sql;
+        
+        create_sql := 'ALTER TABLE ' || constraint_rec.table_schema || '.' || constraint_rec.table_name ||
+                      ' ADD CONSTRAINT ' || constraint_rec.constraint_name || 
+                      ' FOREIGN KEY ' || pg_get_constraintdef(pg_constraint.oid, true) ||
+                      ' ON DELETE CASCADE;';
+        
+        EXECUTE create_sql;
+        
+        RAISE NOTICE 'Constraint % on table % modified.', constraint_rec.constraint_name, constraint_rec.table_name;
+    END LOOP;
+    
+    -- Create the new table with foreign key constraints
+    IF has_constraints THEN
+        -- Add your table creation SQL statement here
+        RAISE NOTICE 'New table created with ON DELETE CASCADE for existing foreign key constraints.';
+    ELSE
+        -- Add your table creation SQL statement here without modification
+        RAISE NOTICE 'New table created without any changes to foreign key constraints.';
+    END IF;
+END $$;
+
+
+CREATE OR REPLACE FUNCTION ddl_event_trigger_function() RETURNS event_trigger AS $$
+DECLARE
+    obj record;
+BEGIN
+    FOR obj IN SELECT * FROM pg_event_trigger_ddl_commands() LOOP
+        RAISE NOTICE 'DDL Event: %', obj.command_tag;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE EVENT TRIGGER ddl_event_trigger
+ON ddl_command_end
+EXECUTE PROCEDURE ddl_event_trigger_function();
+
+
+
+
+CREATE OR REPLACE FUNCTION cascade_delete_dependent_rows()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Delete rows from enrollments table
+    DELETE FROM enrollments WHERE course_id = OLD.id;
+	DELETE FROM watched WHERE course_id=OLD.id;
+    DELETE FROM lecture WHERE course_id = OLD.id;
+	DELETE from topper where exam_id in(
+	SELECT id FROM exam_section
+	WHERE course_id = OLD.id
+	);
+	DELETE FROM result where exam_id in(
+	SELECT id FROM exam_section
+	WHERE course_id = OLD.id
+	);
+	DELETE FROM choice WHERE question_id in
+	(SELECT question_id FROM question
+	where exam_id in (
+		SELECT id FROM exam_section
+	    WHERE course_id = OLD.id
+	));
+	DELETE FROM question 
+	WHERE exam_id in( SELECT id FROM exam_section
+					WHERE course_id = OLD.id);
+					
+    DELETE FROM exam_section WHERE course_id = OLD.id;
+    DELETE FROM rate WHERE course_id = OLD.id;
+	
+	
+
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create trigger for cascading deletes on the courses table
+CREATE TRIGGER cascade_delete_trigger
+BEFORE DELETE ON courses
+FOR EACH ROW
+EXECUTE FUNCTION cascade_delete_dependent_rows();
+
+
+ALTER TABLE routine
+ADD COLUMN student_id INT REFERENCES student(student_id) ON DELETE CASCADE;
+
+
+ALTER TABLE routine
+ADD CONSTRAINT unique_routine_combination UNIQUE (start_time, end_time, student_id),
+ADD FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE;
+
+
+CREATE OR REPLACE FUNCTION check_routine_constraint()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM routine
+        WHERE ((start_time <= NEW.start_time AND NEW.start_time<=end_time) OR
+           (start_time <= NEW.end_time AND  NEW.end_time<=end_time) OR
+           NEW.start_time<=NEW.end_time)
+          AND student_id = NEW.student_id
+    ) THEN
+        RAISE EXCEPTION 'Routine with the same start time, end time, and student ID already exists';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER before_insert_routine
+BEFORE INSERT ON routine
+FOR EACH ROW
+EXECUTE FUNCTION check_routine_constraint();
+
+
+//fix korar try check routine check_routine_constraint
+
+
+CREATE OR REPLACE FUNCTION check_routine_constraint()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM routine
+        WHERE (start_time <= NEW.start_time AND NEW.start_time <= end_time) OR
+              (start_time <= NEW.end_time AND NEW.end_time <= end_time)
+              AND student_id = NEW.student_id
+    ) THEN
+        RAISE EXCEPTION 'Routine with the same start time, end time, and student ID already exists';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+//fix korar try check routine check_routine_constraint
+
+
+CREATE OR REPLACE FUNCTION check_routine_constraint()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM routine
+        WHERE ((start_time <= NEW.start_time AND NEW.start_time <= end_time) OR
+              (start_time <= NEW.end_time AND NEW.end_time <= end_time))
+              AND student_id = NEW.student_id
+    ) THEN
+        RAISE EXCEPTION 'Routine with the same start time, end time, and student ID already exists';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+//profile pic for students
+ALTER TABLE student
+ADD COLUMN profilePicLink VARCHAR(255); -- Assuming the link is stored as a VARCHAR
+
+-- Step 2: Update each row to set the profile picture link based on the conditions
+UPDATE student
+SET profilePicLink = CASE 
+                        WHEN student_id % 2 = 0 THEN 'first_pic'
+                        WHEN student_id % 3 = 0 THEN 'second_pic'
+						WHEN student_id % 5 = 0 THEN 'third_pic'
+						WHEN student_id % 7 = 0 THEN 'fourth_pic'
+						ELSE 'student'||(student_id % 10)
+                     END;
+
+//profile pic for teachers
+ALTER TABLE teacher
+ADD COLUMN profilePicLink VARCHAR(255); 
+
+UPDATE teacher
+SET profilePicLink = 'teacher'||(teacher_id % 10);
+
+
+
+
+ALTER TABLE study_hour
+ADD COLUMN student_id INTEGER,
+ADD CONSTRAINT fk_student_id FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE;
+
+ALTER TABLE study_hour
+ADD COLUMN targetHours INTEGER NOT NULL DEFAULT 6;
+
+
+ALTER TABLE study_hour
+ADD percentage DECIMAL(5,2);
+
+UPDATE study_hour
+SET percentage = CASE
+                    WHEN ((hours_studied * 1.0) / targethours) * 100 > 100 THEN 100
+                    ELSE ((hours_studied * 1.0) / targethours) * 100
+                END;
+
+CREATE OR REPLACE FUNCTION calculate_percentage()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.targetHours <> 0 THEN
+        NEW.percentage := LEAST(((NEW.hours_studied*1.0) / NEW.targetHours) * 100, 100);
+    ELSE
+        NEW.percentage := 0;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_percentage
+BEFORE INSERT OR UPDATE ON study_hour
+FOR EACH ROW
+EXECUTE FUNCTION calculate_percentage();                
+
+
+ALTER TABLE routine
+ADD COLUMN date DATE DEFAULT CURRENT_DATE;
+
+
+ALTER TABLE student
+ALTER COLUMN profilePicLink SET DEFAULT 'student1';
+
+ALTER TABLE teacher
+ALTER COLUMN profilePicLink SET DEFAULT 'teacher1';
+
+
+CREATE OR REPLACE PROCEDURE update_lecture(
+    IN p_lecture_id INT,
+    IN p_lecture_name VARCHAR,
+    IN p_description TEXT,
+    IN p_videolink VARCHAR,
+    IN p_pdflink VARCHAR,
+	OUT p_status_message VARCHAR
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    -- Retrieve the current attributes of the lecture
+    DECLARE
+        v_previous_lecture_name VARCHAR;
+        v_previous_description TEXT;
+        v_previous_videolink VARCHAR;
+        v_previous_pdflink VARCHAR;
+		v_previous_teacher_id INTEGER;
+		v_previous_course_id INTEGER;
+        v_new_pdflink VARCHAR;
+        v_new_videolink VARCHAR;
+		
+    BEGIN
+        SELECT lecture_name, description, videolink, pdflink,course_id,teacher_id
+        INTO v_previous_lecture_name, v_previous_description, v_previous_videolink, v_previous_pdflink,
+		v_previous_course_id,v_previous_teacher_id
+        FROM lecture
+        WHERE lecture_id = p_lecture_id;
+        
+        -- Check if any of the attributes are different
+        IF v_previous_lecture_name != p_lecture_name OR
+           v_previous_description != p_description OR
+           v_previous_videolink != p_videolink OR
+           v_previous_pdflink != p_pdflink
+        THEN
+            -- Generate new filenames for video and PDF
+            v_new_videolink := '/uploads/video_' || p_lecture_id || '_'||v_previous_course_id||'_'||v_previous_teacher_id||'.mp4';
+            v_new_pdflink := '/uploads/pdf_' || p_lecture_id || '_'||v_previous_course_id||'_'||v_previous_teacher_id|| '.pdf';
+            
+            -- If any attribute is different, update the lecture with the new attributes
+            UPDATE lecture
+            SET lecture_name = p_lecture_name,
+                description = p_description,
+                videolink = v_new_videolink,
+                pdflink = v_new_pdflink
+            WHERE lecture_id = p_lecture_id;
+		    p_status_message := 'Lecture updated successfully';
+        ELSE
+            -- Set status message
+            p_status_message := 'No changes were made to the lecture';
+        END IF;
+    END;
+END;
+$$;
+
+
+//new One 07-03-24 8:05 pm 
+CREATE OR REPLACE FUNCTION check_routine_constraint()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM routine
+        WHERE ((start_time <= NEW.start_time AND NEW.start_time <= end_time) OR
+              (start_time <= NEW.end_time AND NEW.end_time <= end_time))
+              AND student_id = NEW.student_id
+    ) THEN
+        RAISE EXCEPTION 'Routine with the same start time, end time, and student ID already exists';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE PROCEDURE find_and_update_toppers()
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    exam_record RECORD;
+    topper_record RECORD;
+    rank_counter INTEGER;
+BEGIN
+    -- Loop through distinct exam IDs in the result table
+    FOR exam_record IN SELECT DISTINCT exam_id FROM result LOOP
+        rank_counter := 1; -- Initialize rank counter for each exam
+        -- Find the top 3 scorers for each exam
+        FOR topper_record IN 
+            SELECT exam_id, student_id,MAX(correct_answers) 
+            FROM result 
+            WHERE exam_id = exam_record.exam_id 
+            GROUP BY student_id, exam_id,correct_answers
+            ORDER BY correct_answers DESC 
+            LIMIT 3
+        LOOP
+            -- Insert or update the topper record in the topper table
+            INSERT INTO topper (exam_id, student_id, rank) 
+            VALUES (topper_record.exam_id, topper_record.student_id, rank_counter)
+            ON CONFLICT (exam_id, rank)
+            DO UPDATE SET student_id = EXCLUDED.student_id;
+            rank_counter := rank_counter + 1; -- Increment rank counter
+        END LOOP;
+    END LOOP;
+END;
+$$;
+---(hoynai ,execute korish na)---
+
+
+SELECT tgname AS trigger_name,
+       relname AS table_name,
+       tgrelid AS table_oid,
+       tgtype AS trigger_type,
+       tgdeferrable AS is_deferrable,
+       tginitdeferred AS initially_deferred,
+       proname AS function_name
+FROM pg_trigger
+JOIN pg_class ON tgrelid = pg_class.oid
+LEFT JOIN pg_proc ON tgfoid = pg_proc.oid
+WHERE tgname NOT LIKE 'RI_%'
+ORDER BY relname, tgname;
+
+
+CREATE TABLE ExecutionLog (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    FunctionName VARCHAR(255),
+    ExecutionTime DATETIME
+);
+
+DELIMITER //
+
+CREATE TRIGGER log_function_execution
+AFTER FUNCTION
+ON DATABASE
+FOR EACH STATEMENT
+BEGIN
+    INSERT INTO ExecutionLog (FunctionName, ExecutionTime)
+    VALUES (TRIGGER_FUNCTION(), NOW());
+END;
+
+CREATE TRIGGER log_procedure_execution
+AFTER PROCEDURE
+ON DATABASE
+FOR EACH STATEMENT
+BEGIN
+    INSERT INTO ExecutionLog (FunctionName, ExecutionTime)
+    VALUES (TRIGGER_PROCEDURE(), NOW());
+END;
+//
+
+DELIMITER ;
+---(hoynai ,execute korish na)---
+
+
+--lecture insert korar jonno amar teacher id 11 theke 15.......course_id 31 theke 5 ta kore course er prottektate 
+--5 ta kore lecture insert kortechi,ar lecture_id 1 theke start korchi
+
+CREATE or replace FUNCTION insert_lectures()
+RETURNS VOID AS
+$$
+DECLARE
+    v_teacher_id INT;
+    v_course_id INT;
+    v_lecture_id INT;
+	x INT :=1; 
+BEGIN
+    FOR v_teacher_id IN 11..15 LOOP
+        FOR v_course_id IN ((v_teacher_id - 11) * 5 + 31) .. ((v_teacher_id - 11) * 5 + 35) LOOP
+            FOR v_lecture_id IN 1..5 LOOP
+                INSERT INTO lecture (lecture_id,lecture_name, description, teacher_id, course_id, videolink, pdflink)
+                VALUES (x,
+                    'Lecture ' || x || ' for Course ' || v_course_id,
+                    'Description for Lecture ' || x || ' of Course ' || v_course_id,
+                    v_teacher_id,
+                    v_course_id,
+                    '/uploads/video_' || x || '_' || v_course_id || '_' || v_teacher_id || '.mp4',
+                    '/uploads/pdf_' || x || '_' || v_course_id || '_' || v_teacher_id || '.pdf'
+                );
+				x:=x+1;
+            END LOOP;
+        END LOOP;
+    END LOOP;
+END;
+$$
+LANGUAGE plpgsql;
+
+SELECT insert_lectures();
+
+SELECT *FROM lecture;
+
+update lecture
+set pdflink='/uploads/pdf_'||(lecture_id%10)||'_'||(lecture_id%10)||'_'||(lecture_id%10)||'.pdf';	
+
+update lecture
+set pdflink='/uploads/pdf_'||(lecture_id%10)||'_'||(lecture_id%10)||'_'||(lecture_id%10)||'.pdf';	
+
+update lecture
+set videolink='/uploads/video_'||(lecture_id%10)||'_'||(lecture_id%10)||'_'||(lecture_id%10)||'.mp4';
+
+
+ALTER TABLE routine
+ADD COLUMN isdeleted BOOLEAN DEFAULT FALSE;
+
+
+-- Drop the existing unique constraint
+ALTER TABLE routine DROP CONSTRAINT unique_routine_combination;
+
+-- Add a new unique constraint on the specified combination of columns
+ALTER TABLE routine
+ADD CONSTRAINT unique_routine_combination
+UNIQUE (start_time, task_name, end_time, student_id, date);
+
+
+CREATE OR REPLACE FUNCTION check_routine_constraint()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM routine
+        WHERE ((start_time <= NEW.start_time AND NEW.start_time <= end_time) OR
+              (start_time <= NEW.end_time AND NEW.end_time <= end_time))
+              AND student_id = NEW.student_id AND isdeleted=FALSE
+    ) THEN
+        RAISE EXCEPTION 'Routine with the same start time, end time, and student ID already exists';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;

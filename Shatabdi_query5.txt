@@ -140,3 +140,9 @@ ALTER TABLE routine
 ADD COLUMN date DATE DEFAULT CURRENT_DATE;
 
 
+ALTER TABLE student
+ALTER COLUMN profilePicLink SET DEFAULT 'student1';
+
+ALTER TABLE teacher
+ALTER COLUMN profilePicLink SET DEFAULT 'teacher1';
+
