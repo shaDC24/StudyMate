@@ -163,7 +163,7 @@
                             </div>
                             <div class="card-body">
                                 <p>
-                                    Lecture Initiated: <%=inputs.length%><br /><br />
+                                    Lecture Initiated: <%= inputs ? inputs.length : 0 %><br /><br />
                                 
                                 </p>
                                 <% for (let i=0; i < inputs.length; i++) { %>

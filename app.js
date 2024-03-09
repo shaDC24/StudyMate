@@ -178,11 +178,13 @@ app.post("/registration", async (req, res) => {
               [first_name, last_name, date_of_birth, password_hash]
             );
             const successMessage = `Account created successfully. Remember your userid ${newid.student_id} and Password ${password_hash} .go to mail.`;
-            const successMessage2 = `Congratulation ${first_name + " " + last_name
-              }!!! 
+            const successMessage2 = `Congratulation ${
+              first_name + " " + last_name
+            }!!! 
                                                  welcome to studymate....
-                                                 you are ${userType}.Account created successfully. Remember your userid ${newid.student_id
-              } and Password ${password_hash} .`;
+                                                 you are ${userType}.Account created successfully. Remember your userid ${
+              newid.student_id
+            } and Password ${password_hash} .`;
 
             // Send success email
             //sendEmail(gmail, 'Registration Successful', successMessage2);
@@ -463,10 +465,10 @@ app.get("/api/search/course", async (req, res) => {
     const courses = await db.any("SELECT *FROM courses");
     const enrolledcourses =
       ("select *from courses c where id in (select course_id from enrollments e where student_id=$1)",
-        id);
+      id);
     const unenrolledcourses =
       ("select * from courses c1 where c1.id in (select c.id from courses c except(select e.course_id from enrollments e where e.student_id=$1))",
-        id);
+      id);
     const matchingCourses = courses.filter((course) =>
       course.course_title.toLowerCase().includes(searchTerm)
     );
@@ -525,10 +527,10 @@ app.get("/course-search-results", async (req, res) => {
     );
     const enrolledcourses =
       ("select *from courses c where id in (select course_id from enrollments e where student_id=$1)",
-        id);
+      id);
     const unenrolledcourses =
       ("select * from courses c1 where c1.id in (select c.id from courses c except(select e.course_id from enrollments e where e.student_id=$1))",
-        id);
+      id);
     const tid = course.id;
     console.log(tid);
     if (course) {
@@ -542,19 +544,21 @@ app.get("/course-search-results", async (req, res) => {
           "select * from lecture l join courses c on l.course_id=c.id where c.id=$1;",
           tid
         );
-        const course = await db.any('select *from courses where id = $1', tid);
-        console.log(inputs);
+        //const course = await db.any("select *from courses where id = $1", tid);
+        console.log(course);
         res.render("individual_course_dashboarsd", {
           userType: "Student",
-          inputs: inputs, course: course
+          inputs: inputs,
+          course: course,
         });
       } else {
         const inputs = await db.one("select * from courses where id= $1", tid);
         console.log(inputs + "LLLLLL");
-        console.log(inputs);
+        console.log(course);
         res.render("individual_course_dashboarsd", {
           userType: "Student",
-          inputs: inputs, course: course
+          inputs: inputs,
+          course: course,
         });
       }
     } else {
@@ -1545,12 +1549,12 @@ app.post(
       //console.log("req  " + req.body);
       console.log(
         lectureName +
-        "  " +
-        description +
-        "  " +
-        req.body.video_link +
-        "  " +
-        req.body.pdf_link
+          "  " +
+          description +
+          "  " +
+          req.body.video_link +
+          "  " +
+          req.body.pdf_link
       );
       const result = await db.proc("update_lecture", [
         lectureId,
@@ -1648,7 +1652,10 @@ app.get("/student/mythingstodo", async (req, res) => {
 app.get("/student/current_routine", async (req, res) => {
   try {
     console.log("current routine");
-    await db.none("UPDATE routine SET isdeleted = TRUE WHERE date <> CURRENT_DATE and student_id = $1", Number(id));
+    await db.none(
+      "UPDATE routine SET isdeleted = TRUE WHERE date <> CURRENT_DATE and student_id = $1",
+      Number(id)
+    );
     const tasks = await db.manyOrNone(
       "select *from routine where student_id = $1 AND isdeleted = false",
       Number(id)
@@ -1888,7 +1895,10 @@ app.get("/progress/graph", async (req, res) => {
 app.get("/student/routine", async (req, res) => {
   try {
     console.log("......get......");
-    await db.none("UPDATE routine SET isdeleted = TRUE WHERE date <> CURRENT_DATE and student_id= $1", Number(id));
+    await db.none(
+      "UPDATE routine SET isdeleted = TRUE WHERE date <> CURRENT_DATE and student_id= $1",
+      Number(id)
+    );
     const tasks = await db.manyOrNone(
       "SELECT * FROM routine WHERE student_id = $1 AND isdeleted=false",
       Number(id)
