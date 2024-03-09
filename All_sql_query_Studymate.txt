@@ -1121,3 +1121,376 @@ CREATE TRIGGER cascade_delete_trigger
 BEFORE DELETE ON courses
 FOR EACH ROW
 EXECUTE FUNCTION cascade_delete_dependent_rows();
+
+
+ALTER TABLE routine
+ADD COLUMN student_id INT REFERENCES student(student_id) ON DELETE CASCADE;
+
+
+ALTER TABLE routine
+ADD CONSTRAINT unique_routine_combination UNIQUE (start_time, end_time, student_id),
+ADD FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE;
+
+
+CREATE OR REPLACE FUNCTION check_routine_constraint()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM routine
+        WHERE ((start_time <= NEW.start_time AND NEW.start_time<=end_time) OR
+           (start_time <= NEW.end_time AND  NEW.end_time<=end_time) OR
+           NEW.start_time<=NEW.end_time)
+          AND student_id = NEW.student_id
+    ) THEN
+        RAISE EXCEPTION 'Routine with the same start time, end time, and student ID already exists';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER before_insert_routine
+BEFORE INSERT ON routine
+FOR EACH ROW
+EXECUTE FUNCTION check_routine_constraint();
+
+
+//fix korar try check routine check_routine_constraint
+
+
+CREATE OR REPLACE FUNCTION check_routine_constraint()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM routine
+        WHERE (start_time <= NEW.start_time AND NEW.start_time <= end_time) OR
+              (start_time <= NEW.end_time AND NEW.end_time <= end_time)
+              AND student_id = NEW.student_id
+    ) THEN
+        RAISE EXCEPTION 'Routine with the same start time, end time, and student ID already exists';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+//fix korar try check routine check_routine_constraint
+
+
+CREATE OR REPLACE FUNCTION check_routine_constraint()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM routine
+        WHERE ((start_time <= NEW.start_time AND NEW.start_time <= end_time) OR
+              (start_time <= NEW.end_time AND NEW.end_time <= end_time))
+              AND student_id = NEW.student_id
+    ) THEN
+        RAISE EXCEPTION 'Routine with the same start time, end time, and student ID already exists';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+//profile pic for students
+ALTER TABLE student
+ADD COLUMN profilePicLink VARCHAR(255); -- Assuming the link is stored as a VARCHAR
+
+-- Step 2: Update each row to set the profile picture link based on the conditions
+UPDATE student
+SET profilePicLink = CASE 
+                        WHEN student_id % 2 = 0 THEN 'first_pic'
+                        WHEN student_id % 3 = 0 THEN 'second_pic'
+						WHEN student_id % 5 = 0 THEN 'third_pic'
+						WHEN student_id % 7 = 0 THEN 'fourth_pic'
+						ELSE 'student'||(student_id % 10)
+                     END;
+
+//profile pic for teachers
+ALTER TABLE teacher
+ADD COLUMN profilePicLink VARCHAR(255); 
+
+UPDATE teacher
+SET profilePicLink = 'teacher'||(teacher_id % 10);
+
+
+
+
+ALTER TABLE study_hour
+ADD COLUMN student_id INTEGER,
+ADD CONSTRAINT fk_student_id FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE;
+
+ALTER TABLE study_hour
+ADD COLUMN targetHours INTEGER NOT NULL DEFAULT 6;
+
+
+ALTER TABLE study_hour
+ADD percentage DECIMAL(5,2);
+
+UPDATE study_hour
+SET percentage = CASE
+                    WHEN ((hours_studied * 1.0) / targethours) * 100 > 100 THEN 100
+                    ELSE ((hours_studied * 1.0) / targethours) * 100
+                END;
+
+CREATE OR REPLACE FUNCTION calculate_percentage()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.targetHours <> 0 THEN
+        NEW.percentage := LEAST(((NEW.hours_studied*1.0) / NEW.targetHours) * 100, 100);
+    ELSE
+        NEW.percentage := 0;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_percentage
+BEFORE INSERT OR UPDATE ON study_hour
+FOR EACH ROW
+EXECUTE FUNCTION calculate_percentage();                
+
+
+ALTER TABLE routine
+ADD COLUMN date DATE DEFAULT CURRENT_DATE;
+
+
+ALTER TABLE student
+ALTER COLUMN profilePicLink SET DEFAULT 'student1';
+
+ALTER TABLE teacher
+ALTER COLUMN profilePicLink SET DEFAULT 'teacher1';
+
+
+CREATE OR REPLACE PROCEDURE update_lecture(
+    IN p_lecture_id INT,
+    IN p_lecture_name VARCHAR,
+    IN p_description TEXT,
+    IN p_videolink VARCHAR,
+    IN p_pdflink VARCHAR,
+	OUT p_status_message VARCHAR
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    -- Retrieve the current attributes of the lecture
+    DECLARE
+        v_previous_lecture_name VARCHAR;
+        v_previous_description TEXT;
+        v_previous_videolink VARCHAR;
+        v_previous_pdflink VARCHAR;
+		v_previous_teacher_id INTEGER;
+		v_previous_course_id INTEGER;
+        v_new_pdflink VARCHAR;
+        v_new_videolink VARCHAR;
+		
+    BEGIN
+        SELECT lecture_name, description, videolink, pdflink,course_id,teacher_id
+        INTO v_previous_lecture_name, v_previous_description, v_previous_videolink, v_previous_pdflink,
+		v_previous_course_id,v_previous_teacher_id
+        FROM lecture
+        WHERE lecture_id = p_lecture_id;
+        
+        -- Check if any of the attributes are different
+        IF v_previous_lecture_name != p_lecture_name OR
+           v_previous_description != p_description OR
+           v_previous_videolink != p_videolink OR
+           v_previous_pdflink != p_pdflink
+        THEN
+            -- Generate new filenames for video and PDF
+            v_new_videolink := '/uploads/video_' || p_lecture_id || '_'||v_previous_course_id||'_'||v_previous_teacher_id||'.mp4';
+            v_new_pdflink := '/uploads/pdf_' || p_lecture_id || '_'||v_previous_course_id||'_'||v_previous_teacher_id|| '.pdf';
+            
+            -- If any attribute is different, update the lecture with the new attributes
+            UPDATE lecture
+            SET lecture_name = p_lecture_name,
+                description = p_description,
+                videolink = v_new_videolink,
+                pdflink = v_new_pdflink
+            WHERE lecture_id = p_lecture_id;
+		    p_status_message := 'Lecture updated successfully';
+        ELSE
+            -- Set status message
+            p_status_message := 'No changes were made to the lecture';
+        END IF;
+    END;
+END;
+$$;
+
+
+//new One 07-03-24 8:05 pm 
+CREATE OR REPLACE FUNCTION check_routine_constraint()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM routine
+        WHERE ((start_time <= NEW.start_time AND NEW.start_time <= end_time) OR
+              (start_time <= NEW.end_time AND NEW.end_time <= end_time))
+              AND student_id = NEW.student_id
+    ) THEN
+        RAISE EXCEPTION 'Routine with the same start time, end time, and student ID already exists';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE PROCEDURE find_and_update_toppers()
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    exam_record RECORD;
+    topper_record RECORD;
+    rank_counter INTEGER;
+BEGIN
+    -- Loop through distinct exam IDs in the result table
+    FOR exam_record IN SELECT DISTINCT exam_id FROM result LOOP
+        rank_counter := 1; -- Initialize rank counter for each exam
+        -- Find the top 3 scorers for each exam
+        FOR topper_record IN 
+            SELECT exam_id, student_id,MAX(correct_answers) 
+            FROM result 
+            WHERE exam_id = exam_record.exam_id 
+            GROUP BY student_id, exam_id,correct_answers
+            ORDER BY correct_answers DESC 
+            LIMIT 3
+        LOOP
+            -- Insert or update the topper record in the topper table
+            INSERT INTO topper (exam_id, student_id, rank) 
+            VALUES (topper_record.exam_id, topper_record.student_id, rank_counter)
+            ON CONFLICT (exam_id, rank)
+            DO UPDATE SET student_id = EXCLUDED.student_id;
+            rank_counter := rank_counter + 1; -- Increment rank counter
+        END LOOP;
+    END LOOP;
+END;
+$$;
+---(hoynai ,execute korish na)---
+
+
+SELECT tgname AS trigger_name,
+       relname AS table_name,
+       tgrelid AS table_oid,
+       tgtype AS trigger_type,
+       tgdeferrable AS is_deferrable,
+       tginitdeferred AS initially_deferred,
+       proname AS function_name
+FROM pg_trigger
+JOIN pg_class ON tgrelid = pg_class.oid
+LEFT JOIN pg_proc ON tgfoid = pg_proc.oid
+WHERE tgname NOT LIKE 'RI_%'
+ORDER BY relname, tgname;
+
+
+CREATE TABLE ExecutionLog (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    FunctionName VARCHAR(255),
+    ExecutionTime DATETIME
+);
+
+DELIMITER //
+
+CREATE TRIGGER log_function_execution
+AFTER FUNCTION
+ON DATABASE
+FOR EACH STATEMENT
+BEGIN
+    INSERT INTO ExecutionLog (FunctionName, ExecutionTime)
+    VALUES (TRIGGER_FUNCTION(), NOW());
+END;
+
+CREATE TRIGGER log_procedure_execution
+AFTER PROCEDURE
+ON DATABASE
+FOR EACH STATEMENT
+BEGIN
+    INSERT INTO ExecutionLog (FunctionName, ExecutionTime)
+    VALUES (TRIGGER_PROCEDURE(), NOW());
+END;
+//
+
+DELIMITER ;
+---(hoynai ,execute korish na)---
+
+
+--lecture insert korar jonno amar teacher id 11 theke 15.......course_id 31 theke 5 ta kore course er prottektate 
+--5 ta kore lecture insert kortechi,ar lecture_id 1 theke start korchi
+
+CREATE or replace FUNCTION insert_lectures()
+RETURNS VOID AS
+$$
+DECLARE
+    v_teacher_id INT;
+    v_course_id INT;
+    v_lecture_id INT;
+	x INT :=1; 
+BEGIN
+    FOR v_teacher_id IN 11..15 LOOP
+        FOR v_course_id IN ((v_teacher_id - 11) * 5 + 31) .. ((v_teacher_id - 11) * 5 + 35) LOOP
+            FOR v_lecture_id IN 1..5 LOOP
+                INSERT INTO lecture (lecture_id,lecture_name, description, teacher_id, course_id, videolink, pdflink)
+                VALUES (x,
+                    'Lecture ' || x || ' for Course ' || v_course_id,
+                    'Description for Lecture ' || x || ' of Course ' || v_course_id,
+                    v_teacher_id,
+                    v_course_id,
+                    '/uploads/video_' || x || '_' || v_course_id || '_' || v_teacher_id || '.mp4',
+                    '/uploads/pdf_' || x || '_' || v_course_id || '_' || v_teacher_id || '.pdf'
+                );
+				x:=x+1;
+            END LOOP;
+        END LOOP;
+    END LOOP;
+END;
+$$
+LANGUAGE plpgsql;
+
+SELECT insert_lectures();
+
+SELECT *FROM lecture;
+
+update lecture
+set pdflink='/uploads/pdf_'||(lecture_id%10)||'_'||(lecture_id%10)||'_'||(lecture_id%10)||'.pdf';	
+
+update lecture
+set pdflink='/uploads/pdf_'||(lecture_id%10)||'_'||(lecture_id%10)||'_'||(lecture_id%10)||'.pdf';	
+
+update lecture
+set videolink='/uploads/video_'||(lecture_id%10)||'_'||(lecture_id%10)||'_'||(lecture_id%10)||'.mp4';
+
+
+ALTER TABLE routine
+ADD COLUMN isdeleted BOOLEAN DEFAULT FALSE;
+
+
+-- Drop the existing unique constraint
+ALTER TABLE routine DROP CONSTRAINT unique_routine_combination;
+
+-- Add a new unique constraint on the specified combination of columns
+ALTER TABLE routine
+ADD CONSTRAINT unique_routine_combination
+UNIQUE (start_time, task_name, end_time, student_id, date);
+
+
+CREATE OR REPLACE FUNCTION check_routine_constraint()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM routine
+        WHERE ((start_time <= NEW.start_time AND NEW.start_time <= end_time) OR
+              (start_time <= NEW.end_time AND NEW.end_time <= end_time))
+              AND student_id = NEW.student_id AND isdeleted=FALSE
+    ) THEN
+        RAISE EXCEPTION 'Routine with the same start time, end time, and student ID already exists';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
