@@ -186,8 +186,8 @@
 
             if (lecture.pdflink) {
                 lectureDetails.innerHTML += `
-                    <div class="pdf-container">
-                        <iframe src="${lecture.pdflink}" frameborder="0"></iframe>
+                    <div class="pdf-download-container">
+                        <button class="download-button" onclick="downloadPDF('${lecture.pdflink}', '${lectureDetails.id}')">Download PDF</button>
                     </div>`;
             } else {
                 lectureDetails.innerHTML += `
@@ -197,6 +197,15 @@
                     </div>`;
             }
         }
+        function downloadPDF(pdflink, containerId) {
+            var lectureDetails = document.getElementById(containerId);
+            lectureDetails.innerHTML += `
+                <div class="pdf-container">
+                    <strong>Lecture Files :</strong>
+                    <iframe src="${pdflink}" width="100%" height="500px" frameborder="0"></iframe>
+                </div>`;
+        }
+
 
         /*<button class="complete-button" onclick="completeLecture(event, ${lecture.lecture_id})">Complete</button>*/
         /*function completeLecture(event, lectureId) {
